@@ -6,6 +6,7 @@
                     v-model="orderContent"
                     placeholder="Talk to Xeno-Loader"
                     size="large"
+                    clearable
                 >
                     <template #append >
                         <el-button color="white"  :icon="Link" />

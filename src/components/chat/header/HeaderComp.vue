@@ -1,5 +1,5 @@
 <template>
-    <el-card style="background-color: #333333;border-radius: 15px 15px 0 0 ;">
+    <el-card style="background-color: #333333;border-radius: 15px 15px 0 0 ;" :body-style="{padding:'10px'}">
         <el-row>
             <el-col :xs="8" :sm="6" :md="4" :lg="20" :xl="1">
                 <span class="head-text">Xeno-Loader</span>
@@ -53,5 +53,6 @@ function logout(){
     font-size: 25px;
     font-weight: bolder;
     color: white;
+    margin-left: 10px;
 }
 </style>
