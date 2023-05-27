@@ -18,7 +18,7 @@
                                  :key="index"
                                  :label="week"
                                  :prop="index"
-                                 :min-width="`${100 / 7}%`" >
+                                 :min-width="`${100 / 7}%`">
                     <!-- 使用作用域插槽自定义单元格内容 -->
                     <template #default="{ row }" >
                         <!-- 显示对应的日期 -->
@@ -78,21 +78,12 @@ onMounted(()=>{
         }
         // 将每一周添加到日期列表中
         dateList.value.push(week)
-        console.log(dateList.value)
     }
 
 })
 const chooseDate = ref(today.getDate())
 const handleClick = (row, column) => {
-    // if (row[column.property] !== undefined){
-    //
-    // }
-    const date = row[column.property]
-    if (date !== undefined) {
-        chooseDate.value = date
-    } else {
-        console.log(`Failed to get date for row ${row} and column ${column.property}`)
-    }
+    chooseDate.value = row[column.rawColumnKey]
 }
 const chooseDateValue = computed(() => chooseDate.value)
 
@@ -112,7 +103,7 @@ const chooseDateValue = computed(() => chooseDate.value)
 
 .choose-bg {
     background-color: #2C6AE3;
-    border-radius: 50%;
+    border-radius: 5px;
     width: 50%;
     display: inline-block;
     text-align: center;
