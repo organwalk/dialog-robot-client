@@ -27,8 +27,8 @@
 
 <script setup>
 import {AlarmClock} from '@element-plus/icons-vue'
-import CustomCalendar from "@/components/chat/interactiveCard/custom-calendar.vue";
-import ASchedule from "@/components/chat/interactiveCard/a-schedule.vue";
+import CustomCalendar from "@/components/chat/interactiveCard/scheduleList/custom-calendar.vue";
+import ASchedule from "@/components/chat/interactiveCard/scheduleList/a-schedule.vue";
 
 </script>
 

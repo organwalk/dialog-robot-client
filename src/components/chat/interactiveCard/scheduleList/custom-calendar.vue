@@ -2,11 +2,48 @@
     <el-row justify="center">
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
             <div style="width: 50%;text-align: center;margin-bottom: 10px;">
-                <span class="year">{{ year }}</span>
-                <span class="month">{{ today.toLocaleString('en',{ month: 'long' }) }}</span>
+                <el-popover
+                        placement="bottom"
+                        title="选择年份"
+                        :width="200"
+                        trigger="click"
+                >
+                    <template #reference>
+                        <span class="year" @click="dialogYearVisible = true">{{ yearValue }}</span>
+                    </template>
+                    <el-date-picker
+                            v-model="yearValue"
+                            type="year"
+                            placeholder="Pick a year"
+                            style="width: 100%;"
+                            value-format="YYYY"
+                            :editable="false"
+                            :clearable="false"
+                    />
+                </el-popover>
+                <el-popover
+                        placement="bottom"
+                        title="选择月份"
+                        :width="200"
+                        trigger="click"
+                >
+                    <template #reference>
+                        <span class="month" @click="dialogYearVisible = true">{{ monthName }}</span>
+                    </template>
+                    <el-date-picker
+                            v-model="monthValue"
+                            type="month"
+                            placeholder="Pick a month"
+                            style="width: 100%;"
+                            value-format="M"
+                            :editable="false"
+                            :clearable="false"
+                    />
+                </el-popover>
             </div>
         </el-col>
     </el-row>
+
     <el-row>
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
             <el-table :data="dateList"
@@ -20,10 +57,20 @@
                                  :prop="index"
                                  :min-width="`${100 / 7}%`">
                     <!-- 使用作用域插槽自定义单元格内容 -->
-                    <template #default="{ row }" >
+                    <template #default="{ row }">
                         <!-- 显示对应的日期 -->
-                        <div :class="{'choose-bg': row[index] === chooseDateValue }"
-                            style="user-select: none;" >{{ row[index] }}</div>
+                        <el-popover
+                            placement="bottom"
+                            :width="50"
+                            trigger="hover"
+                        >
+                            <template #reference>
+                                <div :class="{'choose-bg': row[index] === chooseDateValue }"
+                                     style="user-select: none;">{{ row[index] }}
+                                </div>
+                            </template>
+                            <span>该日期有 {{ scheduleNum }} 条日程</span>
+                        </el-popover>
                     </template>
                 </el-table-column>
             </el-table>
@@ -44,7 +91,7 @@ const month = today.getMonth()
 const firstDay = new Date(year, month, 1)
 const lastDay = new Date(year, month + 1, 0)
 // 填充日期列表
-onMounted(()=>{
+onMounted(() => {
     // 获取第一天和最后一天对应的星期索引
     const firstDayIndex = firstDay.getDay()
     // 创建一个二维数组，每一行代表一周，每一列代表一天
@@ -79,14 +126,20 @@ onMounted(()=>{
         // 将每一周添加到日期列表中
         dateList.value.push(week)
     }
-
 })
 const chooseDate = ref(today.getDate())
+
+//  获取点击的日程单元格
 const handleClick = (row, column) => {
     chooseDate.value = row[column.rawColumnKey]
 }
 const chooseDateValue = computed(() => chooseDate.value)
-
+const dialogYearVisible = ref(false)
+const yearValue = ref('2023')
+const monthValue = ref('5')
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthName = computed(()=> monthNames[parseInt(monthValue.value)-1])
+const scheduleNum = ref('0')
 </script>
 
 <style scoped>
@@ -94,11 +147,13 @@ const chooseDateValue = computed(() => chooseDate.value)
     font-size: 30px;
     font-weight: bolder;
     color: #E5E5E5;
+    user-select: none;
 }
 
 .month {
     font-size: 15px;
     font-weight: bold;
+    user-select: none;
 }
 
 .choose-bg {
@@ -109,7 +164,8 @@ const chooseDateValue = computed(() => chooseDate.value)
     text-align: center;
     color: white;
 }
+
 /deep/ .el-table {
-    --el-table-border-color:white;
+    --el-table-border-color: white;
 }
 </style>

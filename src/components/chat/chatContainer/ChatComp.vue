@@ -7,11 +7,15 @@
             </el-col>
         </el-row>
         <br/>
+<!--        展示推荐指令      -->
         <RecommendComp v-if="showRecommend" @send-recommend-text="getRecommendText"/>
         <div v-for="(item, index) in chatMessages" :key="index">
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
                 <!-- 对话机器人 -->
-                <ScheduleListComp/>
+<!--                查看日程卡片      -->
+                <ScheduleListComp v-if="showScheduleList"/>
+<!--                创建日程卡片      -->
+                <CreateSchedule />
                 <el-card :body-style="{padding:'10px'}"
                     shadow="never"
                     class="robot-chat-bubble">
@@ -28,6 +32,7 @@
             </el-row>
             <br/>
         </div>
+<!--        在对话下展示推荐指令  -->
         <el-row v-if="showRecommendTip" style="margin-top: -1%">
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
                 <el-button v-for="(recommend,index) in recommendList" :key="index"
@@ -45,8 +50,9 @@
 <script setup>
 import ChatInputComp from "@/components/chat/chatContainer/ChatInputComp.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
-import recommendsData from "@/optionConfig/recommendText.json"
-import ScheduleListComp from "@/components/chat/interactiveCard/ScheduleListComp.vue";
+import ScheduleListComp from "@/components/chat/interactiveCard/scheduleList/ScheduleListComp.vue";
+import CreateSchedule from "@/components/chat/interactiveCard/createSchedule/Create-ScheduleComp.vue";
+import recommendsData from "@/optionConfig/recommendText.json";
 import { nextTick, ref,} from "vue";
 
 const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
@@ -55,6 +61,7 @@ const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) +
 const showRecommend = ref(true)
 const showRecommendTip = ref(true)
 const showToDay = ref(false)
+const showScheduleList = ref(false)
 
 const chatMessages = ref([]);
 const containerScrollTop = ref(0)
