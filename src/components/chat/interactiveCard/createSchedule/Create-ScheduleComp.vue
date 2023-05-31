@@ -33,7 +33,7 @@
                 </el-col>
             </el-row>
         </el-card>
-        <el-alert style="user-select: none" v-if="showSuccessTip" title="Success Create" type="success" center show-icon :closable="false" />
+        <el-alert style="user-select: none;border-radius: 10px;" v-if="showSuccessTip" title="Success Create" type="success" center show-icon :closable="false" />
     </el-card>
 
 </template>
@@ -54,8 +54,6 @@ const back = () => {
 }
 
 const create = () => {
-    console.log(pageOneData)
-    console.log(pageTwoData)
     showCreateForm.value = false
     showSuccessTip.value = true
 }
