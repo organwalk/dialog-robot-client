@@ -1,5 +1,5 @@
 <template>
-<el-card shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;">
+<el-card v-show="showPagePreview" shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;">
     <el-row>
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
             <el-tooltip :content=strEndTime placement="top">
@@ -10,12 +10,12 @@
     <el-row>
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
             <el-card shadow="never" style="border:none;border-radius: 15px;">
-                <span style="font-weight: bolder;font-size: 25px;">Working morning</span><br/><br/>
-                <span style="font-size: 15px;"><el-icon size="small"><Location /></el-icon>&nbsp;P.C Street</span><br/><br/>
-                <span style="font-size: 10px;">This is a content about schedule,This is a content about schedule,This is a content about schedule,</span><br/><br/>
+                <span style="font-weight: bolder;font-size: 25px;">{{ allPageData.pageOneData.title }}</span><br/><br/>
+                <span style="font-size: 15px;"><el-icon size="small"><Location /></el-icon>&nbsp;{{ allPageData.pageTwoData.location }}</span><br/><br/>
+                <span style="font-size: 10px;">{{ allPageData.pageTwoData.scheduleDes }}</span><br/><br/>
                 <el-collapse >
                     <el-collapse-item title="Members" name="1">
-                        <span v-html="members"/>
+                        <span v-html="allPageData.pageTwoData.scheduleMembers"/>
                     </el-collapse-item>
                 </el-collapse>
             </el-card>
@@ -26,13 +26,22 @@
 
 <script setup>
 import { Location } from '@element-plus/icons-vue'
-import {ref} from "vue";
+import {reactive, ref,defineProps} from "vue";
+import {useStore} from "vuex";
 
-const startTime = ref('2023-05-04 10:30')
-const strStartTime = ref(startTime.value.split(' ')[0] + ',' + startTime.value.split(' ')[1])
-const endTime = ref('2023-05-05 10:30')
-const strEndTime = ref("截止日期: " + endTime.value.split(' ')[0] + ',' + endTime.value.split(' ')[1])
-const members = ref(["John","Amy","Mike"])
+defineProps({
+    showPagePreview:Boolean
+})
+
+const store = useStore()
+
+const allPageData = reactive({
+    pageOneData:store.state.createSchedule.pageOne ,
+    pageTwoData:store.state.createSchedule.pageTwo
+})
+const strStartTime = ref(allPageData.pageOneData.startTime.split(' ')[0] + ',' + allPageData.pageOneData.startTime.split(' ')[1])
+const strEndTime = ref("截止日期: " + allPageData.pageOneData.endTime.split(' ')[0] + ',' + allPageData.pageOneData.endTime.split(' ')[1])
+
 </script>
 
 <style scoped>
