@@ -15,7 +15,13 @@
 <!--                查看日程卡片      -->
                 <ScheduleListComp v-if="showScheduleList"/>
 <!--                创建日程卡片      -->
-                <CreateSchedule />
+                <CreateSchedule v-if="showCreateSchedule" />
+<!--                查看事项告知卡片    -->
+                <NotificationListComp v-if="showNotificationList"/>
+<!--                创建事项卡片  -->
+                <CreateNotification v-if="showCreateNotification"/>
+                <UpdataEmployeeComp v-if="showUpdataEmployee"/>
+<!--                语言回复        -->
                 <el-card :body-style="{padding:'10px'}"
                     shadow="never"
                     class="robot-chat-bubble">
@@ -51,17 +57,22 @@
 import ChatInputComp from "@/components/chat/chatContainer/ChatInputComp.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import ScheduleListComp from "@/components/chat/interactiveCard/scheduleList/ScheduleListComp.vue";
-import CreateSchedule from "@/components/chat/interactiveCard/createSchedule/Create-ScheduleComp.vue";
+import CreateSchedule from "@/components/chat/interactiveCard/createSchedule/Create-Updata-ScheduleComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
 import { nextTick, ref,} from "vue";
+import NotificationListComp from "@/components/chat/interactiveCard/notificationList/NotificationListComp.vue";
+import CreateNotification from "@/components/chat/interactiveCard/createNotification/Create-Updata-NotificationComp.vue"
+import UpdataEmployeeComp from "@/components/chat/interactiveCard/manageEmployee/UpdataEmployeeComp.vue";
 
 const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
-// const robotContent = ref('Hi，这里是Xeno-Loader😊，一个基于自然语言处理模型的办公助手🤓，我能辅助您完成一些简单的工作🫡。请问有什么能帮到您的吗？')
-// const userContent = ref('Hi，Xeno-Loader，很高兴认识你🥰。你能帮我给John发一条应用消息吗？告诉它今天上午10点有一个会议。')
 const showRecommend = ref(true)
 const showRecommendTip = ref(true)
 const showToDay = ref(false)
 const showScheduleList = ref(false)
+const showCreateSchedule = ref(false)
+const showNotificationList = ref(false)
+const showCreateNotification = ref(false)
+const showUpdataEmployee = ref(true)
 
 const chatMessages = ref([]);
 const containerScrollTop = ref(0)

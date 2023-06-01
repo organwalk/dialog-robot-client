@@ -2,7 +2,7 @@
     <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 80%">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
-                <span style="font-weight: bolder;user-select: none">Create Schedule</span><br/>
+                <span style="font-weight: bolder;user-select: none">Schedule</span><br/>
             </el-col>
         </el-row>
         <br/>
@@ -29,17 +29,17 @@
                 <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
                     <el-button @click="back()" round color="#e9e9eb" v-if="backStep">Back</el-button>
                     <el-button @click="next()" round color="#2C6AE3" v-if="nextStep">Next Step</el-button>
-                    <el-button @click="create()" round color="#2C6AE3" v-if="createStep">Create</el-button>
+                    <el-button @click="create()" round color="#2C6AE3" v-if="createStep">Confirm</el-button>
                 </el-col>
             </el-row>
         </el-card>
-        <el-alert style="user-select: none;border-radius: 10px;" v-if="showSuccessTip" title="Success Create" type="success" center show-icon :closable="false" />
+        <el-alert style="user-select: none;border-radius: 10px;" v-if="showSuccessTip" title="Success" type="success" center show-icon :closable="false" />
     </el-card>
 
 </template>
 
 <script setup>
-import {reactive, ref, watch} from "vue";
+import {reactive, ref, watch,defineEmits} from "vue";
 import OneCreateSchedule from "@/components/chat/interactiveCard/createSchedule/one-create-schedule.vue";
 import TwoCreateSchedule from "@/components/chat/interactiveCard/createSchedule/two-create-schedule.vue";
 import PreviewCreateSchedule from "@/components/chat/interactiveCard/createSchedule/preview-create-schedule.vue";
@@ -151,6 +151,15 @@ watch(
         nextStep.value = (des && location && mem.length>0)
     }
 )
+
+const emit = defineEmits(["getScheduleStatus"])
+
+watch(showSuccessTip,(newTip)=>{
+    if_success(newTip)
+})
+const if_success = (scheduleStatus)=> {
+    emit("getScheduleStatus",scheduleStatus)
+}
 
 </script>
 

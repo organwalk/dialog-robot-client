@@ -79,27 +79,50 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 
 const weekList = ref(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
 // 定义日期列表
 const dateList = ref([])
 // 获取当前月份的第一天和最后一天
 const today = new Date()
-const year = today.getFullYear()
-const month = today.getMonth()
-const firstDay = new Date(year, month, 1)
-const lastDay = new Date(year, month + 1, 0)
+
+const chooseDate = ref(today.getDate())
+
+//  获取点击的日程单元格
+const handleClick = (row, column) => {
+    chooseDate.value = row[column.rawColumnKey]
+}
+const chooseDateValue = computed(() => chooseDate.value)
+const dialogYearVisible = ref(false)
+const yearValue = ref(today.getFullYear())
+const monthValue = ref(today.getMonth()+1)
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthName = computed(()=> monthNames[parseInt(monthValue.value)-1])
+const firstDay = computed(()=>new Date(parseInt(yearValue.value.toString()), parseInt(monthValue.value.toString())-1, 1))
+const lastDay = computed(()=>new Date(parseInt(yearValue.value.toString()),parseInt(monthValue.value.toString()) , 0))
+const scheduleNum = ref('0')
+
+watch([firstDay,lastDay,monthValue],([newFirst,newLast]) => {
+    buildCalendar(newFirst,newLast)
+})
+
+onMounted(()=>{
+    buildCalendar(firstDay.value,lastDay.value)
+})
+
 // 填充日期列表
-onMounted(() => {
+const buildCalendar = (firstDay,lastDay) => {
+    dateList.value.splice(0,dateList.value.length)
     // 获取第一天和最后一天对应的星期索引
-    const firstDayIndex = firstDay.getDay()
+    const firstDayIndex = ref(firstDay.getDay())
     // 创建一个二维数组，每一行代表一周，每一列代表一天
+    console.log(firstDayIndex.value)
     let week = []
     let date = 1
     // 填充第一周
     for (let i = 0; i < 7; i++) {
-        if (i < firstDayIndex) {
+        if (i < firstDayIndex.value) {
             // 填充空字符串
             week.push('')
         } else {
@@ -126,20 +149,7 @@ onMounted(() => {
         // 将每一周添加到日期列表中
         dateList.value.push(week)
     }
-})
-const chooseDate = ref(today.getDate())
-
-//  获取点击的日程单元格
-const handleClick = (row, column) => {
-    chooseDate.value = row[column.rawColumnKey]
 }
-const chooseDateValue = computed(() => chooseDate.value)
-const dialogYearVisible = ref(false)
-const yearValue = ref('2023')
-const monthValue = ref('5')
-const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const monthName = computed(()=> monthNames[parseInt(monthValue.value)-1])
-const scheduleNum = ref('0')
 </script>
 
 <style scoped>

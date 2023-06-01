@@ -1,29 +1,27 @@
 <template>
     <el-row justify="center">
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
-            <span style="font-weight: bolder;align-items: center">Today's schedule</span>
+            <span style="font-weight: bolder;align-items: center">Today's notification</span>
         </el-col>
     </el-row>
     <br/>
     <div style="width: 100%;height:480px;overflow-y: auto">
-        <el-card v-for="(item,index) in scheduleList"
+        <el-card v-for="(item,index) in notificationList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
             <el-row justify="center">
                 <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
-                    <el-collapse>
-                        <el-collapse-item :title="item.time">
+                    <el-collapse >
+                        <el-collapse-item :title="item.time" >
                             <h5>{{ item.des }}</h5>
                         </el-collapse-item>
                     </el-collapse>
-                    <h4>{{ item.title }}</h4>
+                    <h4 v-if="showContext" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 400px;">{{ item.des }}</h4>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :xs="4" :sm="6" :md="8" :lg="20" :xl="11" align="left">
-                <span style="font-size: 10px;color: #808080">{{ item.releaser }} released this schedule | location: {{
-                    item.location
-                    }}</span>
+                <span style="font-size: 10px;color: #808080">{{ item.releaser }} released this notification</span>
                 </el-col>
                 <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center">
                     <el-button type="primary" :icon="Edit" circle size="small" @click="updataSchedule"/>
@@ -35,14 +33,14 @@
             </el-row>
         </el-card>
         <el-dialog
-            v-model="dialogUpdataSchedule"
-            width="40%"
-            destroy-on-close
-            top="20px"
-            style="border-radius: 20px;background-color: rgba(0, 0, 0, 0)"
-            :show-close="false"
+                v-model="dialogUpdataSchedule"
+                width="40%"
+                destroy-on-close
+                align-center
+                style="border-radius: 20px;background-color: rgba(0, 0, 0, 0)"
+                :show-close="false"
         >
-            <create-updata-schedule-comp style="width: 100%;" @getScheduleStatus="getScheduleStatus"/>
+            <CreateUpdataNotificationComp style="width: 100%;" @getNotificationStatus="getNotificationStatus"/>
         </el-dialog>
     </div>
 </template>
@@ -53,37 +51,29 @@ import {
     Delete,
     Edit,
 } from '@element-plus/icons-vue'
-import CreateUpdataScheduleComp from "@/components/chat/interactiveCard/createSchedule/Create-Updata-ScheduleComp.vue";
+import CreateUpdataNotificationComp from "@/components/chat/interactiveCard/createNotification/Create-Updata-NotificationComp.vue";
 
-const scheduleList = ref([])
-scheduleList.value.push(
+const notificationList = ref([])
+notificationList.value.push(
     {
         time: "08:30-09:30",
-        title: "Working morning",
         des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
         releaser: "John",
-        location: "P.C street"
     },
     {
         time: "08:30-09:30",
-        title: "Working morning",
         des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
         releaser: "John",
-        location: "P.C street"
     },
     {
         time: "08:30-09:30",
-        title: "Working morning",
         des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
         releaser: "John",
-        location: "P.C street"
     },
     {
         time: "08:30-09:30",
-        title: "Working morning",
         des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
         releaser: "John",
-        location: "P.C street"
     },
 )
 const dialogUpdataSchedule = ref(false)
@@ -91,14 +81,14 @@ const updataSchedule = ()=> {
     dialogUpdataSchedule.value = true
 }
 
-const getScheduleStatus = (scheduleStatus) => {
-    if (scheduleStatus){
+const getNotificationStatus = (notificationStatus) => {
+    if (notificationStatus){
         setTimeout(()=>{
             dialogUpdataSchedule.value = false
         },1000)
-
     }
 }
+const showContext = ref(true)
 </script>
 
 <style scoped>

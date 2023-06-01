@@ -8,7 +8,7 @@
         </el-col>
     </el-row><br/>
     <el-row>
-        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
+        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
             <el-card shadow="never" style="border:none;border-radius: 15px;">
                 <span style="font-weight: bolder;font-size: 25px;">{{ allPageData.pageOneData.title }}</span><br/><br/>
                 <span style="font-size: 15px;"><el-icon size="small"><Location /></el-icon>&nbsp;{{ allPageData.pageTwoData.location }}</span><br/><br/>
