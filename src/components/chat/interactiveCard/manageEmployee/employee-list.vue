@@ -15,7 +15,7 @@
         <el-card v-for="(item,index) in employeeList" :key="index"
                  shadow="never"
                  style="border-radius: 10px;margin-bottom: 10px">
-            <el-collapse-item :title="item.userName">
+            <el-collapse-item :title="item.userName" >
                 <el-descriptions
                         title="Employee Details"
                         :column="2"

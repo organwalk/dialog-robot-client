@@ -1,6 +1,6 @@
 const routes =[
     {
-        path: '/',
+        path: '/chat',
         name: 'chat',
         component:()=>import('@/components/chat/ChatView.vue')
     },

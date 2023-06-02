@@ -21,7 +21,7 @@
 <!--                创建事项卡片  -->
                 <CreateNotification v-if="showCreateNotification"/>
 <!--                部门人员管理  -->
-                <UpdataEmployeeComp v-if="showUpdataEmployee"/>
+                <UpdataEmployeeComp v-if="showUpdataEmployee=true"/>
 <!--                发送OA消息  -->
                 <OaMessageComp v-if="showOAMessage"/>
 <!--                语言回复        -->
