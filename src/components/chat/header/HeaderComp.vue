@@ -4,20 +4,7 @@
             <el-col :xs="8" :sm="6" :md="4" :lg="20" :xl="1">
                 <span class="head-text">Xeno-Loader</span>
             </el-col>
-            <el-col :xs="8" :sm="6" :md="4" :lg="2" :xl="1">
-                <el-popover
-                    placement="bottom"
-                    :width="400"
-                    trigger="hover"
-                    popper-style="padding: 0;border-radius: 10px;"
-                >
-                    <template #reference>
-                        <el-button :icon=" User " size="large" color="#333" round>User</el-button>
-                    </template>
-                    <h1>用户信息</h1>
-                </el-popover>
-            </el-col>
-            <el-col :xs="8" :sm="6" :md="4" :lg="2" :xl="1">
+            <el-col :xs="8" :sm="6" :md="4" :lg="4" :xl="1" align="right">
                 <el-button :icon=" ArrowRight " size="large" color="#333" round @click="logout()">Log out</el-button>
             </el-col>
         </el-row>
@@ -27,7 +14,7 @@
 </template>
 
 <script setup>
-import {User,ArrowRight} from '@element-plus/icons-vue'
+import {ArrowRight} from '@element-plus/icons-vue'
 import {ElMessage} from "element-plus";
 
 function logout(){

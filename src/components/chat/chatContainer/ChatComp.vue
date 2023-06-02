@@ -1,6 +1,6 @@
 <template>
     <el-card class="chatContainer" :scrollTop="containerScrollTop" shadow="never"
-             style="border: none; background-color: #f7f7f7;height: 520px;overflow-y: auto">
+             style="border: none; background-color: #f7f7f7;height: 550px;overflow-y: auto">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
                 <span style="font-size: 10px;color: #B5B8C0;font-weight: bolder" v-if="showToDay">{{ toDay }}</span>
@@ -20,13 +20,12 @@
                 <NotificationListComp v-if="showNotificationList"/>
 <!--                创建事项卡片  -->
                 <CreateNotification v-if="showCreateNotification"/>
+<!--                部门人员管理  -->
                 <UpdataEmployeeComp v-if="showUpdataEmployee"/>
+<!--                发送OA消息  -->
+                <OaMessageComp v-if="showOAMessage"/>
 <!--                语言回复        -->
-                <el-card :body-style="{padding:'10px'}"
-                    shadow="never"
-                    class="robot-chat-bubble">
-                    <span style="line-height: 1.5;" v-html="item.message"/>
-                </el-card>
+                <robot-reply/>
             </el-row>
             <el-row v-else justify="end" style="padding-left: 10%">
                 <!-- 用户 -->
@@ -63,6 +62,8 @@ import { nextTick, ref,} from "vue";
 import NotificationListComp from "@/components/chat/interactiveCard/notificationList/NotificationListComp.vue";
 import CreateNotification from "@/components/chat/interactiveCard/createNotification/Create-Updata-NotificationComp.vue"
 import UpdataEmployeeComp from "@/components/chat/interactiveCard/manageEmployee/UpdataEmployeeComp.vue";
+import OaMessageComp from "@/components/chat/interactiveCard/oa-message/OaMessageComp.vue";
+import RobotReply from "@/components/chat/chatContainer/robot-reply.vue";
 
 const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
 const showRecommend = ref(true)
@@ -72,7 +73,8 @@ const showScheduleList = ref(false)
 const showCreateSchedule = ref(false)
 const showNotificationList = ref(false)
 const showCreateNotification = ref(false)
-const showUpdataEmployee = ref(true)
+const showUpdataEmployee = ref(false)
+const showOAMessage = ref(true)
 
 const chatMessages = ref([]);
 const containerScrollTop = ref(0)
@@ -137,22 +139,6 @@ const getRecommendList = () => {
 </script>
 
 <style scoped>
-.robot-chat-bubble {
-    animation: robot-chat-bubble 0.5s ease-out;
-    border-radius: 10px;
-}
-
-@keyframes robot-chat-bubble {
-    0% {
-        opacity: 0;
-        transform: translateX(-30%) translateY(50%) scale(0.5);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) translateY(0) scale(1);
-    }
-}
-
 .user-chat-bubble {
     animation: user-chat-bubble 0.5s ease-out;
     border-radius: 10px;
