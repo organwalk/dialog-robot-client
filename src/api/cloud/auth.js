@@ -13,7 +13,6 @@ const getAccessToken = ()=> {
         }
     }
     return axios.get(url, config)
-        .then(res=> sessionStorage.setItem("accessToken",res.data.data.accessToken))
 }
 
 //获取uid

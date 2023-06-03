@@ -83,13 +83,16 @@ const login = () => {
         ElMessage.error("请您重新检查电话号码填写")
     } else {
         loading.value = true
-        auth.getAccessToken()
+        auth.getAccessToken().then(res => {
+                sessionStorage.setItem("accessToken", res.data.data.accessToken)
+            }
+        )
         setTimeout(() => {
-            auth.getUidByAccount(mobile.value).then(res =>{
-                sessionStorage.setItem("uid",res.data.data.uid)
-                sessionStorage.setItem("mobile",mobile.value)
+            auth.getUidByAccount(mobile.value).then(res => {
+                sessionStorage.setItem("uid", res.data.data.uid)
+                sessionStorage.setItem("mobile", mobile.value)
                 auth.getDeptListByUid().then(res => {
-                    sessionStorage.setItem("deptId",res.data.data[1].id)
+                    sessionStorage.setItem("deptId", res.data.data[1].id)
                     user.deptName = res.data.data[1].name
                     auth.getUserInfoByUid().then(res => {
                         user.mobile = res.data.data.mobile
@@ -99,8 +102,8 @@ const login = () => {
                                 if (!res.data.success) {
                                     redisError()
                                 } else {
-                                    auth.getDeptList().then(res=>{
-                                        if (res.data.code === 200){
+                                    auth.getDeptList().then(res => {
+                                        if (res.data.code === 200) {
                                             const deptArray = res.data.data.departments.map(dept => {
                                                 return {
                                                     deptId: dept.deptId,
@@ -109,16 +112,16 @@ const login = () => {
                                                     order: dept.order
                                                 };
                                             });
-                                            save.saveDeptList(deptArray).then(res=>{
-                                                if (!res.data.success){
+                                            save.saveDeptList(deptArray).then(res => {
+                                                if (!res.data.success) {
                                                     redisError()
-                                                }else {
+                                                } else {
                                                     auth.getGroupList().then(res => {
-                                                        save.saveGroupList(res.data.data).then(res=>{
-                                                            if (!res.data.success){
+                                                        save.saveGroupList(res.data.data).then(res => {
+                                                            if (!res.data.success) {
                                                                 redisError()
-                                                            }else {
-                                                                auth.getDeptPersonList().then(res=>{
+                                                            } else {
+                                                                auth.getDeptPersonList().then(res => {
                                                                     const personList = res.data.data.users.map(person => {
                                                                         return {
                                                                             id: person.id.toString(),
@@ -129,10 +132,10 @@ const login = () => {
                                                                             privilege: "mydeptonly"
                                                                         }
                                                                     })
-                                                                    save.saveDeptPersonList(personList).then(res=>{
-                                                                        if (!res.data.success){
+                                                                    save.saveDeptPersonList(personList).then(res => {
+                                                                        if (!res.data.success) {
                                                                             redisError()
-                                                                        }else {
+                                                                        } else {
                                                                             loading.value = false
                                                                             window.location.href = '/chat'
                                                                         }
@@ -152,7 +155,7 @@ const login = () => {
                         )
                     })
                 })
-            } )
+            })
         }, 500)
     }
 }

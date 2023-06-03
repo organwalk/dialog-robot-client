@@ -28,7 +28,7 @@
             </el-row>
         </div>
         <el-alert title="成功发送OA消息" type="success" center show-icon :closable="false" v-show="showSuccess"/>
-    </el-card><br/>
+    </el-card>
 </template>
 
 <script setup>
