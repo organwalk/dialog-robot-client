@@ -98,6 +98,7 @@ const login = () => {
                         user.mobile = res.data.data.mobile
                         user.uid = res.data.data.uid
                         user.name = res.data.data.userName
+                        sessionStorage.setItem("userName",res.data.data.userName)
                         save.saveUserInfo(user).then(res => {
                                 if (!res.data.success) {
                                     redisError()

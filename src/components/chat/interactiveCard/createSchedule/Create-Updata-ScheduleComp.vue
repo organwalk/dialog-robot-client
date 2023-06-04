@@ -1,5 +1,5 @@
 <template>
-    <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 80%">
+    <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
                 <span style="font-weight: bolder;user-select: none">Schedule</span><br/>
@@ -22,7 +22,9 @@
 <!--            创建日程的页面     -->
             <one-create-schedule :showPageOne="showPageOne" @getPageOneData="getPageOneData"/>
             <two-create-schedule :showPageTwo="showPageTwo" @getPageTwoData="getPageTwoData"/>
-            <preview-create-schedule :showPagePreview="showPagePreview"/>
+            <preview-create-schedule :showPagePreview="showPagePreview"
+                                     :page-one-data="pageOneData"
+                                     :page-two-data="pageTwoData"/>
 
 
             <el-row>
@@ -43,7 +45,8 @@ import {reactive, ref, watch,defineEmits} from "vue";
 import OneCreateSchedule from "@/components/chat/interactiveCard/createSchedule/one-create-schedule.vue";
 import TwoCreateSchedule from "@/components/chat/interactiveCard/createSchedule/two-create-schedule.vue";
 import PreviewCreateSchedule from "@/components/chat/interactiveCard/createSchedule/preview-create-schedule.vue";
-import {useStore} from "vuex";
+import {sendAddPlan} from "@/api/cloud/card";
+import * as data from "@/api/server/data"
 
 const active = ref(0)
 const next = () => {
@@ -52,10 +55,33 @@ const next = () => {
 const back = () => {
     active.value --
 }
-
 const create = () => {
     showCreateForm.value = false
     showSuccessTip.value = true
+    allPageData.content = pageOneData.title
+    allPageData.begintime = Math.floor(Date.parse(pageOneData.startTime) / 1000)
+    allPageData.endtime = Math.floor(Date.parse(pageOneData.endTime) / 1000)
+    if (pageOneData.notice){
+        allPageData['warntime']=[0,5,15]
+        allPageData.iswarn = Boolean(pageOneData.notice)
+    }else {
+        allPageData.iswarn = Boolean(pageOneData.notice)
+    }
+    allPageData.straddr = JSON.stringify(
+        {
+            isCoordinate:0,
+            title:pageTwoData.location,
+            address:pageTwoData.location,
+            latitude:0,
+            longitude:0
+        }
+    )
+    allPageData.strdescrip = pageTwoData.scheduleDes
+    allPageData.members = pageTwoData.scheduleMembers
+    sendAddPlan(allPageData).then(res=>{
+        const sid = res.data.data.scheduleId
+        data.saveScheduleCount(sid,allPageData)
+    })
 }
 
 watch(active,(newVal,oldVal)=>{
@@ -95,8 +121,6 @@ const backStep = ref(false)
 const createStep = ref(false)
 const showSuccessTip = ref(false)
 
-const store = useStore()
-
 watch(active,(newVal) => {
     if (newVal){
         backStep.value = true
@@ -110,6 +134,15 @@ watch(active,(newVal) => {
     }
 })
 
+const allPageData = reactive({
+    content:'',
+    begintime:Number,
+    endtime:Number,
+    iswarn:Boolean,
+    straddr:'',
+    strdescrip:'',
+    members:[]
+})
 const pageOneData = reactive(
     {
         title:'',
@@ -123,7 +156,6 @@ const getPageOneData = (title,startTime,endTime,notice)=>{
     pageOneData.startTime = startTime
     pageOneData.endTime = endTime
     pageOneData.notice = notice
-    store.dispatch('updataPageOneData',pageOneData)
 }
 watch(
     () => [pageOneData.title, pageOneData.startTime, pageOneData.endTime, pageOneData.notice],
@@ -136,14 +168,13 @@ const pageTwoData = reactive(
     {
         scheduleDes:'',
         location:'',
-        scheduleMembers:''
+        scheduleMembers:[]
     }
 )
 const getPageTwoData = (scheduleDes,location,scheduleMembers) => {
     pageTwoData.scheduleDes = scheduleDes
     pageTwoData.location = location
     pageTwoData.scheduleMembers = scheduleMembers
-    store.dispatch('updataPageTwoData',pageTwoData)
 }
 watch(
     () => [pageTwoData.scheduleDes,pageTwoData.location,pageTwoData.scheduleMembers],

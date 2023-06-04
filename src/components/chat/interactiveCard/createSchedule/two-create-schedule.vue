@@ -27,14 +27,19 @@
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
                 <el-card shadow="never" style="border: none;background-color: #f5f9fa" align="center">
                     <span style="font-weight: bolder">添加日程成员</span><br/><br/>
-                    <el-select-v2
-                            v-model="scheduleMembers"
-                            filterable
-                            :options="options"
-                            placeholder="Please select schedule members"
-                            style="width: 80%"
-                            multiple
-                    />
+                    <el-select v-model="scheduleMembers"
+                               placeholder="Select"
+                               multiple
+                               filterable
+                               @change="handleChange">
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                        />
+                    </el-select>
+
                 </el-card>
             </el-col>
         </el-row>
@@ -44,7 +49,8 @@
 
 <script setup>
 import {LocationInformation} from '@element-plus/icons-vue'
-import {defineEmits, ref, watch, defineProps} from "vue";
+import {defineEmits, ref, watch, defineProps, onMounted} from "vue"
+import * as card from '@/api/cloud/card'
 
 defineProps({
     showPageTwo: Boolean
@@ -53,36 +59,38 @@ defineProps({
 const scheduleDes = ref('')
 const location = ref('')
 
+const opUsers = ref([])
+onMounted(()=>{
+    card.getPersonList().then(res=>{
+        let users = res.data.data.userList
+        opUsers.value = users
+            .map(user => ({ value: user.userId, label: user.name }))
+            .filter((user, index, arr) => (
+                arr.findIndex(u => u.value === user.value && u.label === user.label) === index
+            ));
+        options.value = opUsers.value
+    })
+})
 const scheduleMembers = ref([])
-const options = [
-    {
-        value: 'group1',
-        label: 'Group Xeno',
-        options: [
-            {value: '张三', label: '张三'},
-            {value: '李四', label: '李四'},
-            {value: '王五', label: '王五'},
-        ],
-    },
-    {
-        value: 'group2',
-        label: 'Group Yolo',
-        options: [
-            {value: 'Tom', label: 'Tom'},
-            {value: 'Jerry', label: 'Jerry'},
-            {value: 'Spike', label: 'Spike'},
-        ],
-    },
-];
+const options = ref([])
+const mem = ref([])
+const handleChange = (selectedValues)=> {
+    mem.value = selectedValues.map(() => {
+        const selectedMember = options.value.find(item => selectedValues.includes(item.value));
+        return {
+            uid: selectedMember.value,
+            name: selectedMember.label,
+        };
+    });
+}
 
 const emit = defineEmits(["getPageTwoData"])
-
 const sendPageTwoData = () => {
-    emit('getPageTwoData', scheduleDes.value, location.value, scheduleMembers.value)
+    emit('getPageTwoData', scheduleDes.value, location.value,mem.value)
 }
 
 watch(
-    [scheduleDes, location, scheduleMembers],
+    [scheduleMembers],
     () => {
         sendPageTwoData()
     }

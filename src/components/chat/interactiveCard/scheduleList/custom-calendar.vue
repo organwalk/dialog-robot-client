@@ -66,6 +66,7 @@
                         >
                             <template #reference>
                                 <div :class="{'choose-bg': row[index] === chooseDateValue }"
+                                     @mouseover="getScheduleNum(row[index])"
                                      style="user-select: none;">{{ row[index] }}
                                 </div>
                             </template>
@@ -79,7 +80,8 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
+import * as data from "@/api/server/data";
 
 const weekList = ref(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
 // 定义日期列表
@@ -102,6 +104,8 @@ const monthName = computed(()=> monthNames[parseInt(monthValue.value)-1])
 const firstDay = computed(()=>new Date(parseInt(yearValue.value.toString()), parseInt(monthValue.value.toString())-1, 1))
 const lastDay = computed(()=>new Date(parseInt(yearValue.value.toString()),parseInt(monthValue.value.toString()) , 0))
 const scheduleNum = ref('0')
+const hoverData = ref('')
+const countList = reactive([])
 
 watch([firstDay,lastDay,monthValue],([newFirst,newLast]) => {
     buildCalendar(newFirst,newLast)
@@ -109,7 +113,21 @@ watch([firstDay,lastDay,monthValue],([newFirst,newLast]) => {
 
 onMounted(()=>{
     buildCalendar(firstDay.value,lastDay.value)
+    data.getScheduleCount().then(res=>{
+        countList.value = res.data.scheduleData
+    })
 })
+
+const getScheduleNum = (val)=>{
+    hoverData.value = yearValue.value + "-" + monthValue.value + '-' +val
+    const dateParts = hoverData.value.split('-');
+    const year = dateParts[0];
+    const month = dateParts[1].padStart(2, '0');
+    const day = dateParts[2].padStart(2, '0');
+    hoverData.value = `${year}-${month}-${day}`
+    const result = countList.value.find(item => item.date === hoverData.value)
+    scheduleNum.value = result ? result.count : 0
+}
 
 // 填充日期列表
 const buildCalendar = (firstDay,lastDay) => {

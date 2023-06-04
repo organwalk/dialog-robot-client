@@ -48,44 +48,42 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {
     Delete,
     Edit,
 } from '@element-plus/icons-vue'
 import CreateUpdataScheduleComp from "@/components/chat/interactiveCard/createSchedule/Create-Updata-ScheduleComp.vue";
+import * as data from '@/api/server/data'
 
 const scheduleList = ref([])
-scheduleList.value.push(
-    {
-        time: "08:30-09:30",
-        title: "Working morning",
-        des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
-        releaser: "John",
-        location: "P.C street"
-    },
-    {
-        time: "08:30-09:30",
-        title: "Working morning",
-        des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
-        releaser: "John",
-        location: "P.C street"
-    },
-    {
-        time: "08:30-09:30",
-        title: "Working morning",
-        des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
-        releaser: "John",
-        location: "P.C street"
-    },
-    {
-        time: "08:30-09:30",
-        title: "Working morning",
-        des: "Consistent with real life: in line with the process and logic of real life, and comply with languages and habits that the users are used to;",
-        releaser: "John",
-        location: "P.C street"
-    },
-)
+onMounted(()=>{
+    const today = new Date().toISOString().slice(0, 10);
+    const todayObj = {
+        begintime:today,
+        endtime:today
+    }
+    data.getSchedule(todayObj).then(res=>{
+        scheduleList.value = res.data.scheduleData.map(item => {
+            const start = new Date(parseInt(item.begintime));
+            const end = new Date(parseInt(item.endtime));
+            const startTime = `${start.getHours()}:${start.getMinutes().toString().padStart(2, '0')}`;
+            const endTime = `${end.getHours()}:${end.getMinutes().toString().padStart(2, '0')}`;
+            const time = `${startTime}-${endTime}`;
+            return {
+                time: time,
+                title: item.content,
+                des: item.strdescrip,
+                releaser: item.name,
+                location: JSON.parse(item.straddr).address,
+                uid: item.uid,
+                scheduleId: item.scheduleId
+            }
+        })
+        console.log(scheduleList.value)
+    })
+})
+
 const dialogUpdataSchedule = ref(false)
 const updataSchedule = ()=> {
     dialogUpdataSchedule.value = true

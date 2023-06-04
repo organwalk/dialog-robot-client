@@ -50,7 +50,7 @@
                                 <el-switch
                                         v-model="notice"
                                         style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-                                />
+                                /><br/>
                             </el-card>
                         </el-col>
                     </el-row>
@@ -78,20 +78,21 @@ const title = ref('')
 const emit = defineEmits(["getPageOneData"])
 
 const sendPageOneData = () => {
-    const start = new Date(startTime.value);
-    const end = new Date(endTime.value);
-    if (end < start) {
-        ElMessage.error('截止日期不可小于起始日期')
-        endTime.value = ''
-    } else {
+    const start = new Date(startTime.value).getFullYear()+new Date(startTime.value).getMonth() +new Date(startTime.value).getDate();
+    const end = new Date(endTime.value).getFullYear() + new Date(endTime.value).getMonth() + new Date(endTime.value).getDate();
+    if (end === start) {
         emit('getPageOneData', title.value, startTime.value, endTime.value, notice.value)
+    } else {
+        ElMessage.error('日程仅限定在今日范围')
+        endTime.value = ''
     }
 }
 
-watch([title, startTime, endTime, notice], () => {
-    sendPageOneData()
+watch([startTime, endTime], (newStart,newEnd) => {
+    if (newStart[0]!=='' && newEnd[0] !== ''){
+        sendPageOneData()
+    }
 });
-
 
 </script>
 

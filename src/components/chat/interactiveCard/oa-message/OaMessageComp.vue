@@ -33,13 +33,15 @@
 
 <script setup>
 import OnePageSendOamessage from "@/components/chat/interactiveCard/oa-message/one-page-send-oamessage.vue";
-import {ref, watch} from "vue";
+import {reactive, ref, watch,defineEmits} from "vue";
 import TwoPageSendOamessage from "@/components/chat/interactiveCard/oa-message/two-page-send-oamessage.vue";
+import * as card from "@/api/cloud/card"
 
 const active = ref(0)
 const showNext = ref(false)
 const showBack = ref(false)
 const showSubmit = ref(false)
+const emit = defineEmits(['sendSuccess'])
 watch(active, (newVal) => {
     if (newVal) {
         showBack.value = true
@@ -58,19 +60,35 @@ watch(active, (newVal) => {
 })
 
 const showPageOne = ref(true)
+
+const obj = reactive({
+    title:'',
+    subject:'',
+    summary:'',
+    image:'',
+    receivers:[]
+})
 const getPageOneData = (newMsg, newTit, newSum) => {
+    obj.title = newMsg
+    obj.subject = newTit
+    obj.summary = newSum
     showNext.value = !!(newMsg && newTit && newSum);
 }
 
-const getPageTwoData = (newFile) => {
-    console.log("11" + newFile.name)
+const getPageTwoData = (newFile,newRec) => {
+    obj.image='https://th.bing.com/th/id/OIP.ee1vF42zkXMEnJdn6bFOXAHaHa?pid=ImgDet&rs=1'
+    obj.receivers = newRec
     showSubmit.value = (newFile.name)
 }
+
+
 const showPageTwo = ref(false)
 
 const showSuccess = ref(false)
 const submit = () => {
     showSuccess.value = true
+    card.sendOAMsg(obj)
+    emit('sendSuccess',showSuccess.value)
 }
 </script>
 

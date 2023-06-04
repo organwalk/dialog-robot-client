@@ -1,5 +1,5 @@
 <template>
-<el-card v-show="showPagePreview" shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;">
+<el-card v-show="props.showPagePreview" shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;">
     <el-row>
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
             <el-tooltip :content=strEndTime placement="top">
@@ -27,17 +27,16 @@
 <script setup>
 import { Location } from '@element-plus/icons-vue'
 import {reactive, ref,defineProps} from "vue";
-import {useStore} from "vuex";
-
-defineProps({
-    showPagePreview:Boolean
+console.log(sessionStorage.getItem("userName"))
+const props = defineProps({
+    showPagePreview:Boolean,
+    pageOneData:Object,
+    pageTwoData:Object
 })
 
-const store = useStore()
-
 const allPageData = reactive({
-    pageOneData:store.state.createSchedule.pageOne ,
-    pageTwoData:store.state.createSchedule.pageTwo
+    pageOneData:props.pageOneData,
+    pageTwoData:props.pageTwoData
 })
 const strStartTime = ref(allPageData.pageOneData.startTime.split(' ')[0] + ',' + allPageData.pageOneData.startTime.split(' ')[1])
 const strEndTime = ref("截止日期: " + allPageData.pageOneData.endTime.split(' ')[0] + ',' + allPageData.pageOneData.endTime.split(' ')[1])

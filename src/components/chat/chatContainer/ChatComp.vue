@@ -7,19 +7,11 @@
             </el-col>
         </el-row>
         <br/>
-<!--        展示推荐指令      -->
+        <!--        展示推荐指令      -->
         <RecommendComp v-if="showRecommend" @send-recommend-text="getRecommendText"/>
         <div v-for="(item, index) in chatMessages" :key="index">
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
                 <!-- 对话机器人 -->
-                <!--                查看日程卡片      -->
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-                    <ScheduleListComp v-if="showScheduleList"/>
-                </el-col>
-                <!--                创建日程卡片      -->
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-                    <CreateSchedule v-if="showCreateSchedule" />
-                </el-col>
                 <!--                查看事项告知卡片    -->
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                     <NotificationListComp v-if="showNotificationList"/>
@@ -32,14 +24,14 @@
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                     <UpdataEmployeeComp v-if="showUpdataEmployee"/>
                 </el-col>
-                <!--                发送OA消息  -->
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-                    <OaMessageComp v-if="showOAMessage"/>
-                </el-col>
                 <!--                语言回复        -->
-                <robot-reply :order-type="orderType"
-                             :empty-keys-list="emptyKeysList"
-                             @send-miss-value-type="getMissValueType"/>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
+                    <robot-reply :order-type="orderType"
+                                 :empty-keys-list="emptyKeysList"
+                                 :card-status="cardStatus"
+                                 @send-miss-value-type="getMissValueType"
+                                 @show-recommend="dontShowRec"/>
+                </el-col>
             </el-row>
             <br/>
             <el-row v-if="!showRecommend && item.type === 'user'" justify="end" style="padding-left: 10%">
@@ -47,11 +39,11 @@
                 <el-card shadow="never" class="user-chat-bubble"
                          :body-style="{padding:'10px'}"
                          align="left">
-                    <span style="line-height: 1.5;color: white" v-html="item.message" />
+                    <span style="line-height: 1.5;color: white" v-html="item.message"/>
                 </el-card>
             </el-row>
         </div>
-<!--        在对话下展示推荐指令  -->
+        <!--        在对话下展示推荐指令  -->
         <el-row v-if="showRecommendTip" style="margin-top: -1%">
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
                 <el-button v-for="(recommend,index) in recommendList" :key="index"
@@ -64,35 +56,31 @@
         </el-row>
     </el-card>
     <ChatInputComp
-        @user-input="onUserInput"
-        @res-order-type="getOrderType"
-        @send-empty-keys-list="getEmptyKeysList"
-        :missing-value="missValueType"/>
+            @user-input="onUserInput"
+            @res-order-type="getOrderType"
+            @send-empty-keys-list="getEmptyKeysList"
+            @send-card-status="getCardStatus"
+            :missing-value="missValueType"/>
 </template>
 
 <script setup>
 import ChatInputComp from "@/components/chat/chatContainer/ChatInputComp.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
-import ScheduleListComp from "@/components/chat/interactiveCard/scheduleList/ScheduleListComp.vue";
-import CreateSchedule from "@/components/chat/interactiveCard/createSchedule/Create-Updata-ScheduleComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
 import {nextTick, ref} from "vue";
 import NotificationListComp from "@/components/chat/interactiveCard/notificationList/NotificationListComp.vue";
 import CreateNotification from "@/components/chat/interactiveCard/createNotification/Create-Updata-NotificationComp.vue"
 import UpdataEmployeeComp from "@/components/chat/interactiveCard/manageEmployee/UpdataEmployeeComp.vue";
-import OaMessageComp from "@/components/chat/interactiveCard/oa-message/OaMessageComp.vue";
+
 import RobotReply from "@/components/chat/chatContainer/robot-reply.vue";
 
 const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
 const showRecommend = ref(true)
 const showRecommendTip = ref(true)
 const showToDay = ref(false)
-const showScheduleList = ref(false)
-const showCreateSchedule = ref(false)
 const showNotificationList = ref(false)
 const showCreateNotification = ref(false)
 const showUpdataEmployee = ref(false)
-const showOAMessage = ref(false)
 
 const chatMessages = ref([]);
 const containerScrollTop = ref(0)
@@ -122,20 +110,18 @@ const onUserInput = (userInput) => {
         setTimeout(() => {
             chatMessages.value.push({
                 type: 'robot',
-                message:''
+                message: ''
             })
-            scrollBottom()
-        }, 2000)
-        setTimeout(() => {
             showRecommendTip.value = true
             getRecommendList()
             scrollBottom()
-        }, 2500)
+        }, 2000)
+
     }
 }
 
 const orderType = ref('')
-const getOrderType = (ot) =>{
+const getOrderType = (ot) => {
     orderType.value = ot
 }
 
@@ -148,6 +134,16 @@ const missValueType = ref('')
 const getMissValueType = (val) => {
     missValueType.value = val
 }
+
+const cardStatus = ref('')
+const getCardStatus = (val) => {
+    cardStatus.value = val
+}
+
+const dontShowRec = (val) => {
+    showRecommendTip.value = val;
+}
+
 const scrollBottom = () => {
     nextTick(() => {
         const chatContainer = document.querySelector('.chatContainer')

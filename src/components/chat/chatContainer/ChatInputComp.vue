@@ -25,13 +25,13 @@
 <script setup>
 import {Link,Promotion} from '@element-plus/icons-vue'
 import {ref, defineEmits,defineProps} from "vue";
-import sendOrderToServer from "@/api/server/order";
+import * as order from "@/api/server/order";
 import msg from "@/api/cloud/message"
 import {useStore} from "vuex";
 
 const orderContent = ref('')
 const store= useStore()
-const emit = defineEmits(["user-input","res-orderType","send-emptyKeysList"])
+const emit = defineEmits(["user-input","res-orderType","send-emptyKeysList","send-cardStatus"])
 const props = defineProps({
     missingValue:String
 })
@@ -39,17 +39,20 @@ const props = defineProps({
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务
 const sendOrder = () =>{
+    let refresh = ''
     emit('user-input',orderContent.value)
+    emit('send-cardStatus',refresh)
     let missingValueObj = store.state.chat.missingKeyObj
     //判断是否存有上次对话记录的空缺值对象，如果不存在，则表明本轮对话为新一轮对话
     if (Object.keys(missingValueObj).length === 0){
-        sendOrderToServer(orderContent.value).then(res=>{
+        order.sendOrderToServer(orderContent.value).then(res=>{
             let ot = '' //指令类型
             let obj = {} //参数对象
             //判断指令类型是否为空
             if (res.data.orderRes.orderType !== '' ){
                 ot = res.data.orderRes.orderType
                 obj = res.data.orderRes
+                emit('res-orderType',ot)
                 //然后判断指令体对象中是否存在空值
                 if (filterEmptyKeys(obj).length > 0){
                     //将空缺值列表发送给父组件
@@ -58,8 +61,14 @@ const sendOrder = () =>{
                     store.dispatch('updataMissingKeyObj',obj)
                     emit('res-orderType',ot)
                 }else {
-                    //如果不存在空缺值，则可以直接调用赛方接口
-                    msg(ot,getOrderResObject(obj))
+                    //如果不存在空缺值，则可以调用赛方接口
+                    //在此应该进行类别划分
+                    const msgType = /Msg/
+                    if (msgType.test(ot)){
+                        msg(ot,getOrderResObject(obj))
+                    }else{
+                        emit("send-cardStatus",ot)
+                    }
                 }
             }else {
                 //若为空，则将空指令类型发送至父组件,以表意图不明
@@ -67,17 +76,17 @@ const sendOrder = () =>{
             }
         })
     }else {
-        console.log("------"+filterEmptyKeys(userInputAoubtMissingValues(props.missingValue,orderContent.value)).length)
-        userInputAoubtMissingValues(props.missingValue,orderContent.value)
-        if (filterEmptyKeys(userInputAoubtMissingValues(props.missingValue,orderContent.value)).length > 0){
-            sendMissingValues(filterEmptyKeys(userInputAoubtMissingValues(props.missingValue,orderContent.value)))
-            emit('res-orderType',userInputAoubtMissingValues(props.missingValue,orderContent.value).orderType)
-        }else if (filterEmptyKeys(userInputAoubtMissingValues(props.missingValue,orderContent.value)).length === 0){
-            let orderType = store.state.chat.missingKeyObj.orderType
-            sendMissingValues([])
-            msg(orderType,getOrderResObject(store.state.chat.missingKeyObj))
-            emit('res-orderType',orderType)
-        }
+        userInputAoubtMissingValues(props.missingValue,orderContent.value).then(newObj=>{
+            if (filterEmptyKeys(newObj).length > 0){
+                sendMissingValues(filterEmptyKeys(newObj))
+                emit('res-orderType',newObj.orderType)
+            }else if (filterEmptyKeys(newObj).length === 0){
+                let orderType = store.state.chat.missingKeyObj.orderType
+                sendMissingValues([])
+                msg(orderType,getOrderResObject(store.state.chat.missingKeyObj))
+                emit('res-orderType',orderType)
+            }
+        })
 
     }
     orderContent.value = ''
@@ -112,17 +121,52 @@ const sendMissingValues = (emptyKeysList) => {
 }
 
 //将用户对空缺值的补充填补进空缺对象中
-const userInputAoubtMissingValues = (type,val) => {
+const userInputAoubtMissingValues = async (type,val) => {
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
+    let data
     //type就是要补充字段的key，val就是要填补的值
     if (type in oldObj){
-        newObj = {...oldObj,[type]:val}
+        //此处应该判断Type的类型
+        switch (type) {
+            case 'receivers':
+            case 'groupId':
+                data = await objectIdByName(type, val);
+                newObj = { ...oldObj, [type]: data };
+                break;
+            default:
+                newObj = { ...oldObj, [type]: val };
+        }
     }
     //返回新的对象
-    store.dispatch('updataMissingKeyObj',newObj)
+    await store.dispatch('updataMissingKeyObj',newObj)
     return newObj
 }
+
+//获取主体的id属性
+const objectIdByName = async (type, val) => {
+    if (type === 'receivers') {
+        const namePattern = /[\u4e00-\u9fa5]{2,}(?:·[\u4e00-\u9fa5]{2,})*/g;
+        let res
+        if (val.length>1){
+            const matches = val.match(namePattern);
+            res = await order.getUserIdByName(matches)
+        }else {
+            let nameList = []
+            res = await order.getUserIdByName(nameList.push(val))
+        }
+
+        const dataArray = res.data.data;
+        dataArray.forEach((item) => {
+            item[0] = item[0] || '';
+        });
+        return dataArray.map((item) => item[0]);
+    } else if (type === 'groupId') {
+        const res = await order.getGroupIdByName(val);
+        const groupId = res.data.data;
+        return groupId.map((item) => item[1])[0];
+    }
+};
 </script>
 
 <style scoped>
