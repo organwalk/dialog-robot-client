@@ -67,6 +67,7 @@
                             <template #reference>
                                 <div :class="{'choose-bg': row[index] === chooseDateValue }"
                                      @mouseover="getScheduleNum(row[index])"
+                                     @click="getScheduleListByDay(row[index])"
                                      style="user-select: none;">{{ row[index] }}
                                 </div>
                             </template>
@@ -80,7 +81,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref, watch} from "vue";
+import {computed, onMounted, reactive, ref, watch,defineEmits} from "vue";
 import * as data from "@/api/server/data";
 
 const weekList = ref(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
@@ -90,6 +91,7 @@ const dateList = ref([])
 const today = new Date()
 
 const chooseDate = ref(today.getDate())
+const emit = defineEmits(["sendClickDay"])
 
 //  获取点击的日程单元格
 const handleClick = (row, column) => {
@@ -127,6 +129,15 @@ const getScheduleNum = (val)=>{
     hoverData.value = `${year}-${month}-${day}`
     const result = countList.value.find(item => item.date === hoverData.value)
     scheduleNum.value = result ? result.count : 0
+}
+const getScheduleListByDay = (val)=>{
+    hoverData.value = yearValue.value + "-" + monthValue.value + '-' +val
+    const dateParts = hoverData.value.split('-');
+    const year = dateParts[0];
+    const month = dateParts[1].padStart(2, '0');
+    const day = dateParts[2].padStart(2, '0');
+    hoverData.value = `${year}-${month}-${day}`
+    emit('sendClickDay',hoverData.value)
 }
 
 // 填充日期列表

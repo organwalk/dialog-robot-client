@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref, defineProps, computed, watch} from "vue";
 import {
     Delete,
     Edit,
@@ -57,18 +57,25 @@ import CreateUpdataScheduleComp from "@/components/chat/interactiveCard/createSc
 import * as data from '@/api/server/data'
 
 const scheduleList = ref([])
+const props = defineProps({
+    clickDay:String
+})
 onMounted(()=>{
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-').split('-');
+    const year = today[0];
+    const month = today[1].padStart(2, '0');
+    const date = today[2].padStart(2, '0');
+    const formattedDate = `${year}-${month}-${date}`;
     const todayObj = {
-        begintime:today,
-        endtime:today
+        begintime:formattedDate,
+        endtime:formattedDate
     }
     data.getSchedule(todayObj).then(res=>{
         scheduleList.value = res.data.scheduleData.map(item => {
-            const start = new Date(parseInt(item.begintime));
-            const end = new Date(parseInt(item.endtime));
-            const startTime = `${start.getHours()}:${start.getMinutes().toString().padStart(2, '0')}`;
-            const endTime = `${end.getHours()}:${end.getMinutes().toString().padStart(2, '0')}`;
+            const start = new Date(item.begintime * 1000)
+            const end = new Date(item.endtime * 1000);
+            const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+            const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
             const time = `${startTime}-${endTime}`;
             return {
                 time: time,
@@ -80,8 +87,35 @@ onMounted(()=>{
                 scheduleId: item.scheduleId
             }
         })
-        console.log(scheduleList.value)
     })
+})
+const clickDay = computed(()=>props.clickDay)
+watch(clickDay,(newVal)=>{
+    if (newVal){
+        console.log(clickDay.value)
+        const clickObj = {
+            begintime:props.clickDay,
+            endtime:props.clickDay
+        }
+        data.getSchedule(clickObj).then(res=>{
+            scheduleList.value = res.data.scheduleData.map(item => {
+                const start = new Date(item.begintime * 1000)
+                const end = new Date(item.endtime * 1000);
+                const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+                const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+                const time = `${startTime}-${endTime}`;
+                return {
+                    time: time,
+                    title: item.content,
+                    des: item.strdescrip,
+                    releaser: item.name,
+                    location: JSON.parse(item.straddr).address,
+                    uid: item.uid,
+                    scheduleId: item.scheduleId
+                }
+            })
+        })
+    }
 })
 
 const dialogUpdataSchedule = ref(false)
