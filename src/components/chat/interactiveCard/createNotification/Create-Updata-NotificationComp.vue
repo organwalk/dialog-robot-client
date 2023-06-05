@@ -1,5 +1,5 @@
 <template>
-    <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 80%">
+    <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
                 <span style="font-weight: bolder;user-select: none">Notification</span><br/>

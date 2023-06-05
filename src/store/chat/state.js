@@ -1,3 +1,5 @@
 export default {
-    missingKeyObj: {}
+    missingKeyObj: {},
+    searchUid:Object,
+    oldMem:Array
 }

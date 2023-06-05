@@ -11,9 +11,14 @@ const sendAddPlan = (obj)=>{
     return http.unPost('/schedule/create',obj)
 }
 
+const updataPlan = (sid,obj)=>{
+    return http.unPost('/schedule/update?scheduleId='+sid,obj)
+}
+
 
 export {
     sendOAMsg,
     getPersonList,
-    sendAddPlan
+    sendAddPlan,
+    updataPlan
 }

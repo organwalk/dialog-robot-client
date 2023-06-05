@@ -1,5 +1,5 @@
 <template>
-    <div v-show="showPageTwo" style="width: 100%">
+    <div v-show="props.showPageTwo" style="width: 100%">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
                 <el-input
@@ -49,17 +49,21 @@
 
 <script setup>
 import {LocationInformation} from '@element-plus/icons-vue'
-import {defineEmits, ref, watch, defineProps, onMounted} from "vue"
+import {defineEmits, ref, watch, defineProps, onMounted, computed} from "vue"
 import * as card from '@/api/cloud/card'
+import * as data from "@/api/server/data";
 
-defineProps({
-    showPageTwo: Boolean
+const props = defineProps({
+    showPageTwo: Boolean,
+    sid:String
 })
 
 const scheduleDes = ref('')
 const location = ref('')
 
 const opUsers = ref([])
+
+//  组件被挂载时远程获取人员列表
 onMounted(()=>{
     card.getPersonList().then(res=>{
         let users = res.data.data.userList
@@ -73,20 +77,37 @@ onMounted(()=>{
 })
 const scheduleMembers = ref([])
 const options = ref([])
-const mem = ref([])
-const handleChange = (selectedValues)=> {
-    mem.value = selectedValues.map(() => {
-        const selectedMember = options.value.find(item => selectedValues.includes(item.value));
-        return {
-            uid: selectedMember.value,
-            name: selectedMember.label,
-        };
+let mem = []
+
+//获取选择用户的uid及name值
+const handleChange = (selectedValues) => {
+    mem = []
+    const selectedOptions = selectedValues.map((value) => {
+        const option = options.value.find((item) => item.value === value);
+        return { value: value, label: option ? option.label : '' };
     });
+    // 检查是否已经存在相同的对象数组
+    const isDuplicate = mem.some((arr) => {
+        if (arr.length !== selectedOptions.length) {
+            return false;
+        }
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].value !== selectedOptions[i].value || arr[i].label !== selectedOptions[i].label) {
+                return false;
+            }
+        }
+        return true;
+    });
+    // 如果不存在相同的对象数组，则将新的对象数组添加到mem.value属性中
+    if (!isDuplicate) {
+        mem.push(selectedOptions);
+    }
 }
 
+//传递该页的数据值
 const emit = defineEmits(["getPageTwoData"])
 const sendPageTwoData = () => {
-    emit('getPageTwoData', scheduleDes.value, location.value,mem.value)
+    emit('getPageTwoData', scheduleDes.value, location.value,mem)
 }
 
 watch(
@@ -96,6 +117,19 @@ watch(
     }
 )
 
+//监听父组件传递的sid值，如果存在sid，说明本次组件调用行为是修改，而非创建
+const sid = computed(()=>props.sid)
+if (sid.value){
+    data.getScheduleBySid(sid.value).then(res=>{
+        const obj = res.data.scheduleData[0]
+        scheduleDes.value = obj.strdescrip
+        const jsonObject = JSON.parse(obj.straddr)
+        location.value = jsonObject.address
+        JSON.parse(obj.members).forEach(member => {
+            scheduleMembers.value.push(member.uid)
+        })
+    })
+}
 </script>
 
 <style scoped>

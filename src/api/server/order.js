@@ -18,8 +18,13 @@ const getGroupIdByName = (nameArray) => {
     })
 }
 
+const getDeptIdByName = (name) => {
+    return http.post('/dept/id/'+sessionStorage.getItem('mobile')+"?deptName="+encodeURIComponent(name))
+}
+
 export {
     sendOrderToServer,
     getUserIdByName,
-    getGroupIdByName
+    getGroupIdByName,
+    getDeptIdByName
 }

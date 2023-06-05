@@ -24,9 +24,13 @@ const http = {
     put(url,params){
         const config = {
             method:'put',
-            url:url
+            url:url,
+            data: params,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }
-        if (params) config.params = params
+        if (params) config.data = params
         return request(config)
     },
     delete(url,params){

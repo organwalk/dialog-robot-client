@@ -14,11 +14,27 @@ const saveScheduleCount = (sid,obj)=>{
     obj["name"] = sessionStorage.getItem("userName")
     delete obj.warntime
     newOld["data"] = obj
-
     return http.post('/data/schedule',newOld)
 }
+
+const getScheduleBySid = (sid)=>{
+    return http.get('/data/schedule/sid/'+sid)
+}
+const updataSchedule = (sid,obj)=>{
+    const newOld = {}
+    newOld["action"] = "updata"
+    newOld["scheduleId"] = obj.scheduleId
+    obj["uid"] = Number(sessionStorage.getItem("uid"))
+    obj["name"] = sessionStorage.getItem("userName")
+    delete obj.warntime
+    newOld["data"] = obj
+    return http.put('/data/schedule/'+sid,newOld)
+}
+
 export {
     getSchedule,
     getScheduleCount,
-    saveScheduleCount
+    saveScheduleCount,
+    getScheduleBySid,
+    updataSchedule
 }

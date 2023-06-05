@@ -28,10 +28,12 @@ import {ref, defineEmits,defineProps} from "vue";
 import * as order from "@/api/server/order";
 import msg from "@/api/cloud/message"
 import {useStore} from "vuex";
+import * as mp from "@/api/cloud/manage-person";
+import * as md from "@/api/cloud/manage-dept"
 
 const orderContent = ref('')
 const store= useStore()
-const emit = defineEmits(["user-input","res-orderType","send-emptyKeysList","send-cardStatus"])
+const emit = defineEmits(["user-input","res-orderType","send-emptyKeysList","send-cardStatus","send-name"])
 const props = defineProps({
     missingValue:String
 })
@@ -64,9 +66,19 @@ const sendOrder = () =>{
                     //如果不存在空缺值，则可以调用赛方接口
                     //在此应该进行类别划分
                     const msgType = /Msg/
+                    const manType = /Man/
+                    const deptType = /Dept/
                     if (msgType.test(ot)){
                         msg(ot,getOrderResObject(obj))
-                    }else{
+                    }else if (manType.test(ot)){
+                        if (ot ==='ModMan'){
+                            emit("send-cardStatus",ot)
+                        }
+                        mp.man(ot,getOrderResObject(obj))
+                    }else if (deptType.test(ot)){
+                        md.dept(ot,getOrderResObject(obj))
+                    }
+                    else{
                         emit("send-cardStatus",ot)
                     }
                 }
@@ -84,6 +96,10 @@ const sendOrder = () =>{
                 let orderType = store.state.chat.missingKeyObj.orderType
                 sendMissingValues([])
                 msg(orderType,getOrderResObject(store.state.chat.missingKeyObj))
+                const mType = /Man/
+                if (mType.test(orderType)){
+                    mp.man(orderType,getOrderResObject(store.state.chat.missingKeyObj))
+                }
                 emit('res-orderType',orderType)
             }
         })
@@ -124,6 +140,7 @@ const sendMissingValues = (emptyKeysList) => {
 const userInputAoubtMissingValues = async (type,val) => {
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
+    let userinfo = {}
     let data
     //type就是要补充字段的key，val就是要填补的值
     if (type in oldObj){
@@ -132,6 +149,27 @@ const userInputAoubtMissingValues = async (type,val) => {
             case 'receivers':
             case 'groupId':
                 data = await objectIdByName(type, val);
+                newObj = { ...oldObj, [type]: data };
+                break;
+            case 'name':
+                data = await objectIdByName(type, val);
+                if (data){
+                    userinfo = {
+                        name:val,
+                        uid:Number(data)
+                    }
+                    await store.dispatch('updataSearchUid', userinfo)
+                }
+                newObj = { ...oldObj, [type]: data };
+                break;
+            case 'dept':
+                data = await objectIdByName(type,val)
+                if (data){
+                    userinfo = {
+                        deptId:Number(data)
+                    }
+                    await store.dispatch('updataSearchUid',userinfo)
+                }
                 newObj = { ...oldObj, [type]: data };
                 break;
             default:
@@ -143,7 +181,7 @@ const userInputAoubtMissingValues = async (type,val) => {
     return newObj
 }
 
-//获取主体的id属性
+//获取缺失主体的id属性
 const objectIdByName = async (type, val) => {
     if (type === 'receivers') {
         const namePattern = /[\u4e00-\u9fa5]{2,}(?:·[\u4e00-\u9fa5]{2,})*/g;
@@ -155,7 +193,6 @@ const objectIdByName = async (type, val) => {
             let nameList = []
             res = await order.getUserIdByName(nameList.push(val))
         }
-
         const dataArray = res.data.data;
         dataArray.forEach((item) => {
             item[0] = item[0] || '';
@@ -165,6 +202,19 @@ const objectIdByName = async (type, val) => {
         const res = await order.getGroupIdByName(val);
         const groupId = res.data.data;
         return groupId.map((item) => item[1])[0];
+    }else if (type === 'name'){
+        let nameList = []
+        nameList.push(val)
+        const res = await order.getUserIdByName(nameList)
+        const dataArray = res.data.data;
+        dataArray.forEach((item) => {
+            item[0] = item[0] || '';
+        })
+        return dataArray.map((item) => item[0]);
+    }else if (type === 'dept'){
+        const res = await order.getGroupIdByName(val);
+        const groupId = res.data.data;
+        return groupId.map((item) => item[0])[0];
     }
 };
 </script>

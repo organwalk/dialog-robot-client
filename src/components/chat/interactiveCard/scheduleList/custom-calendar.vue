@@ -71,7 +71,7 @@
                                      style="user-select: none;">{{ row[index] }}
                                 </div>
                             </template>
-                            <span>该日期有 {{ scheduleNum }} 条日程</span>
+                            <span>该日期有 {{ scheduleNum }} 条记录</span>
                         </el-popover>
                     </template>
                 </el-table-column>
@@ -115,6 +115,7 @@ watch([firstDay,lastDay,monthValue],([newFirst,newLast]) => {
 
 onMounted(()=>{
     buildCalendar(firstDay.value,lastDay.value)
+    //组件加载时获取记录数列表
     data.getScheduleCount().then(res=>{
         countList.value = res.data.scheduleData
     })
@@ -130,8 +131,11 @@ const getScheduleNum = (val)=>{
     const result = countList.value.find(item => item.date === hoverData.value)
     scheduleNum.value = result ? result.count : 0
 }
+
+const clickDay = ref('')
 const getScheduleListByDay = (val)=>{
-    hoverData.value = yearValue.value + "-" + monthValue.value + '-' +val
+    clickDay.value = val
+    hoverData.value = yearValue.value + "-" + monthValue.value + '-' + val
     const dateParts = hoverData.value.split('-');
     const year = dateParts[0];
     const month = dateParts[1].padStart(2, '0');
@@ -140,13 +144,24 @@ const getScheduleListByDay = (val)=>{
     emit('sendClickDay',hoverData.value)
 }
 
+watch([yearValue,monthValue],([newYear,newMonth])=>{
+    if (newYear && newMonth){
+        hoverData.value = newYear + "-" + newMonth + '-' + clickDay.value
+        const dateParts = hoverData.value.split('-');
+        const year = dateParts[0];
+        const month = dateParts[1].padStart(2, '0');
+        const day = dateParts[2].padStart(2, '0');
+        hoverData.value = `${year}-${month}-${day}`
+        emit('sendClickDay',hoverData.value)
+    }
+})
+
 // 填充日期列表
 const buildCalendar = (firstDay,lastDay) => {
     dateList.value.splice(0,dateList.value.length)
     // 获取第一天和最后一天对应的星期索引
     const firstDayIndex = ref(firstDay.getDay())
     // 创建一个二维数组，每一行代表一周，每一列代表一天
-    console.log(firstDayIndex.value)
     let week = []
     let date = 1
     // 填充第一周

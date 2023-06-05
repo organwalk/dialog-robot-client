@@ -1,8 +1,8 @@
 <template>
-    <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
-        <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
-                <span style="font-weight: bolder;user-select: none">Schedule</span><br/>
+    <el-card v-loading="loading" style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
+        <el-row v-if="sid">
+            <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="left">
+                <el-button @click="backSchedule()" circle :icon="ArrowLeft" size="small" />
             </el-col>
         </el-row>
         <br/>
@@ -20,8 +20,9 @@
             <br/><br/>
 
 <!--            创建日程的页面     -->
-            <one-create-schedule :showPageOne="showPageOne" @getPageOneData="getPageOneData"/>
-            <two-create-schedule :showPageTwo="showPageTwo" @getPageTwoData="getPageTwoData"/>
+            <one-create-schedule :showPageOne="showPageOne" :sid="sid"
+                                 @getPageOneData="getPageOneData"/>
+            <two-create-schedule :showPageTwo="showPageTwo" :sid="sid" @getPageTwoData="getPageTwoData"/>
             <preview-create-schedule :showPagePreview="showPagePreview"
                                      :page-one-data="pageOneData"
                                      :page-two-data="pageTwoData"/>
@@ -41,12 +42,15 @@
 </template>
 
 <script setup>
-import {reactive, ref, watch,defineEmits} from "vue";
-import OneCreateSchedule from "@/components/chat/interactiveCard/createSchedule/one-create-schedule.vue";
-import TwoCreateSchedule from "@/components/chat/interactiveCard/createSchedule/two-create-schedule.vue";
-import PreviewCreateSchedule from "@/components/chat/interactiveCard/createSchedule/preview-create-schedule.vue";
-import {sendAddPlan} from "@/api/cloud/card";
+import {reactive, ref, watch, defineEmits, defineProps, computed} from "vue"
+import OneCreateSchedule from "@/components/chat/interactiveCard/createSchedule/one-create-schedule.vue"
+import TwoCreateSchedule from "@/components/chat/interactiveCard/createSchedule/two-create-schedule.vue"
+import PreviewCreateSchedule from "@/components/chat/interactiveCard/createSchedule/preview-create-schedule.vue"
+import * as card from "@/api/cloud/card"
 import * as data from "@/api/server/data"
+import {
+    ArrowLeft,
+} from '@element-plus/icons-vue'
 
 const active = ref(0)
 const next = () => {
@@ -55,36 +59,17 @@ const next = () => {
 const back = () => {
     active.value --
 }
-const create = () => {
-    showCreateForm.value = false
-    showSuccessTip.value = true
-    allPageData.content = pageOneData.title
-    allPageData.begintime = Math.floor(Date.parse(pageOneData.startTime) / 1000)
-    allPageData.endtime = Math.floor(Date.parse(pageOneData.endTime) / 1000)
-    if (pageOneData.notice){
-        allPageData['warntime']=[0,5,15]
-        allPageData.iswarn = Boolean(pageOneData.notice)
-    }else {
-        allPageData.iswarn = Boolean(pageOneData.notice)
-    }
-    allPageData.straddr = JSON.stringify(
-        {
-            isCoordinate:0,
-            title:pageTwoData.location,
-            address:pageTwoData.location,
-            latitude:0,
-            longitude:0
-        }
-    )
-    allPageData.strdescrip = pageTwoData.scheduleDes
-    allPageData.members = pageTwoData.scheduleMembers
-    sendAddPlan(allPageData).then(res=>{
-        const sid = res.data.data.scheduleId
-        data.saveScheduleCount(sid,allPageData)
-    })
+const backSchedule = () => {
+    let refresh = ''
+    emit("clearSid",refresh)
 }
+const props = defineProps({
+    scheduleData:String
+})
 
+//监听步骤值，以切换不同页面
 watch(active,(newVal,oldVal)=>{
+    console.log(pageTwoData.scheduleMembers)
     switch (newVal){
         case 0:
             showPageOne.value = true
@@ -120,7 +105,9 @@ const nextStep = ref(false)
 const backStep = ref(false)
 const createStep = ref(false)
 const showSuccessTip = ref(false)
+const loading = ref(false)
 
+//监听步骤值以显示不同按钮
 watch(active,(newVal) => {
     if (newVal){
         backStep.value = true
@@ -143,6 +130,7 @@ const allPageData = reactive({
     strdescrip:'',
     members:[]
 })
+
 const pageOneData = reactive(
     {
         title:'',
@@ -157,6 +145,7 @@ const getPageOneData = (title,startTime,endTime,notice)=>{
     pageOneData.endTime = endTime
     pageOneData.notice = notice
 }
+
 watch(
     () => [pageOneData.title, pageOneData.startTime, pageOneData.endTime, pageOneData.notice],
     ([title, startTime, endTime, notice]) => {
@@ -179,19 +168,82 @@ const getPageTwoData = (scheduleDes,location,scheduleMembers) => {
 watch(
     () => [pageTwoData.scheduleDes,pageTwoData.location,pageTwoData.scheduleMembers],
     ([des,location,mem]) => {
-        nextStep.value = (des && location && mem.length>0)
+        nextStep.value = (des && location && Array(mem).length>0)
     }
 )
 
-const emit = defineEmits(["getScheduleStatus"])
+const emit = defineEmits(["getScheduleStatus","clearSid"])
 
 watch(showSuccessTip,(newTip)=>{
     if_success(newTip)
 })
+const create = () => {
+    showCreateForm.value = false
+    allPageData.content = pageOneData.title
+    allPageData.begintime = Date.parse(pageOneData.startTime);
+    allPageData.endtime = Date.parse(pageOneData.endTime);
+    if (pageOneData.notice){
+        allPageData['warntime']=[0,5,15]
+        allPageData.iswarn = Boolean(pageOneData.notice)
+    }else {
+        allPageData.iswarn = Boolean(pageOneData.notice)
+    }
+    allPageData.straddr = JSON.stringify(
+        {
+            isCoordinate:0,
+            title:pageTwoData.location,
+            address:pageTwoData.location,
+            latitude:0,
+            longitude:0
+        }
+    )
+    allPageData.strdescrip = pageTwoData.scheduleDes
+    allPageData.members = pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name}));
+    //  如果存在sid则说明此次操作为修改操作
+    if (sid.value){
+        card.updataPlan(sid.value,allPageData).then(res=>{
+           if (res.data.code !== 400){
+               allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
+               loading.value = true
+               data.updataSchedule(sid.value,allPageData).then(res=>{
+                   if (res.data.success){
+                       setTimeout(()=>{
+                           loading.value = false
+                           showSuccessTip.value = true
+                       },1000)
+                       setTimeout(()=>{
+                           let refresh = ''
+                           emit("clearSid",refresh)
+                       },2000)
+                   }
+               })
+           }
+        })
+    }else {
+        card.sendAddPlan(allPageData).then(res=>{
+            const sid = res.data.data.scheduleId
+            allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
+            loading.value = true
+            data.saveScheduleCount(sid,allPageData).then(res=>{
+                if (res.data.success){
+                    setTimeout(()=>{
+                        loading.value = false
+                        showSuccessTip.value = true
+                    },1000)
+                    setTimeout(()=>{
+                        let refresh = ''
+                        emit("clearSid",refresh)
+                    },2000)
+                }
+            })
+        })
+    }
+}
 const if_success = (scheduleStatus)=> {
     emit("getScheduleStatus",scheduleStatus)
 }
 
+const sid = computed(()=>props.scheduleData)
 </script>
 
 <style scoped>

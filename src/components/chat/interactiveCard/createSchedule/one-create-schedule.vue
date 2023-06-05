@@ -1,5 +1,5 @@
 <template>
-    <div v-show="showPageOne" style="width: 100%">
+    <div v-show="props.showPageOne" style="width: 100%">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
                 <el-input
@@ -63,11 +63,13 @@
 
 <script setup>
 import {Check} from "@element-plus/icons-vue";
-import {defineEmits, ref, watch, defineProps} from "vue";
+import {defineEmits, ref, watch, defineProps, computed} from "vue";
 import {ElMessage} from "element-plus";
+import * as data from '@/api/server/data'
 
-defineProps({
-    showPageOne: Boolean
+const props = defineProps({
+    showPageOne: Boolean,
+    sid:String
 })
 
 const startTime = ref('')
@@ -78,13 +80,18 @@ const title = ref('')
 const emit = defineEmits(["getPageOneData"])
 
 const sendPageOneData = () => {
-    const start = new Date(startTime.value).getFullYear()+new Date(startTime.value).getMonth() +new Date(startTime.value).getDate();
-    const end = new Date(endTime.value).getFullYear() + new Date(endTime.value).getMonth() + new Date(endTime.value).getDate();
-    if (end === start) {
-        emit('getPageOneData', title.value, startTime.value, endTime.value, notice.value)
-    } else {
-        ElMessage.error('日程仅限定在今日范围')
-        endTime.value = ''
+    const startDate = new Date(startTime.value).toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' })
+    if (startTime.value){
+        if (endTime.value){
+            const endDate = new Date(endTime.value).toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' })
+            // 如果输入的日期等于今天的日期
+            if (startDate === endDate ){
+                emit('getPageOneData', title.value, startTime.value, endTime.value, notice.value);
+            }else {
+                ElMessage.error('日程仅限定在今日范围');
+                endTime.value = '';
+            }
+        }
     }
 }
 
@@ -94,6 +101,14 @@ watch([startTime, endTime], (newStart,newEnd) => {
     }
 });
 
+const sid = computed(()=>props.sid)
+if (sid.value){
+    data.getScheduleBySid(sid.value).then(res=>{
+        const obj = res.data.scheduleData[0]
+        title.value = obj.content
+        notice.value = Boolean(obj.iswarn)
+    })
+}
 </script>
 
 <style scoped>

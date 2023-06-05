@@ -12,18 +12,6 @@
         <div v-for="(item, index) in chatMessages" :key="index">
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
                 <!-- 对话机器人 -->
-                <!--                查看事项告知卡片    -->
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-                    <NotificationListComp v-if="showNotificationList"/>
-                </el-col>
-                <!--                创建事项卡片  -->
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-                    <CreateNotification v-if="showCreateNotification"/>
-                </el-col>
-                <!--                部门人员管理  -->
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-                    <UpdataEmployeeComp v-if="showUpdataEmployee"/>
-                </el-col>
                 <!--                语言回复        -->
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                     <robot-reply :order-type="orderType"
@@ -68,9 +56,6 @@ import ChatInputComp from "@/components/chat/chatContainer/ChatInputComp.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
 import {nextTick, ref} from "vue";
-import NotificationListComp from "@/components/chat/interactiveCard/notificationList/NotificationListComp.vue";
-import CreateNotification from "@/components/chat/interactiveCard/createNotification/Create-Updata-NotificationComp.vue"
-import UpdataEmployeeComp from "@/components/chat/interactiveCard/manageEmployee/UpdataEmployeeComp.vue";
 
 import RobotReply from "@/components/chat/chatContainer/robot-reply.vue";
 
@@ -78,9 +63,6 @@ const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) +
 const showRecommend = ref(true)
 const showRecommendTip = ref(true)
 const showToDay = ref(false)
-const showNotificationList = ref(false)
-const showCreateNotification = ref(false)
-const showUpdataEmployee = ref(false)
 
 const chatMessages = ref([]);
 const containerScrollTop = ref(0)
