@@ -15,10 +15,12 @@ const manBaseUrl = '/user'
 const addMan = (obj)=>{
     const newObj = {
         ...obj,
-        userName:obj.name,
+        userName:String(obj.userName[0]),
         deptId:obj.dept,
         title:obj.job
     }
+    delete newObj.dept
+    delete newObj.job
     return http.post(manBaseUrl + '/add',newObj)
 }
 
@@ -29,10 +31,25 @@ const delMan = (obj)=>{
 
 const getUserDept = (obj)=>{
     return http.get(manBaseUrl+'/deptList?uid='+obj)
-
 }
 
+const getPersonDept = (obj)=>{
+    return http.get('/department/userList?deptId='+obj)
+}
+
+const getDeptList = ()=>{
+    let num = 0
+    return http.get('/department/deptList?deptId='+ num )
+}
+
+const updataPersonInfo = (obj)=>{
+    return http.post('/user/update',obj)
+}
 export {
     man,
-    getUserDept
+    getUserDept,
+    getPersonDept,
+    getDeptList,
+    updataPersonInfo,
+    delMan
 }

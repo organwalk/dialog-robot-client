@@ -1,10 +1,10 @@
 <template>
-    <div v-show="showPageOne" style="width: 100%">
+    <div v-show="props.showPageOne" style="width: 100%">
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
                 <el-input
                         v-model="notificationDes"
-                        placeholder="Please input a title about notification "
+                        placeholder="Please input a content about notification "
                         :prefix-icon="Check"
                         maxlength="80"
                         :rows="3"
@@ -26,19 +26,7 @@
                                         type="datetime"
                                         format="YYYY-MM-DD HH:mm"
                                         value-format="YYYY-MM-DD HH:mm"
-                                        placeholder="开始时间"
-                                        style="width: 100%"
-                                />
-                            </el-card>
-                        </el-col>
-                        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
-                            <el-card shadow="never" style="border: none;border-radius: 8px;">
-                                <el-date-picker
-                                        v-model="endTime"
-                                        type="datetime"
-                                        format="YYYY-MM-DD HH:mm"
-                                        value-format="YYYY-MM-DD HH:mm"
-                                        placeholder="结束时间"
+                                        placeholder="通知时间"
                                         style="width: 100%"
                                 />
                             </el-card>
@@ -50,9 +38,28 @@
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
                                 <span>是否邮件提醒</span><br/><br/>
                                 <el-switch
-                                        v-model="notice"
-                                        style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                                    v-model="notice"
+                                    style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
                                 />
+                            </el-card>
+                        </el-col>
+                    </el-row><br/>
+                    <el-row>
+                        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+                            <el-card shadow="never" style="border: none;border-radius: 8px;">
+                                <span>选择通知人员</span><br/><br/>
+                                <el-select v-model="scheduleMembers"
+                                           placeholder="Select"
+                                           multiple
+                                           filterable
+                                           @change="handleChange">
+                                    <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value"
+                                    />
+                                </el-select>
                             </el-card>
                         </el-col>
                     </el-row>
@@ -65,34 +72,84 @@
 
 <script setup>
 import {Check} from "@element-plus/icons-vue";
-import {defineEmits, ref, watch, defineProps} from "vue";
-import {ElMessage} from "element-plus";
+import {defineEmits, ref, watch, defineProps, onMounted, computed} from "vue";
+import * as card from "@/api/cloud/card";
+import * as data from "@/api/server/data"
 
-defineProps({
-    showPageOne: Boolean
+const props = defineProps({
+    showPageOne: Boolean,
+    nid:String
 })
 
 const startTime = ref('')
 const notice = ref(true)
-const endTime = ref('')
 const notificationDes = ref('')
+const scheduleMembers = ref([])
+const opUsers = ref([])
+const notice_id = computed(()=>props.nid)
 
-const emit = defineEmits(["getPageOneData"])
+//  组件被挂载时远程获取人员列表
+onMounted(()=>{
+    //  如果存在事项id则为修改事件，应该预先填充部分数据
+    if (notice_id.value){
+        data.getNotificationByNid(notice_id.value).then(res=>{
+            const obj = res.data.notificationData[0]
+            notice.value = Boolean(obj.is_push_mail)
+            notificationDes.value = obj.content
+            JSON.parse(obj.members).forEach(member => {
+                scheduleMembers.value.push(member.uid)
+            })
+        })
+    }
+    card.getPersonList().then(res=>{
+        let users = res.data.data.userList
+        opUsers.value = users
+            .map(user => ({ value: user.userId, label: user.name }))
+            .filter((user, index, arr) => (
+                arr.findIndex(u => u.value === user.value && u.label === user.label) === index
+            ));
+        options.value = opUsers.value
+    })
+})
+const options = ref([])
+let mem = []
 
-const sendPageOneData = () => {
-    const start = new Date(startTime.value);
-    const end = new Date(endTime.value);
-    if (end < start) {
-        ElMessage.error('截止日期不可小于起始日期')
-        endTime.value = ''
-    } else {
-        emit('getPageOneData', notificationDes.value, startTime.value, endTime.value, notice.value)
+//获取选择用户的uid及name值
+const handleChange = (selectedValues) => {
+    mem = []
+    const selectedOptions = selectedValues.map((value) => {
+        const option = options.value.find((item) => item.value === value);
+        return { value: value, label: option ? option.label : '' };
+    });
+    // 检查是否已经存在相同的对象数组
+    const isDuplicate = mem.some((arr) => {
+        if (arr.length !== selectedOptions.length) {
+            return false;
+        }
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].value !== selectedOptions[i].value || arr[i].label !== selectedOptions[i].label) {
+                return false;
+            }
+        }
+        return true;
+    });
+    // 如果不存在相同的对象数组，则将新的对象数组添加到mem.value属性中
+    if (!isDuplicate) {
+        mem.push(selectedOptions);
     }
 }
 
-watch([notificationDes, startTime, endTime, notice], () => {
-    sendPageOneData()
-});
+//向父组件发送该页数据，以辅助其进行表单检验
+const emit = defineEmits(["getPageOneData"])
+const sendPageOneData = () => {
+    emit('getPageOneData', notificationDes.value, startTime.value, notice.value, mem)
+}
+
+watch([scheduleMembers], (newMem) => {
+    if (newMem){
+        sendPageOneData()
+    }
+})
 
 
 </script>

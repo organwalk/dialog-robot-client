@@ -84,19 +84,15 @@
 import {computed, onMounted, reactive, ref, watch,defineEmits} from "vue";
 import * as data from "@/api/server/data";
 
-const weekList = ref(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
-// 定义日期列表
-const dateList = ref([])
-// 获取当前月份的第一天和最后一天
-const today = new Date()
-
-const chooseDate = ref(today.getDate())
-const emit = defineEmits(["sendClickDay"])
-
 //  获取点击的日程单元格
 const handleClick = (row, column) => {
     chooseDate.value = row[column.rawColumnKey]
 }
+
+//  日历组件的基本组成单位
+const weekList = ref(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+const dateList = ref([])
+const today = new Date()
 const chooseDateValue = computed(() => chooseDate.value)
 const dialogYearVisible = ref(false)
 const yearValue = ref(today.getFullYear())
@@ -105,6 +101,9 @@ const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'Jul
 const monthName = computed(()=> monthNames[parseInt(monthValue.value)-1])
 const firstDay = computed(()=>new Date(parseInt(yearValue.value.toString()), parseInt(monthValue.value.toString())-1, 1))
 const lastDay = computed(()=>new Date(parseInt(yearValue.value.toString()),parseInt(monthValue.value.toString()) , 0))
+
+const chooseDate = ref(today.getDate())
+const emit = defineEmits(["sendClickDay"])
 const scheduleNum = ref('0')
 const hoverData = ref('')
 const countList = reactive([])

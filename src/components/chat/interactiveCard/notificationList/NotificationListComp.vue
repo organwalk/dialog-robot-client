@@ -13,13 +13,13 @@
         <br/>
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
-                <custom-calendar/>
+                <n-custom-calendar @send-click-day="getClickDay"/>
             </el-col>
         </el-row>
         <br/>
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
-                <a-notification/>
+                <a-notification :click-day="clickDay"/>
             </el-col>
         </el-row>
     </el-card>
@@ -27,9 +27,13 @@
 
 <script setup>
 import {AlarmClock} from '@element-plus/icons-vue'
-import CustomCalendar from "@/components/chat/interactiveCard/scheduleList/custom-calendar.vue";
 import ANotification from "@/components/chat/interactiveCard/notificationList/a-notification.vue";
-
+import {ref} from "vue";
+import NCustomCalendar from "@/components/chat/interactiveCard/notificationList/n-custom-calendar.vue";
+const clickDay = ref('')
+const getClickDay = (day)=>{
+    clickDay.value = day
+}
 </script>
 
 <style scoped>

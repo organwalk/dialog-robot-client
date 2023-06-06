@@ -1,11 +1,11 @@
 <template>
     <el-row justify="center">
         <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
-            <span style="font-weight: bolder;align-items: center">Today's schedule</span>
+            <span style="font-weight: bolder;align-items: center">Schedule List</span>
         </el-col>
     </el-row>
     <br/>
-    <div style="width: 100%;height:480px;overflow-y: auto" v-if="!scheduleId">
+    <div style="width: 100%;height:480px;overflow-y: auto" v-if="!scheduleId" v-loading="loading">
         <el-card v-for="(item,index) in scheduleList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
@@ -25,34 +25,34 @@
                     item.location
                     }}</span>
                 </el-col>
-                <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center">
-                    <el-button v-if="item.uid === uid" type="primary" :icon="Edit" circle size="small" @click="updataSchedule(item.scheduleId)"/>
+                <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center" v-if="unShowInOtherDay">
+                    <el-button v-if="item.uid === uid" type="primary" :icon="Edit" circle size="small"
+                               @click="updataSchedule(item.scheduleId)"/>
                 </el-col>
-                <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center">
-<!--                    取消-->
-                    <el-button v-if="item.action !== 'cancel'" type="info" :icon="Close" circle size="small"/>
+                <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center" v-if="unShowInOtherDay">
+                    <!--                    取消-->
+                    <el-popconfirm width="200"
+                                   title="确定取消该日程吗？" @confirm="cancel(item.scheduleId)">
+                        <template #reference>
+                            <el-button v-if="item.action !== 'cancel'" type="info" :icon="Close" circle size="small"/>
+                        </template>
+                    </el-popconfirm>
                     <!-- 删除 -->
-                    <el-button v-if="item.action === 'cancel'"  type="danger" :icon="Delete" circle size="small"/>
+                    <el-popconfirm width="200"
+                                   title="确定取消该日程吗？" @confirm="deleteSchedule(item.scheduleId)">
+                        <template #reference>
+                            <el-button v-if="item.action === 'cancel'" type="danger" :icon="Delete" circle
+                                       size="small"/>
+                        </template>
+                    </el-popconfirm>
                 </el-col>
             </el-row>
         </el-card>
-<!--        <el-dialog-->
-<!--                v-model="dialogUpdataSchedule"-->
-<!--                width="40%"-->
-<!--                destroy-on-close-->
-<!--                top="20px"-->
-<!--                style="border-radius: 20px;background-color: rgba(0, 0, 0, 0)"-->
-<!--                :show-close="false"-->
-<!--        >-->
-<!--            -->
-<!--        </el-dialog>-->
-
     </div>
     <create-updata-schedule-comp v-if="scheduleId"
                                  style="width: 100%"
-                                 @getScheduleStatus="getScheduleStatus"
-                                 @clearSid = "clearSid"
-                                 :schedule-data="scheduleId" />
+                                 @clearSid="clearSid"
+                                 :schedule-data="scheduleId"/>
 </template>
 
 <script setup>
@@ -64,29 +64,44 @@ import {
 } from '@element-plus/icons-vue'
 import CreateUpdataScheduleComp from "@/components/chat/interactiveCard/createSchedule/Create-Updata-ScheduleComp.vue";
 import * as data from '@/api/server/data'
+import * as card from '@/api/cloud/card'
+import {ElMessage} from "element-plus";
 
 const scheduleList = ref([])
 const props = defineProps({
-    clickDay:String
+    clickDay: String
 })
-const uid =  sessionStorage.getItem("uid")
-onMounted(()=>{
-    getToDayDate()
+const uid = sessionStorage.getItem("uid")
+onMounted(() => {
+    setTimeout(() => {
+        getToDayDate()
+    }, 1000)
 })
 
 //切换日期
-const clickDay = computed(()=>props.clickDay)
+const clickDay = computed(() => props.clickDay)
+const today = new Date().toISOString().substring(0,10)
+const unShowInOtherDay = ref(true)
 watch(clickDay,(newVal)=>{
-    if (newVal){
+    if (newVal !== today){
+        unShowInOtherDay.value = false
+    }else {
+        unShowInOtherDay.value = true
+    }
+})
+
+
+watch(clickDay, (newVal) => {
+    if (newVal) {
         const timestamp = new Date(props.clickDay).getTime();
         const utcDate = new Date(timestamp).toUTCString();
         const unixTimestamp = Date.parse(utcDate);
         const clickObj = {
-            begintime:unixTimestamp,
-            endtime:unixTimestamp
+            begintime: unixTimestamp,
+            endtime: unixTimestamp
         }
         //且换到新的日期时，获取新的日程列表
-        data.getSchedule(clickObj).then(res=>{
+        data.getSchedule(clickObj).then(res => {
             scheduleList.value = res.data.scheduleData.map(item => {
                 const start = new Date(item.begintime * 1000)
                 const end = new Date(item.endtime * 1000);
@@ -101,40 +116,75 @@ watch(clickDay,(newVal)=>{
                     location: JSON.parse(item.straddr).address,
                     uid: item.uid,
                     scheduleId: item.scheduleId,
-                    action:item.action
+                    action: item.action
                 }
             })
         })
     }
 })
 
-// 更新日程对话框
-const dialogUpdataSchedule = ref(false)
 const scheduleId = ref('')
-const updataSchedule = (val)=> {
-    dialogUpdataSchedule.value = true
+const updataSchedule = (val) => {
     scheduleId.value = val
 }
 
-const clearSid = (val)=>{
+//清空sid并刷新
+const clearSid = (val) => {
     scheduleId.value = val
-    getToDayDate()
+    setTimeout(() => {
+        getToDayDate()
+    }, 1000)
 }
 
-const getToDayDate = ()=>{
+//取消日程
+const cancel = (val) => {
+    card.cancelPlan(val).then(res => {
+        if (res.data.code === 200) {
+            data.cancelSchedule(val).then(res=>{
+                if (res.data.status === 200){
+                    getToDayDate()
+                    ElMessage({
+                        message: '取消成功',
+                        type: 'success',
+                    })
+                }
+            })
+        }
+    })
+}
+
+//删除日程
+const deleteSchedule = (val) => {
+    card.deletePlan(val).then(res => {
+        if (res.data.code === 200) {
+            data.deleteSchedule(val).then(res =>{
+                if (res.data.status === 200){
+                    getToDayDate()
+                    ElMessage({
+                        message: '删除成功',
+                        type: 'success',
+                    })
+                }
+            })
+        }
+    })
+}
+const loading = ref(true)
+const getToDayDate = () => {
     const timestamp = new Date().getTime();
     const utcDate = new Date(timestamp).toUTCString();
     const unixTimestamp = Date.parse(utcDate);
     const todayObj = {
-        begintime:unixTimestamp
+        begintime: unixTimestamp
     }
     //在页面挂载时请求日程列表
-    data.getSchedule(todayObj).then(res=>{
+    data.getSchedule(todayObj).then(res => {
+        loading.value = false
         scheduleList.value = res.data.scheduleData.map(item => {
-            const start = new Date(item.begintime * 1000)
-            const end = new Date(item.endtime * 1000);
-            const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-            const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+            const startTime = new Date(Number(item.begintime)).toLocaleString('en-US',
+                { timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit' });
+            const endTime = new Date(Number(item.endtime)).toLocaleString('en-US',
+                { timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit' });
             const time = `${startTime}-${endTime}`;
             return {
                 time: time,
@@ -144,18 +194,10 @@ const getToDayDate = ()=>{
                 location: JSON.parse(item.straddr).address,
                 uid: item.uid,
                 scheduleId: item.scheduleId,
-                action:item.action
+                action: item.action
             }
         })
     })
-}
-const getScheduleStatus = (scheduleStatus) => {
-    if (scheduleStatus){
-        setTimeout(()=>{
-            dialogUpdataSchedule.value = false
-        },1000)
-
-    }
 }
 </script>
 

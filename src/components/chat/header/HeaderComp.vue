@@ -5,7 +5,7 @@
                 <span class="head-text">Xeno-Loader</span>
             </el-col>
             <el-col :xs="8" :sm="6" :md="4" :lg="4" :xl="1" align="right">
-                <el-button :icon=" ArrowRight " size="large" color="#333" round @click="logout()">Log out</el-button>
+                <el-button :icon=" ArrowRight " style="font-weight: bolder" size="large" color="#333" round @click="logout()">Log out</el-button>
             </el-col>
         </el-row>
     </el-card>

@@ -34,6 +34,19 @@ const http = {
         }
         if (params) config.data = params
         return request(config)
+    },
+    uPost(url,params){
+        const config = {
+            method: 'post',
+            url:url,
+            data: params,
+            headers: {
+                'Content-Type': 'application/json',
+                'uid': sessionStorage.getItem("uid"),
+            }
+        }
+        if (params) config.data = params
+        return request(config)
     }
 }
 export default http

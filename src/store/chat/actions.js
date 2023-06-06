@@ -5,7 +5,7 @@ export default {
     updataSearchUid({commit},searchUid){
         commit('setSearchUid',searchUid)
     },
-    updataOldMem({commit},oldMem){
-        commit('setSearchUid',oldMem)
+    updataSending({commit},sending){
+        commit('setSending',sending)
     },
 }

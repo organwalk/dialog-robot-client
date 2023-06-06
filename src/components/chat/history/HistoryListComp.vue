@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" style="border:none;height: 450px;overflow-y: auto">
+    <el-card shadow="never" style="border-top:none;height: 480px;overflow-y: auto">
         <!-- 一个卡片单位 -->
         <el-card style="border-radius:10px;margin-bottom: 20px; " v-for="(card, index) in cardList" :key="index">
             <el-row justify="center">
@@ -23,28 +23,26 @@
             </el-row>
         </el-card>
     </el-card>
-    <el-button @click="addCard()">添加卡片</el-button>
 </template>
 
 <script setup>
 import {Check,CircleCloseFilled} from '@element-plus/icons-vue'
-import {ref} from "vue";
 
-const TypeName = ref('发送应用消息')
-// const orderStatus = ref("success")
-const orderContentText = ref('一段文字内容，该内容表示当前指令所完成的任务')
-const orderTime = ref('15:00')
-const cardList = ref([
-]);
-const addCard = () => {
-    const orderStatus = cardList.value.length % 2 === 0 ? "success" : "fail";
-    cardList.value.unshift({
-        TypeName: TypeName.value,
-        //orderStatus:orderStatus.value,
-        orderStatus:orderStatus,
-        orderContentText: orderContentText.value,
-        orderTime: orderTime.value, });
-};
+// const TypeName = ref('发送应用消息')
+// // const orderStatus = ref("success")
+// const orderContentText = ref('一段文字内容，该内容表示当前指令所完成的任务')
+// const orderTime = ref('15:00')
+// const cardList = ref([
+// ]);
+// const addCard = () => {
+//     const orderStatus = cardList.value.length % 2 === 0 ? "success" : "fail";
+//     cardList.value.unshift({
+//         TypeName: TypeName.value,
+//         //orderStatus:orderStatus.value,
+//         orderStatus:orderStatus,
+//         orderContentText: orderContentText.value,
+//         orderTime: orderTime.value, });
+// };
 
 </script>
 

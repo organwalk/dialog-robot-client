@@ -5,7 +5,7 @@ export default {
     setSearchUid(state,searchUid){
         state.searchUid = searchUid
     },
-    setOldMem(state,oldMem){
-        state.searchUid = oldMem
-    }
+    setSending(state,sending){
+        state.sending = sending
+    },
 }

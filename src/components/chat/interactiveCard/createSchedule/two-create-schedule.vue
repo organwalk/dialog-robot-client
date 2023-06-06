@@ -26,7 +26,15 @@
         <el-row>
             <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
                 <el-card shadow="never" style="border: none;background-color: #f5f9fa" align="center">
-                    <span style="font-weight: bolder">添加日程成员</span><br/><br/>
+                    <span style="font-weight: bolder">添加日程成员</span>
+                    <el-tooltip
+                    effect="dark"
+                    content="需要重新修改日程成员以继续"
+                    placement="right-start"
+                    v-if="sid"
+                >
+                        <el-button color="#f5f9fa" :icon="WarningFilled"  circle />
+                </el-tooltip><br/><br/>
                     <el-select v-model="scheduleMembers"
                                placeholder="Select"
                                multiple
@@ -48,7 +56,7 @@
 </template>
 
 <script setup>
-import {LocationInformation} from '@element-plus/icons-vue'
+import {LocationInformation,WarningFilled} from '@element-plus/icons-vue'
 import {defineEmits, ref, watch, defineProps, onMounted, computed} from "vue"
 import * as card from '@/api/cloud/card'
 import * as data from "@/api/server/data";

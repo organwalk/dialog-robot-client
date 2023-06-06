@@ -20,7 +20,7 @@
     <el-row v-if="cardStatus === 'AddPlan'">
         <!--                创建日程卡片      -->
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
-            <CreateSchedule @get-schedule-status="getScheduleSuccess"/>
+            <CreateSchedule @send-success="getScheduleSuccess"/>
         </el-col>
     </el-row>
     <el-row v-if="cardStatus === 'GetNotes'">
@@ -76,6 +76,7 @@ if (cardStatus.value){
 
 //如果意图不明则恳请用户重新输入
 if (props.orderType === ''){
+    console.log(props.orderType)
     robotReply.value = (robotReplyObject["OrderTypeNull"])
 }else {
     //如果意图明确，则判断其对话是否含有空缺值

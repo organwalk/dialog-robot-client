@@ -16,10 +16,11 @@ const request = (config) => {
         }
         return config
     },error => {
-        console.log(error)
         return Promise.error(error)
     })
     return instance(config)
 }
+
+
 
 export default request

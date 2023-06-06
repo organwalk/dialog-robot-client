@@ -10,6 +10,14 @@
         <!--        展示推荐指令      -->
         <RecommendComp v-if="showRecommend" @send-recommend-text="getRecommendText"/>
         <div v-for="(item, index) in chatMessages" :key="index">
+            <el-row v-if="!showRecommend && item.type === 'user'" justify="end" style="padding-left: 10%">
+                <!-- 用户 -->
+                <el-card shadow="never" class="user-chat-bubble"
+                         :body-style="{padding:'10px'}"
+                         align="left">
+                    <span style="line-height: 1.5;color: white" v-html="item.message"/>
+                </el-card>
+            </el-row>
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
                 <!-- 对话机器人 -->
                 <!--                语言回复        -->
@@ -20,16 +28,7 @@
                                  @send-miss-value-type="getMissValueType"
                                  @show-recommend="dontShowRec"/>
                 </el-col>
-            </el-row>
-            <br/>
-            <el-row v-if="!showRecommend && item.type === 'user'" justify="end" style="padding-left: 10%">
-                <!-- 用户 -->
-                <el-card shadow="never" class="user-chat-bubble"
-                         :body-style="{padding:'10px'}"
-                         align="left">
-                    <span style="line-height: 1.5;color: white" v-html="item.message"/>
-                </el-card>
-            </el-row>
+            </el-row><br/>
         </div>
         <!--        在对话下展示推荐指令  -->
         <el-row v-if="showRecommendTip" style="margin-top: -1%">
@@ -55,8 +54,7 @@
 import ChatInputComp from "@/components/chat/chatContainer/ChatInputComp.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
-import {nextTick, ref} from "vue";
-
+import { nextTick, ref} from "vue";
 import RobotReply from "@/components/chat/chatContainer/robot-reply.vue";
 
 const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
@@ -64,10 +62,10 @@ const showRecommend = ref(true)
 const showRecommendTip = ref(true)
 const showToDay = ref(false)
 
-const chatMessages = ref([]);
+const chatMessages = ref([])
 const containerScrollTop = ref(0)
 const recommendList = ref([])
-const randomIndexes = new Set();
+const randomIndexes = new Set()
 
 const getRecommendText = (recommend) => {
     showToDay.value = true
@@ -80,15 +78,17 @@ const getRecommendTip = (recommend) => {
 }
 
 const onUserInput = (userInput) => {
+    //当用户输入时，隐藏初始推荐输入卡片，显示今日日期
     if (userInput !== '') {
         showToDay.value = true
         showRecommend.value = false
         showRecommendTip.value = false
+        //显示用户输入
         chatMessages.value.push({
             type: 'user',
             message: userInput
         });
-        scrollBottom()
+        scrollBottom()//自动滚动至聊天容器底部
         setTimeout(() => {
             chatMessages.value.push({
                 type: 'robot',
@@ -98,7 +98,6 @@ const onUserInput = (userInput) => {
             getRecommendList()
             scrollBottom()
         }, 2000)
-
     }
 }
 
@@ -119,7 +118,10 @@ const getMissValueType = (val) => {
 
 const cardStatus = ref('')
 const getCardStatus = (val) => {
-    cardStatus.value = val
+    if (val){
+        cardStatus.value = val
+        console.log(cardStatus.value)
+    }
 }
 
 const dontShowRec = (val) => {

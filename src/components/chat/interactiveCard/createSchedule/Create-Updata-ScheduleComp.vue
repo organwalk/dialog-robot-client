@@ -1,11 +1,13 @@
 <template>
     <el-card v-loading="loading" style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
-        <el-row v-if="sid">
+        <el-row v-if="sid && !showSuccessTip">
             <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="left">
                 <el-button @click="backSchedule()" circle :icon="ArrowLeft" size="small" />
             </el-col>
+            <el-col :xs="4" :sm="6" :md="8" :lg="20" :xl="11" align="center">
+                <span style="font-weight: bolder">修改日程</span>
+            </el-col>
         </el-row>
-        <br/>
         <el-card shadow="never" style="border: none" v-if="showCreateForm">
             <el-row>
                 <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
@@ -26,8 +28,6 @@
             <preview-create-schedule :showPagePreview="showPagePreview"
                                      :page-one-data="pageOneData"
                                      :page-two-data="pageTwoData"/>
-
-
             <el-row>
                 <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
                     <el-button @click="back()" round color="#e9e9eb" v-if="backStep">Back</el-button>
@@ -36,7 +36,7 @@
                 </el-col>
             </el-row>
         </el-card>
-        <el-alert style="user-select: none;border-radius: 10px;" v-if="showSuccessTip" title="Success" type="success" center show-icon :closable="false" />
+        <el-alert v-if="showSuccessTip" style="user-select: none;border-radius: 10px;" title="Success" type="success" center show-icon :closable="false" />
     </el-card>
 
 </template>
@@ -69,7 +69,6 @@ const props = defineProps({
 
 //监听步骤值，以切换不同页面
 watch(active,(newVal,oldVal)=>{
-    console.log(pageTwoData.scheduleMembers)
     switch (newVal){
         case 0:
             showPageOne.value = true
@@ -168,17 +167,14 @@ const getPageTwoData = (scheduleDes,location,scheduleMembers) => {
 watch(
     () => [pageTwoData.scheduleDes,pageTwoData.location,pageTwoData.scheduleMembers],
     ([des,location,mem]) => {
-        nextStep.value = (des && location && Array(mem).length>0)
+        nextStep.value = (des && location && mem[0].length>0)
     }
 )
 
-const emit = defineEmits(["getScheduleStatus","clearSid"])
+const emit = defineEmits(["clearSid","sendSuccess"])
 
-watch(showSuccessTip,(newTip)=>{
-    if_success(newTip)
-})
 const create = () => {
-    showCreateForm.value = false
+    loading.value = true
     allPageData.content = pageOneData.title
     allPageData.begintime = Date.parse(pageOneData.startTime);
     allPageData.endtime = Date.parse(pageOneData.endTime);
@@ -204,11 +200,11 @@ const create = () => {
         card.updataPlan(sid.value,allPageData).then(res=>{
            if (res.data.code !== 400){
                allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
-               loading.value = true
                data.updataSchedule(sid.value,allPageData).then(res=>{
                    if (res.data.success){
                        setTimeout(()=>{
                            loading.value = false
+                           showCreateForm.value = false
                            showSuccessTip.value = true
                        },1000)
                        setTimeout(()=>{
@@ -220,27 +216,22 @@ const create = () => {
            }
         })
     }else {
+        //若没有sid则为创建操作
         card.sendAddPlan(allPageData).then(res=>{
             const sid = res.data.data.scheduleId
             allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
-            loading.value = true
             data.saveScheduleCount(sid,allPageData).then(res=>{
                 if (res.data.success){
                     setTimeout(()=>{
                         loading.value = false
+                        showCreateForm.value = false
                         showSuccessTip.value = true
+                        emit("sendSuccess",showSuccessTip.value)
                     },1000)
-                    setTimeout(()=>{
-                        let refresh = ''
-                        emit("clearSid",refresh)
-                    },2000)
                 }
             })
         })
     }
-}
-const if_success = (scheduleStatus)=> {
-    emit("getScheduleStatus",scheduleStatus)
 }
 
 const sid = computed(()=>props.scheduleData)

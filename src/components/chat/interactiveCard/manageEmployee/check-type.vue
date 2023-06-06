@@ -1,9 +1,9 @@
 <template>
     <el-row :gutter="10">
-        <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4" align="left">
+        <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" align="left">
             <el-tag style="width: 100%" type="info" round>{{ props.deptName }}</el-tag>
         </el-col>
-        <el-col :xs="11" :sm="11" :md="11" :lg="11" :xl="11" align="left">
+        <el-col :xs="9" :sm="9" :md="9" :lg="9" :xl="9" align="left">
             <span style="font-weight: bolder;user-select: none">Employee Manage</span>
         </el-col>
         <el-col :xs="9" :sm="9" :md="9" :lg="9" :xl="9" align="right">

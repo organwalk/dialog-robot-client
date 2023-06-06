@@ -11,11 +11,11 @@
             />
         </el-col>
     </el-row><br/>
-    <el-collapse accordion style="width: 100%;height:370px;overflow-y: auto">
+    <el-collapse v-loading="loading" accordion style="width: 100%;height:370px;overflow-y: auto">
         <el-card v-for="(item,index) in employeeList" :key="index"
                  shadow="never"
                  style="border-radius: 10px;margin-bottom: 10px">
-            <el-collapse-item :title="item.userName" >
+            <el-collapse-item :title="item.name" >
                 <el-descriptions
                         title="Employee Details"
                         :column="2"
@@ -32,7 +32,7 @@
                     </template>
                     <el-descriptions-item>
                         <template #label>Name</template>
-                        <el-input class="edit" v-model="item.userName" :readonly="read"/>
+                        <el-input class="edit" v-model="item.name" :readonly="read"/>
                     </el-descriptions-item>
                     <el-descriptions-item>
                         <template #label>Mobile</template>
@@ -64,76 +64,89 @@
 
 <script setup>
 import {Search} from "@element-plus/icons-vue";
-import {ref, defineProps} from "vue";
+import {ref, defineProps, computed, watch, onMounted} from "vue";
 import {Delete, Edit} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
+import * as mp from "@/api/cloud/manage-person"
 
-defineProps(
+const props = defineProps(
     {
-        deptId:String
+        deptId:String,
+        deptName:String
     }
 )
 
 const employeeList = ref([])
+const deptId = computed(()=>props.deptId)
+const deptName = computed(()=>props.deptName)
 
-employeeList.value.push(
-    {
-        id:'10101003',
-        userName:'John',
-        mobile:'183xxxxxxxx',
-        deptName:'开发部',
-        title:'开发人员'
-    },
-    {
-        id:'10101003',
-        userName:'Bob',
-        mobile:'183xxxxxxxx',
-        deptName:'开发部',
-        title:'开发人员'
-    },
-    {
-        id:'10101003',
-        userName:'Bob',
-        mobile:'183xxxxxxxx',
-        deptName:'开发部',
-        title:'开发人员'
-    },
-    {
-        id:'10101003',
-        userName:'Bob',
-        mobile:'183xxxxxxxx',
-        deptName:'开发部',
-        title:'开发人员'
-    },
-    {
-        id:'10101003',
-        userName:'Bob',
-        mobile:'183xxxxxxxx',
-        deptName:'开发部',
-        title:'开发人员'
-    },
-    {
-        id:'10101003',
-        userName:'Bob',
-        mobile:'183xxxxxxxx',
-        deptName:'开发部',
-        title:'开发人员'
+//实现人员列表加载
+onMounted(()=>{
+    if (deptId.value){
+        mp.getPersonDept(deptId.value).then(res=>{
+            res.data.data.users.forEach((user) => {
+                user.deptName = deptName.value
+                employeeList.value.push(user)
+                loading.value = false
+            })
+        })
     }
-)
-const search = ref('')
+})
+watch(deptId,(newVal)=>{
+    mp.getPersonDept(newVal).then(res=>{
+        employeeList.value = []
+        res.data.data.users.forEach((user) => {
+            user.deptName = deptName.value
+            employeeList.value.push(user)
+            loading.value = false
+        })
+    })
+})
 
-const searchEmployee = ()=> {
-    console.log(search.value)
+//实现人员搜索
+const loading = ref(true)
+const search = ref('')
+const searchEmployee = () => {
+    if(search.value){
+        const found = employeeList.value.find(employee => {
+            return employee.name.includes(search.value)
+        })
+        if(found) {
+            employeeList.value = [found]
+        }
+    } else {
+        mp.getPersonDept(Number(deptId.value)).then(res=>{
+            employeeList.value = []
+            res.data.data.users.forEach((user) => {
+                user.deptName = deptName.value
+                employeeList.value.push(user)
+                loading.value = false
+            })
+        })
+    }
 }
 
 const read = ref(true)
 const confirmEdit = (itemObject) =>{
-    if (itemObject.userName && itemObject.mobile && itemObject.deptName && itemObject.title){
-        console.log(itemObject)
-        read.value = true
-        ElMessage({
-            message: '修改成功',
-            type: 'success',
+    if (itemObject.name && itemObject.mobile && itemObject.deptName && itemObject.title){
+        itemObject["uid"] = itemObject.id
+        delete itemObject.id
+        mp.updataPersonInfo(itemObject).then(res=>{
+            if (res.data.data.uid){
+                read.value = true
+                ElMessage({
+                    message: '修改成功',
+                    type: 'success',
+                })
+                mp.getPersonDept(Number(deptId.value)).then(res=>{
+                    employeeList.value = []
+                    res.data.data.users.forEach((user) => {
+                        user.deptName = deptName.value
+                        employeeList.value.push(user)
+                        loading.value = false
+                    })
+                })
+            }
         })
     }else {
         ElMessage.error('请完整填写信息')
@@ -142,8 +155,28 @@ const confirmEdit = (itemObject) =>{
 }
 
 const deleteUser = (userID)=>{
-    console.log(userID)
+    let user = {
+        name:userID,
+        dept:deptId.value
+    }
+    mp.delMan(user).then(res=>{
+        if (res.data.code === 200){
+            ElMessage({
+                message: '删除成功',
+                type: 'success',
+            })
+            mp.getPersonDept(Number(deptId.value)).then(res=>{
+                employeeList.value = []
+                res.data.data.users.forEach((user) => {
+                    user.deptName = deptName.value
+                    employeeList.value.push(user)
+                    loading.value = false
+                })
+            })
+        }
+    })
 }
+
 </script>
 
 <style scoped>

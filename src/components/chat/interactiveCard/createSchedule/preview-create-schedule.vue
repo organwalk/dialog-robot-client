@@ -14,7 +14,7 @@
                 <span style="font-size: 15px;"><el-icon size="small"><Location /></el-icon>&nbsp;{{ strLocation }}</span><br/><br/>
                 <span style="font-size: 10px;">{{ strScheduleDes }}</span><br/><br/>
                 <el-collapse >
-                    <el-collapse-item title="Members" name="1">
+                    <el-collapse-item class="preview" title="Members" name="1">
                             <span v-for="(item,index) in strScheduleMembers[0]" :key="index" v-html="item.label + '&nbsp&nbsp' "/>
                     </el-collapse-item>
                 </el-collapse>
@@ -66,7 +66,7 @@ watch(allPageData,(newVal)=>{
     --el-collapse-border-color:none;
     --el-collapse-header-height: 30px;
 }
-/deep/ .el-collapse-item__header {
+/deep/ .preview .el-collapse-item__header {
     background-color: white;
 }
 </style>
