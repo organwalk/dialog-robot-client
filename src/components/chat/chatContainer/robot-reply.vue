@@ -46,7 +46,7 @@
 
 <script setup>
 import robotReplyConfig from '@/optionConfig/robot-reply.json'
-import {reactive, ref, defineProps, defineEmits, watch} from "vue";
+import {reactive, ref, defineProps, defineEmits, watch, computed} from "vue";
 import {useStore} from "vuex";
 import OaMessageComp from "@/components/chat/interactiveCard/oa-message/OaMessageComp.vue";
 import ScheduleListComp from "@/components/chat/interactiveCard/scheduleList/ScheduleListComp.vue";
@@ -66,7 +66,7 @@ const emit = defineEmits(['sendMissValueType','showRecommend'])
 const store = useStore()
 const robotReplyObject = reactive(robotReplyConfig)
 const robotReply = ref('')
-const cardStatus = ref(props.cardStatus)
+const cardStatus = computed(() => props.cardStatus)
 const showRec = false
 
 // 如果有卡片式消息或处于追问环境，则取消推荐卡片的显示

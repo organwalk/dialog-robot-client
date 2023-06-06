@@ -56,13 +56,14 @@ const sendOrder = () => {
             if (res.data.orderRes.orderType !== '') {
                 ot = res.data.orderRes.orderType
                 obj = res.data.orderRes
-                emit("send-cardStatus", ot)
+                emit("res-orderType",ot)
                 //然后判断指令体对象中是否存在空值
                 if (filterEmptyKeys(obj).length > 0) {
                     //将空缺值列表发送给父组件
                     sendMissingValues(filterEmptyKeys(obj))
                     //保存空缺的响应参数对象至状态管理
                     store.dispatch('updataMissingKeyObj', obj)
+                    emit('res-orderType',ot)
                 } else {
                     //如果不存在空缺值，则可以调用赛方接口
                     //在此应该进行类别划分
@@ -201,7 +202,7 @@ const objectIdByName = async (type, val) => {
                 let nameList = []
                 res = await order.getUserIdByName(nameList.push(val))
             }
-            const dataArray = res.data.data;
+            const dataArray = res.data.data
             dataArray.forEach((item) => {
                 item[0] = item[0] || '';
             });

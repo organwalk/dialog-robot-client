@@ -113,7 +113,9 @@ const getEmptyKeysList = (emptyKeys) => {
 
 const missValueType = ref('')
 const getMissValueType = (val) => {
-    missValueType.value = val
+    if (val){
+        missValueType.value = val
+    }
 }
 
 const cardStatus = ref('')
