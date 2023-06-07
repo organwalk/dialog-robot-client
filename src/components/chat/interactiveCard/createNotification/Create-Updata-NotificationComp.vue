@@ -1,10 +1,10 @@
 <template>
     <el-card v-loading="loading" style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
         <el-row v-if="notice_id && !showSuccessTip">
-            <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="left">
+            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="left">
                 <el-button @click="backNotification()" circle :icon="ArrowLeft" size="small" />
             </el-col>
-            <el-col :xs="4" :sm="6" :md="8" :lg="20" :xl="11" align="center">
+            <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20" align="center">
                 <span style="font-weight: bolder">修改事项告知</span>
             </el-col>
         </el-row>
@@ -14,7 +14,7 @@
                                      :nid="notice_id"
                                      @getPageOneData="getPageOneData"/>
             <el-row>
-                <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                     <el-button @click="create()" round color="#2C6AE3" v-if="createStep">Confirm</el-button>
                 </el-col>
             </el-row>

@@ -42,6 +42,8 @@ const saveDeptPersonList = (users) => {
         ]
     })
 }
+
+
 export {
     saveUserInfo,
     saveDeptList,

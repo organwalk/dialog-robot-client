@@ -25,9 +25,12 @@ const addMan = (obj)=>{
 }
 
 const delMan = (obj)=>{
-    return http.post(manBaseUrl+'/delete?uid='+String(obj.name)+"&&deptId="+Number(obj.dept))
+    return http.post(manBaseUrl+'/delete?uid='+String(obj.name.uid)+"&&deptId="+Number(obj.dept))
 }
 
+const getUserDetail = (uid,deptid)=>{
+    return http.get(manBaseUrl + '/detail?uid='+ String(uid) + '&&deptId='+Number(deptid))
+}
 
 const getUserDept = (obj)=>{
     return http.get(manBaseUrl+'/deptList?uid='+obj)
@@ -49,6 +52,7 @@ export {
     man,
     getUserDept,
     getPersonDept,
+    getUserDetail,
     getDeptList,
     updataPersonInfo,
     delMan

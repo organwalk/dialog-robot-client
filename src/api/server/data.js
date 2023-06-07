@@ -1,5 +1,6 @@
 import http from "@/api/server/http";
 
+//根据uid及时间戳数据获取数据
 const getSchedule = (obj)=>{
     return http.post('/data/schedule/'+sessionStorage.getItem("uid"),obj)
 }

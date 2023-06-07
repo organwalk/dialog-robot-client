@@ -1,7 +1,7 @@
 <template>
     <div v-show="props.showPageTwo" style="width: 100%">
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                 <el-input
                         v-model="scheduleDes"
                         :rows="3"
@@ -14,7 +14,7 @@
         </el-row>
         <br/>
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                 <el-input v-model="location"
                           maxlength="15"
                           show-word-limit
@@ -24,7 +24,7 @@
         </el-row>
         <br/>
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                 <el-card shadow="never" style="border: none;background-color: #f5f9fa" align="center">
                     <span style="font-weight: bolder">添加日程成员</span>
                     <el-tooltip

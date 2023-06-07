@@ -1,7 +1,7 @@
 <template>
     <el-card shadow="never" style="border: none; background-color: #f7f7f7">
         <el-row :gutter="10">
-            <el-col :xs="4" :sm="6" :md="8" :lg="22" :xl="11">
+            <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22">
                 <el-input
                         class="chat-input"
                         v-model="orderContent"
@@ -15,7 +15,7 @@
                     </template>
                 </el-input>
             </el-col>
-            <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center">
+            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center">
                 <el-button :icon="Promotion" style="border-radius: 10px;" size="large" color="#2C6AE3"
                            @click="sendOrder()"/>
             </el-col>
@@ -32,10 +32,17 @@ import msg from "@/api/cloud/message"
 import {useStore} from "vuex";
 import * as mp from "@/api/cloud/manage-person";
 import * as md from "@/api/cloud/manage-dept"
+import * as card from "@/api/cloud/card"
 
 const orderContent = ref('')
 const store = useStore()
-const emit = defineEmits(["user-input","res-orderType", "send-emptyKeysList", "send-cardStatus", "send-name"])
+const emit = defineEmits(["user-input",
+    "res-orderType",
+    "send-emptyKeysList",
+    "send-cardStatus",
+    "send-status",  //不同事件下的消息状态
+    "reply-robot",
+    "send-name"])
 const props = defineProps({
     missingValue: String
 })
@@ -46,12 +53,15 @@ const sendOrder = () => {
     let refresh = ''
     emit('user-input', orderContent.value)
     emit('send-cardStatus', refresh)
+    emit('send-status',refresh)
     let missingValueObj = store.state.chat.missingKeyObj
     //判断是否存有上次对话记录的空缺值对象，如果不存在，则表明本轮对话为新一轮对话
     if (Object.keys(missingValueObj).length === 0) {
         order.sendOrderToServer(orderContent.value).then(res => {
             let ot = '' //指令类型
             let obj = {} //参数对象
+            let reply = true
+            emit('reply-robot',reply)
             //判断指令是否为空
             if (res.data.orderRes.orderType !== '') {
                 ot = res.data.orderRes.orderType
@@ -63,6 +73,7 @@ const sendOrder = () => {
                     sendMissingValues(filterEmptyKeys(obj))
                     //保存空缺的响应参数对象至状态管理
                     store.dispatch('updataMissingKeyObj', obj)
+                    emit('send-status','missValue')
                     emit('res-orderType',ot)
                 } else {
                     //如果不存在空缺值，则可以调用赛方接口
@@ -72,12 +83,17 @@ const sendOrder = () => {
                     const deptType = /Dept/
                     if (msgType.test(ot)) {
                         msg(ot, getOrderResObject(obj))
+                        if (ot === 'OAMsg'){
+                            emit('send-cardStatus', ot)
+                        }
                     } else if (manType.test(ot)) {
                         if (ot === 'ModMan') {
                             emit("send-cardStatus", ot)
                         }
+                        emit('send-status','orderType')
                         mp.man(ot, getOrderResObject(obj))
                     } else if (deptType.test(ot)) {
+                        emit('send-status','orderType')
                         md.dept(ot, getOrderResObject(obj))
                     } else {
                         emit("send-cardStatus", ot)
@@ -85,26 +101,53 @@ const sendOrder = () => {
                 }
             } else {
                 //若为空，则将空指令类型发送至父组件,以表意图不明
+                emit('send-status','initial')
                 emit('res-orderType', ot)
             }
         })
     } else {
-        userInputAoubtMissingValues(props.missingValue, orderContent.value).then(newObj => {
-            if (filterEmptyKeys(newObj).length > 0) {
-                sendMissingValues(filterEmptyKeys(newObj))
-                emit('res-orderType', newObj.orderType)
-            } else if (filterEmptyKeys(newObj).length === 0) {
-                let orderType = store.state.chat.missingKeyObj.orderType
-                sendMissingValues([])
-                msg(orderType, getOrderResObject(store.state.chat.missingKeyObj))
-                const mType = /Man/
-                if (mType.test(orderType)) {
-                    mp.man(orderType, getOrderResObject(store.state.chat.missingKeyObj))
+        if (props.missingValue === 'object'){
+            const regex = /^部门(?:群)?$/
+            if (regex.test(orderContent.value)){
+                const newObject = {
+                    ...store.state.chat.missingKeyObj,
+                    groupId:[]
                 }
-                emit('res-orderType', orderType)
+                delete newObject.object
+                sendMissingValues(filterEmptyKeys(newObject))
+                store.dispatch('updataMissingKeyObj', newObject)
+                emit('send-status','missValue')
+                emit('reply-robot',newObject)
+            }else if (orderContent.value === '人'){
+                const newObject = {
+                    ...store.state.chat.missingKeyObj,
+                    receivers:[]
+                }
+                delete newObject.object
+                store.dispatch('updataMissingKeyObj', newObject)
+                sendMissingValues(filterEmptyKeys(newObject))
+                emit('send-status','missValue')
+                emit('reply-robot',newObject)
             }
-        })
-
+        }else {
+            userInputAoubtMissingValues(props.missingValue, orderContent.value).then(newObj => {
+                if (filterEmptyKeys(newObj).length > 0) {
+                    sendMissingValues(filterEmptyKeys(newObj))
+                    emit('send-status','missValue')
+                    emit('res-orderType', newObj.orderType)
+                } else if (filterEmptyKeys(newObj).length === 0) {
+                    let orderType = store.state.chat.missingKeyObj.orderType
+                    sendMissingValues([])
+                    msg(orderType, getOrderResObject(store.state.chat.missingKeyObj))
+                    const mType = /Man/
+                    if (mType.test(orderType)) {
+                        mp.man(orderType, getOrderResObject(store.state.chat.missingKeyObj))
+                    }
+                    emit('send-status','orderType')
+                    emit('res-orderType', orderType)
+                }
+            })
+        }
     }
     orderContent.value = ''
 }
@@ -136,6 +179,7 @@ const filterEmptyKeys = (obj) => {
 
 //将空缺值数组发送给父组件中转给回复组件处理
 const sendMissingValues = (emptyKeysList) => {
+    console.log(emptyKeysList)
     emit('send-emptyKeysList', emptyKeysList)
 }
 
@@ -152,27 +196,37 @@ const userInputAoubtMissingValues = async (type, val) => {
         switch (type) {
             case 'receivers':
             case 'groupId':
-                data = await objectIdByName(type, val);
-                newObj = {...oldObj, [type]: data};
-                break;
+                data = await objectIdByName(type, val)
+                newObj = {...oldObj, [type]: data}
+                break
             case 'name':
-                data = await objectIdByName(type, val);
-                if (data) {
-                    userinfo = {
-                        name: val,
-                        uid: Number(data)
-                    }
-                    await store.dispatch('updataSearchUid', userinfo)
+                data = await objectIdByName(type, val)
+                //如果数据具有长度，则表明为数组，此时插值部门数组
+                userinfo = {
+                    name:val,
+                    dept:data.deptList,
+                    uid:data.uid
                 }
+                await store.dispatch('updataSearchUid', userinfo)
+                // else {
+                //     //如果数据不具有长度，则考虑为一般情况
+                //     userinfo = {
+                //         name: val,
+                //         uid: Number(data)
+                //     }
+                //     await store.dispatch('updataSearchUid', userinfo)
+                // }
                 newObj = {...oldObj, [type]: data};
                 break;
             case 'dept':
                 data = await objectIdByName(type, val)
                 if (data) {
-                    userinfo = {
+                    const user = store.state.chat.searchUid
+                    let newUser = {
+                        ...user,
                         deptId: Number(data)
                     }
-                    await store.dispatch('updataSearchUid', userinfo)
+                    await store.dispatch('updataSearchUid', newUser)
                 }
                 newObj = {...oldObj, [type]: data};
                 break;
@@ -214,17 +268,40 @@ const objectIdByName = async (type, val) => {
         } else if (type === 'name') {
             let nameList = []
             nameList.push(val)
-            const res = await order.getUserIdByName(nameList)
-            const dataArray = res.data.data;
-            dataArray.forEach((item) => {
-                item[0] = item[0] || '';
-            })
-            return dataArray.map((item) => item[0]);
+            // //  尝试从本部门的redis缓存中查找   ---- 仅适用于对本部门的uid获取
+            // const res = await order.getUserIdByName(nameList)
+            // const dataArray = res.data.data;
+            //  若结果为空则表明为外部部门人员，通过通讯录导入并处理数组
+            const resAll = await card.getPersonList()
+            const uidId = resAll.data.data.userList.find(user => user.name === val).userId
+            const res = await mp.getUserDept(uidId);
+            let deptList = [];
+            if (res.data.code === 200){
+                res.data.data.map(dept =>{
+                    deptList.push(dept.name)
+                })
+            }
+            return {
+                uid:uidId,
+                deptList:deptList
+            }
         } else if (type === 'dept') {
             const res = await order.getGroupIdByName(val);
             const groupId = res.data.data;
             return groupId.map((item) => item[0])[0];
         }
+        // } else if (type === 'object'){
+        //     const regex = /^(?:部门)?群(?:组)?$/
+        //     if (regex.test(val)){
+        //         const newObject = {
+        //             ...store.state.chat.missingKeyObj,
+        //             groupId:''
+        //         }
+        //         delete newObject.object
+        //         await store.dispatch('updataMissingKeyObj', newObject)
+        //         emit('sendMissingValues',filterEmptyKeys(newObject))
+        //     }
+        // }
     } catch (err) {
         // Handle 500 error
         if (err.response && err.response.status === 500) {

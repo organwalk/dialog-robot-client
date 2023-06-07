@@ -34,6 +34,7 @@
                                       v-model="mobile"
                                       placeholder="电话号码"
                                       :prefix-icon="Iphone"
+                                      @keyup.enter="login()"
                                       size="large"/>
                         </el-col>
                     </el-row>

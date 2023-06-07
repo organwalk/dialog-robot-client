@@ -1,10 +1,10 @@
 <template>
     <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
         <el-row justify="center">
-            <el-col :xs="4" :sm="6" :md="8" :lg="12" :xl="11" align="left">
+            <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="left">
                 <span style="font-size: 18px;font-weight: bolder;">Notification</span>
             </el-col>
-            <el-col :xs="4" :sm="6" :md="8" :lg="12" :xl="11" align="right">
+            <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="right">
                 <el-icon size="20px">
                     <AlarmClock/>
                 </el-icon>
@@ -12,13 +12,13 @@
         </el-row>
         <br/>
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <n-custom-calendar @send-click-day="getClickDay"/>
             </el-col>
         </el-row>
         <br/>
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <a-notification :click-day="clickDay"/>
             </el-col>
         </el-row>

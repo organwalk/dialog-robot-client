@@ -3,21 +3,21 @@
         <!-- 一个卡片单位 -->
         <el-card style="border-radius:10px;margin-bottom: 20px; " v-for="(card, index) in cardList" :key="index">
             <el-row justify="center">
-                <el-col :xs="8" :sm="6" :md="4" :lg="14" :xl="1" >
+                <el-col :xs="14" :sm="14" :md="14" :lg="14" :xl="14" >
                 <h5>{{ card.TypeName }}</h5>
                 </el-col>
-                <el-col :xs="8" :sm="6" :md="4" :lg="10" :xl="1" style="display:flex;align-items: center" >
+                <el-col :xs="8" :sm="6" :md="10" :lg="10" :xl="10" style="display:flex;align-items: center" >
                     <el-button type="success" :icon="Check" size="small" round style="margin: auto" v-if="card.orderStatus === 'success'">Success</el-button>
                     <el-button type="danger" :icon="CircleCloseFilled" size="small" round style="margin: auto" v-if="card.orderStatus === 'fail'">Fail</el-button>
                 </el-col>
             </el-row>
             <el-row justify="center">
-                <el-col :xs="8" :sm="6" :md="4" :lg="24" :xl="1" >
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="10" >
                     <span style="font-size: 10px">{{ card.orderContentText }}</span>
                 </el-col>
             </el-row><br/>
             <el-row justify="center">
-                <el-col :xs="8" :sm="6" :md="4" :lg="24" :xl="1" align="right">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
                     <el-button size="small" round text bg >{{ card.orderTime }}</el-button>
                 </el-col>
             </el-row>

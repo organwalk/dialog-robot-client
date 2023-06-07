@@ -2,7 +2,7 @@
     <el-card class="chatContainer" :scrollTop="containerScrollTop" shadow="never"
              style="border: none; background-color: #f7f7f7;height: 550px;overflow-y: auto">
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <span style="font-size: 10px;color: #B5B8C0;font-weight: bolder" v-if="showToDay">{{ toDay }}</span>
             </el-col>
         </el-row>
@@ -25,6 +25,7 @@
                     <robot-reply :order-type="orderType"
                                  :empty-keys-list="emptyKeysList"
                                  :card-status="cardStatus"
+                                 :status="messageStatus"
                                  @send-miss-value-type="getMissValueType"
                                  @show-recommend="dontShowRec"/>
                 </el-col>
@@ -32,7 +33,7 @@
         </div>
         <!--        在对话下展示推荐指令  -->
         <el-row v-if="showRecommendTip" style="margin-top: -1%">
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                 <el-button v-for="(recommend,index) in recommendList" :key="index"
                            @click="getRecommendTip(recommend)"
                            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom:10px;margin-left:0;width: 100%"
@@ -47,6 +48,8 @@
             @res-order-type="getOrderType"
             @send-empty-keys-list="getEmptyKeysList"
             @send-card-status="getCardStatus"
+            @send-status="getMessageStatus"
+            @reply-robot = 'getReplyStatus'
             :missing-value="missValueType"/>
 </template>
 
@@ -55,7 +58,7 @@ import ChatInputComp from "@/components/chat/chatContainer/ChatInputComp.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
 import { nextTick, ref} from "vue";
-import RobotReply from "@/components/chat/chatContainer/robot-reply.vue";
+import RobotReply from "@/components/chat/chatContainer/robot-reply-c.vue";
 
 const toDay = ref(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
 const showRecommend = ref(true)
@@ -77,6 +80,24 @@ const getRecommendTip = (recommend) => {
     onUserInput(recommend)
 }
 
+const messageStatus = ref()
+const getMessageStatus = (val)=>{
+    messageStatus.value = val
+}
+const typeStatus = ref()
+const getReplyStatus = (val) =>{
+    typeStatus.value = val
+    if (typeStatus.value){
+        chatMessages.value.push({
+            type: 'robot',
+            message: ''
+        })
+        showRecommendTip.value = true
+        getRecommendList()
+        scrollBottom()
+        typeStatus.value = false
+    }
+}
 const onUserInput = (userInput) => {
     //当用户输入时，隐藏初始推荐输入卡片，显示今日日期
     if (userInput !== '') {
@@ -89,15 +110,6 @@ const onUserInput = (userInput) => {
             message: userInput
         });
         scrollBottom()//自动滚动至聊天容器底部
-        setTimeout(() => {
-            chatMessages.value.push({
-                type: 'robot',
-                message: ''
-            })
-            showRecommendTip.value = true
-            getRecommendList()
-            scrollBottom()
-        }, 2000)
     }
 }
 
@@ -106,9 +118,10 @@ const getOrderType = (ot) => {
     orderType.value = ot
 }
 
-const emptyKeysList = ref([])
+const emptyKeysList = ref()
 const getEmptyKeysList = (emptyKeys) => {
     emptyKeysList.value = emptyKeys
+    console.log(emptyKeysList.value)
 }
 
 const missValueType = ref('')

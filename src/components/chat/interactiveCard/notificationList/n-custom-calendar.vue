@@ -1,6 +1,6 @@
 <template>
     <el-row justify="center">
-        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
             <div style="width: 50%;text-align: center;margin-bottom: 10px;">
                 <el-popover
                         placement="bottom"
@@ -45,7 +45,7 @@
     </el-row>
 
     <el-row>
-        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
             <el-table :data="dateList"
                       :cell-style="{'text-align':'center'}"
                       :header-cell-style="{'text-align':'center'}"

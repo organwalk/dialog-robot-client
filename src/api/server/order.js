@@ -1,9 +1,11 @@
-import axios from "axios";
 import http from "@/api/server/http";
 
-const mockBaseURL = 'http://localhost:4523/m1/2785261-0-default/m1/2785261-0-default'
 const sendOrderToServer = (content) => {
-    return axios.get(mockBaseURL+'/order/msg?id='+content)
+    let obj = {
+        action:"order",
+        orderContent:content
+    }
+    return http.post('/order/'+sessionStorage.getItem("mobile"),obj)
 }
 
 const getUserIdByName = (nameArrary) => {

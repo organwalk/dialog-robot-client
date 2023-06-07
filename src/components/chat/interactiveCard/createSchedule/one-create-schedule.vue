@@ -1,7 +1,7 @@
 <template>
     <div v-show="props.showPageOne" style="width: 100%">
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <el-input
                         v-model="title"
                         placeholder="Please input a title about schedule "
@@ -13,11 +13,11 @@
         </el-row>
         <br/><br/>
         <el-row>
-            <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+            <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <el-card shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;">
                     <span style="font-weight: bolder">请选择日程的基本配置项</span><br/><br/>
                     <el-row :gutter="10">
-                        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
                                 <el-date-picker
                                         v-model="startTime"
@@ -29,7 +29,7 @@
                                 />
                             </el-card>
                         </el-col>
-                        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
                                 <el-date-picker
                                         v-model="endTime"
@@ -44,7 +44,7 @@
                     </el-row>
                     <br/>
                     <el-row>
-                        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="center">
+                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
                                 <span>是否提醒</span><br/><br/>
                                 <el-switch

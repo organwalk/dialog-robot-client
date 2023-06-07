@@ -1,7 +1,7 @@
 <template>
     <el-row style="margin-top: 5%">
-        <el-col :xs="8" :sm="6" :md="4" :lg="2" :xl="1"/>
-        <el-col :xs="8" :sm="6" :md="4" :lg="10" :xl="1" align="center">
+        <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="1"/>
+        <el-col :xs="10" :sm="10" :md="10" :lg="10" :xl="10" align="center">
             <el-card shadow="never" style="background-color: #f7f7f7;border: none">
                 <el-icon size="25px"><Sunny /></el-icon><br/>
                 <span>Examples</span><br/><br/>
@@ -16,7 +16,7 @@
                 </el-card>
             </el-card>
         </el-col>
-        <el-col :xs="8" :sm="6" :md="4" :lg="10" :xl="1" align="center">
+        <el-col :xs="10" :sm="10" :md="10" :lg="10" :xl="10" align="center">
             <el-card shadow="never" style="background-color: #f7f7f7;border: none">
                 <el-icon size="25px"><Sunrise /></el-icon><br/>
                 <span>Limitations</span><br/><br/>
@@ -28,7 +28,7 @@
             </el-card>
 
         </el-col>
-        <el-col :xs="8" :sm="6" :md="4" :lg="2" :xl="1"/>
+        <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"/>
     </el-row>
 </template>
 

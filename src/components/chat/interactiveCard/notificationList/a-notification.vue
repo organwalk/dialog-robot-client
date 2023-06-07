@@ -1,6 +1,6 @@
 <template>
     <el-row justify="center">
-        <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
+        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
             <span style="font-weight: bolder;align-items: center">Notification List</span>
         </el-col>
         <el-empty v-if="showEmpty" description="暂无记录" />
@@ -11,7 +11,7 @@
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
             <el-row justify="center">
-                <el-col :xs="4" :sm="6" :md="8" :lg="24" :xl="11" align="left">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                     <el-collapse >
                         <el-collapse-item :title="item.remind_time" >
                             <h5>{{ item.content }}</h5>
@@ -21,14 +21,14 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :xs="4" :sm="6" :md="8" :lg="20" :xl="11" align="left">
+                <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20" align="left">
                 <span style="font-size: 10px;color: #808080">{{ item.name }} released this notification</span>
                 </el-col>
-                <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center" v-if="unShowInOtherDay">
+                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
                     <el-button v-if="item.uid === uid" type="primary" :icon="Edit" circle size="small"
                                @click="updataNotification(item.notice_id)"/>
                 </el-col>
-                <el-col :xs="4" :sm="6" :md="8" :lg="2" :xl="11" align="center" v-if="unShowInOtherDay">
+                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
                     <!--                    取消-->
                     <el-popconfirm width="200"
                                    title="确定取消该日程吗？" @confirm="cancel(item.notice_id)">
