@@ -6,12 +6,12 @@
             />
         </el-col>
     </el-row>
-        <el-card shadow="never"
-                 :body-style="{padding:'10px'}"
-                 class="robot-chat-bubble"
-                 v-if="!cardStatus">
-            <span v-html="robotReply"/>
-        </el-card>
+    <el-card shadow="never"
+             :body-style="{padding:'10px'}"
+             class="robot-chat-bubble"
+             v-if="!cardStatus">
+        <span v-html="robotReply"/>
+    </el-card>
 </template>
 
 <script setup>
@@ -27,42 +27,41 @@ import NotificationListComp from "@/components/chat/interactiveCard/notification
 import CreateNotification
     from "@/components/chat/interactiveCard/createNotification/Create-Updata-NotificationComp.vue";
 
+//  定义状态值接收器
 const props = defineProps({
-    status:String,
+    status: String,
     orderType: String,
     emptyKeysList: Array,
     cardStatus: String
 })
 
-const status = computed(()=>props.status)
+//  初始化状态
+const status = computed(() => props.status)
 const missValue = ref(null)
-const orderType = computed(()=>props.orderType)
-const emptyKeysList = computed(()=>props.emptyKeysList)
-const cardStatus = computed(()=>props.cardStatus)
+const orderType = computed(() => props.orderType)
+const emptyKeysList = computed(() => props.emptyKeysList)
+const cardStatus = computed(() => props.cardStatus)
 
-const robotReply = ref('')
-const cardComponent = computed(() => {
-    switch(cardStatus.value) {
-        case 'OAMsg': return OaMessageComp
-        case 'ModMan': return UpdataEmployeeComp
-        case 'GetPlan': return ScheduleListComp
-        case 'AddPlan': return CreateSchedule
-        case 'GetNotes': return NotificationListComp
-        case 'AddNote': return CreateNotification
-        default: return ''
-    }
-})
-
-const emit = defineEmits(['showRecommend','send-miss-value-type'])
+/** 定义提交事件和状态管理
+ * 提交‘展示推荐卡片’、‘缺失值Key’
+ * @type {EmitFn<(string)[]>}
+ */
+const emit = defineEmits(['showRecommend', 'send-miss-value-type'])
 const store = useStore()
 
+console.log(cardStatus.value)
+
+//  初始化文字回复
+const robotReply = ref('')
+
+//  定义总体回复状态机
 const getReply = () => {
     switch (status.value) {
         case 'initial':
             robotReply.value = getInitialReply()
             break;
         case 'missValue':
-            emit('send-miss-value-type',emptyKeysList.value[0])
+            emit('send-miss-value-type', emptyKeysList.value[0])
             missValue.value = emptyKeysList.value[0]
             robotReply.value = getMissValueReply()
             break;
@@ -73,24 +72,42 @@ const getReply = () => {
             robotReply.value = getCardStatusReply()
             break;
     }
-    if (!emptyKeysList.value.length) {
-        missValue.value = null
-    }
 }
-onMounted(()=>{
+onMounted(() => {
     getReply()
-    emitShowRecommend()
+    emitShowRecommend() //回复时展示推荐卡片
 })
-watch(status,()=>{
+watch(status, () => {
     getReply()
 })
 
+//  定义不同类别卡片回复状态机
+const cardComponent = computed(() => {
+    switch (cardStatus.value) {
+        case 'OAMsg':
+            return OaMessageComp
+        case 'ModMan':
+            return UpdataEmployeeComp
+        case 'GetPlan':
+            return ScheduleListComp
+        case 'AddPlan':
+            return CreateSchedule
+        case 'GetNotes':
+            return NotificationListComp
+        case 'AddNote':
+            return CreateNotification
+        default:
+            return ''
+    }
+})
 
+//  详细定义回复状态机内的调用方法
 const getInitialReply = () => {
     return robotReplyConfig.OrderTypeNull
 }
 
 const getMissValueReply = () => {
+    //发送缺失值key
     emit('send-miss-value-type', missValue.value)
     return robotReplyConfig[missValue.value + 'Missing'];
 }
@@ -105,31 +122,31 @@ const getOrderTypeReply = () => {
         const deptName = store.state.chat.searchUid.dept
         robotReply.value = reply.replace(/\${userName}/g, userName).replace(/\${deptName}/g, deptName.join("、"));
         let refresh = ''
-        store.dispatch('updataSearchUid',refresh)
+        store.dispatch('updataSearchUid', refresh)
         store.dispatch('updataMissingKeyObj', {})
     } else if (orderType.value === 'GetMan') {
         let userId
-        if (store.state.chat.missingKeyObj.name.uid){
+        if (store.state.chat.missingKeyObj.name.uid) {
             userId = store.state.chat.missingKeyObj.name.uid
-        }else {
+        } else {
             userId = store.state.chat.missingKeyObj.name[0]
         }
         const deptId = store.state.chat.missingKeyObj.dept
-        getUserDetail(userId,deptId).then(res=>{
+        getUserDetail(userId, deptId).then(res => {
             const userName = res.data.data.user.name
             let job
-            if (job===undefined){
+            if (job === undefined) {
                 job = "暂未设置"
-            }else {
+            } else {
                 job = res.data.data.user.title
             }
             const mobile = res.data.data.user.mobile
-            getUserDept(userId).then(res=>{
+            getUserDept(userId).then(res => {
                 const deptName = res.data.data.map(item => item.name)
                 robotReply.value = reply.replace(/\${userName}/g, userName)
-                    .replace(/\${deptName}/g,deptName)
-                    .replace(/\${job}/g,job)
-                    .replace(/\${mobile}/g,mobile)
+                    .replace(/\${deptName}/g, deptName)
+                    .replace(/\${job}/g, job)
+                    .replace(/\${mobile}/g, mobile)
                 store.dispatch('updataMissingKeyObj', {})
             })
         })
@@ -142,7 +159,9 @@ const getOrderTypeReply = () => {
 
 const getCardStatusReply = () => {
     const reply = robotReplyConfig[cardStatus.value]
+    // 卡片回复完成后重置回复状态与卡片状态
     status.value = 'initial'
+    cardStatus.value = ''
     emitShowRecommend()
     return reply
 }
