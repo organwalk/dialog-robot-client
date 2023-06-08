@@ -5,7 +5,8 @@
         </el-col>
     </el-row>
     <br/>
-    <div style="width: 100%;height:480px;overflow-y: auto" v-if="!scheduleId" v-loading="loading">
+    <div style="width: 100%;height:350px;overflow-y: auto" v-if="!scheduleId" v-loading="loading">
+        <el-empty v-if="showEmpty" description="当前日期暂无日程"></el-empty>
         <el-card v-for="(item,index) in scheduleList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
@@ -78,6 +79,12 @@ onMounted(() => {
     }, 1000)
 })
 
+const showEmpty = ref(true)
+
+watch(scheduleList,(val)=>{
+    showEmpty.value = val.length <= 0;
+})
+
 //切换日期
 const clickDay = computed(() => props.clickDay)
 const today = new Date().toISOString().substring(0,10)
@@ -119,6 +126,9 @@ watch(clickDay, (newVal) => {
                     action: item.action
                 }
             })
+            if (scheduleList.value.length === 0){
+                showEmpty.value = true
+            }
         })
     }
 })

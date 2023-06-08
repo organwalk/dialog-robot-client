@@ -2,25 +2,25 @@
     <el-row>
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
             <component
-                    :is="cardComponent"
+                :is="component"
             />
         </el-col>
     </el-row>
     <el-card shadow="never"
              :body-style="{padding:'10px'}"
              class="robot-chat-bubble"
-             v-if="!cardStatus">
+             v-if="robotReply">
         <span v-html="robotReply"/>
     </el-card>
 </template>
 
 <script setup>
 import robotReplyConfig from '@/optionConfig/robot-reply.json'
-import {ref, defineProps, defineEmits, watch, computed, onMounted} from "vue";
+import {ref, defineProps, defineEmits, computed, onMounted} from "vue";
 import {useStore} from "vuex";
 import {getUserDept, getUserDetail} from '@/api/cloud/manage-person'
 import OaMessageComp from "@/components/chat/interactiveCard/oa-message/OaMessageComp.vue";
-import ScheduleListComp from "@/components/chat/interactiveCard/scheduleList/ScheduleListComp.vue";
+import ScheduleListComp from "@/components/chat/interactiveCard/scheduleList/ScheduleListView.vue";
 import CreateSchedule from "@/components/chat/interactiveCard/createSchedule/Create-Updata-ScheduleComp.vue";
 import UpdataEmployeeComp from "@/components/chat/interactiveCard/manageEmployee/UpdataEmployeeComp.vue";
 import NotificationListComp from "@/components/chat/interactiveCard/notificationList/NotificationListComp.vue";
@@ -32,7 +32,8 @@ const props = defineProps({
     status: String,
     orderType: String,
     emptyKeysList: Array,
-    cardStatus: String
+    cardStatus: String,
+    msg:Number
 })
 
 //  初始化状态
@@ -46,16 +47,15 @@ const cardStatus = computed(() => props.cardStatus)
  * 提交‘展示推荐卡片’、‘缺失值Key’
  * @type {EmitFn<(string)[]>}
  */
-const emit = defineEmits(['showRecommend', 'send-miss-value-type'])
+const emit = defineEmits(['showRecommend', 'send-miss-value-type','send-loading'])
 const store = useStore()
-
-console.log(cardStatus.value)
 
 //  初始化文字回复
 const robotReply = ref('')
 
 //  定义总体回复状态机
 const getReply = () => {
+    emit('send-loading',false)
     switch (status.value) {
         case 'initial':
             robotReply.value = getInitialReply()
@@ -73,33 +73,45 @@ const getReply = () => {
             break;
     }
 }
-onMounted(() => {
+
+onMounted(()=>{
     getReply()
-    emitShowRecommend() //回复时展示推荐卡片
-})
-watch(status, () => {
-    getReply()
+    cardComponent()
 })
 
 //  定义不同类别卡片回复状态机
-const cardComponent = computed(() => {
+const component = ref()
+const cardComponent = () => {
+    console.log(cardStatus.value)
     switch (cardStatus.value) {
         case 'OAMsg':
-            return OaMessageComp
+            component.value =  OaMessageComp
+            break
         case 'ModMan':
-            return UpdataEmployeeComp
+            component.value =  UpdataEmployeeComp
+            break
         case 'GetPlan':
-            return ScheduleListComp
+            component.value = ScheduleListComp
+            break
         case 'AddPlan':
-            return CreateSchedule
+            component.value = CreateSchedule
+            break
+        case 'ModPlan':
+            component.value = ScheduleListComp
+            break
         case 'GetNotes':
-            return NotificationListComp
+            component.value = NotificationListComp
+            break
+        case 'ModNote':
+            component.value = NotificationListComp
+            break
         case 'AddNote':
-            return CreateNotification
+            component.value = CreateNotification
+            break
         default:
-            return ''
+            return null
     }
-})
+}
 
 //  详细定义回复状态机内的调用方法
 const getInitialReply = () => {
@@ -109,6 +121,7 @@ const getInitialReply = () => {
 const getMissValueReply = () => {
     //发送缺失值key
     emit('send-miss-value-type', missValue.value)
+    emit('showRecommend', !missValue.value)
     return robotReplyConfig[missValue.value + 'Missing'];
 }
 
@@ -153,21 +166,19 @@ const getOrderTypeReply = () => {
     } else {
         reply = template
     }
+    emit('showRecommend', reply)
     store.dispatch('updataMissingKeyObj', {})
     return reply
 }
 
 const getCardStatusReply = () => {
     const reply = robotReplyConfig[cardStatus.value]
-    // 卡片回复完成后重置回复状态与卡片状态
-    status.value = 'initial'
-    cardStatus.value = ''
     emitShowRecommend()
     return reply
 }
 
 const emitShowRecommend = () => {
-    emit('showRecommend', !cardStatus.value)
+    emit('showRecommend', cardStatus.value)
 }
 </script>
 

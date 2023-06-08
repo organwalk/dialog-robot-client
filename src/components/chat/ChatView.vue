@@ -1,5 +1,5 @@
 <template>
-    <el-row >
+    <el-row>
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
             <HeaderComp/>
         </el-col>
@@ -10,7 +10,7 @@
             <HistoryListComp/>
         </el-col>
         <el-col :xs="18" :sm="18" :md="18" :lg="18" :xl="18">
-            <ChatComp/>
+            <ChatComp />
         </el-col>
     </el-row>
 </template>
@@ -19,5 +19,8 @@
 import HeaderComp from "@/components/chat/header/HeaderComp.vue";
 import HistoryComp from "@/components/chat/history/HistoryComp.vue";
 import HistoryListComp from "@/components/chat/history/HistoryListComp.vue";
-import ChatComp from "@/components/chat/chatContainer/ChatComp.vue";
+import ChatComp from "@/components/chat/chatContainer/chat-comp.vue";
 </script>
+
+<style>
+</style>

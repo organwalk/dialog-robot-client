@@ -5,7 +5,7 @@ import http from "@/api/cloud/http";
 const getAccessToken = ()=> {
     const appId = '17587865'
     const appSecret = '08eb7d2a6336c7c7bcb7bbbf8768d579'
-    const url = '/api/token/get'
+    const url = '/api/token/get?flags=1'
     const config = {
         headers: {
             'appId': appId,
@@ -50,6 +50,7 @@ const getDeptPersonList = () => {
         deptId:sessionStorage.getItem("deptId")
     })
 }
+
 export {
     getAccessToken,
     getUidByAccount,

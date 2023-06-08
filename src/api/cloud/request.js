@@ -18,6 +18,7 @@ const request = (config) => {
     },error => {
         return Promise.error(error)
     })
+
     return instance(config)
 }
 

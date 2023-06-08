@@ -15,7 +15,7 @@ const manBaseUrl = '/user'
 const addMan = (obj)=>{
     const newObj = {
         ...obj,
-        userName:String(obj.userName[0]),
+        userName:String(obj.name),
         deptId:obj.dept,
         title:obj.job
     }

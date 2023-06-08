@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" style="border-top:none;height: 480px;overflow-y: auto">
+    <el-card shadow="never" style="border-top:none;height: 500px;overflow-y: auto">
         <!-- 一个卡片单位 -->
         <el-card style="border-radius:10px;margin-bottom: 20px; " v-for="(card, index) in cardList" :key="index">
             <el-row justify="center">
@@ -12,7 +12,7 @@
                 </el-col>
             </el-row>
             <el-row justify="center">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="10" >
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
                     <span style="font-size: 10px">{{ card.orderContentText }}</span>
                 </el-col>
             </el-row><br/>

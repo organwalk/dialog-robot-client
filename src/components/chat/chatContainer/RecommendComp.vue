@@ -47,6 +47,7 @@ const limitationsList = ref([])
 const emit = defineEmits(['send-recommend-text'])
 
 const sendRecommendText = (recommend) => {
+    console.log(recommend)
    emit('send-recommend-text',recommend)
 }
 

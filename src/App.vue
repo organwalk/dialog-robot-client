@@ -4,7 +4,17 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import {getAccessToken} from "@/api/cloud/auth";
+import {onMounted} from "vue";
+
+onMounted(()=>{
+    setInterval(()=>{
+        getAccessToken().then(res=>{
+            sessionStorage.setItem("accessToken", res.data.data.accessToken)
+        })
+    },1000 * 60 * 60)
+})
 
 </script>
 
