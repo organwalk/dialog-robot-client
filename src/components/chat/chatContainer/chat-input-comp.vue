@@ -92,12 +92,12 @@ const inNewConversation = (content) => {
         emit('reply-robot',reply)
         //判断对话指令响应体中的意图是否为空
         if (res.data.orderRes.orderType !== '') {
-            //  若存在意图
+            //  若存在意图，则继续
             ot = res.data.orderRes.orderType
             obj = res.data.orderRes
             intentionIsNotNull(ot,obj)
         } else {
-            //  若不存在意图
+            //  若不存在意图，则视为无效指令，要求用户重新输入
             intentionIsNull(ot)
         }
     })
@@ -109,8 +109,10 @@ const intentionIsNotNull = (ot,obj) => {
     emit("res-orderType",ot)
     //然后判断指令体对象中是否存在空值
     if (filterEmptyKeys(obj).length > 0) {
+        //  如果存在空值则处理空值
         missingKeyIsExist(ot,obj)
     } else {
+        //  如果不存在空值则直接调用接口
         useApiAboutByDirect(ot,obj)
     }
 }
@@ -185,24 +187,27 @@ const objectIsMissingKey = (content) => {
 
 //  从对话中提取信息填补缺失值
 const fillMissingValueFromContent = (msv,oc) => {
-    console.log(msv+'---------'+oc)
+    // 当指令为AddMan时，此时用户提供的姓名作为Value，而无需转换为uid，因此可直接写入空缺值状态管理
     if (store.state.chat.missingKeyObj.orderType === 'AddMan' && store.state.chat.missingKeyObj.name === ''){
         const newObj = {
             ...store.state.chat.missingKeyObj,
             name:oc
         }
-        store.dispatch('updataMissingKeyObj',newObj)
-        sendMissingValues(filterEmptyKeys(newObj))
-        emit('send-status','missValue')
-        emit('reply-robot',newObj)
+        store.dispatch('updataMissingKeyObj',newObj)    //  更新空缺值状态
+        sendMissingValues(filterEmptyKeys(newObj))  //  对空缺值进行过滤
+        emit('send-status','missValue') //  发送当前状态为“空缺值”供回复组件状态机响应
+        emit('reply-robot',newObj)  //  发送当前对象值，供聊天容器组件唤醒回复
     }else {
+        //  如果指令不为AddMan，则获取空缺值属性处理结果
         userInputAoubtMissingValues(msv, oc).then(newObj => {
+            //  如果过滤后的空缺值数组存在，则表明仍存在空缺值，应继续过滤
             if (filterEmptyKeys(newObj).length > 0) {
                 sendMissingValues(filterEmptyKeys(newObj))
-                emit('send-status','missValue')
-                emit('res-orderType', newObj.orderType)
-                emit('reply-robot',newObj)
+                emit('send-status','missValue') //  发送当前状态为“空缺值”供回复组件状态机响应
+                emit('res-orderType', newObj.orderType) //发送当前指令类型，供回复组件状态机调用响应缺失值问询
+                emit('reply-robot',newObj)//  发送当前对象值，供聊天容器组件唤醒回复
             }
+            //  如果过滤后不存在空缺值数组，则可以调用接口
             else if (filterEmptyKeys(newObj).length === 0) {
                 let orderType = store.state.chat.missingKeyObj.orderType
                 sendMissingValues([])
@@ -221,6 +226,9 @@ const fillMissingValueFromContent = (msv,oc) => {
 
 
 
+
+
+/*------------以下为工具方法，非必要不修改维护-----------------------*/
 
 //提取orderRes中除orderType外的字段
 const getOrderResObject = (obj) => {
@@ -247,13 +255,11 @@ const filterEmptyKeys = (obj) => {
 
 //将空缺值数组发送给父组件中转给回复组件处理
 const sendMissingValues = (emptyKeysList) => {
-    console.log(emptyKeysList)
     emit('send-emptyKeysList', emptyKeysList)
 }
 
 //将用户对空缺值的补充填补进空缺对象中
 const userInputAoubtMissingValues = async (type, val) => {
-    console.log("++++++++"+type)
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
     let userinfo = {}
@@ -346,7 +352,6 @@ const objectIdByName = async (type, val) => {
             return groupId.map((item) => item[0])[0];
         }
     } catch (err) {
-        // Handle 500 error
         if (err.response && err.response.status === 500) {
             return [];  // 返回空数组
         } else {
