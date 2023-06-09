@@ -9,11 +9,17 @@ import {getAccessToken} from "@/api/cloud/auth";
 import {onMounted} from "vue";
 
 onMounted(()=>{
-    setInterval(()=>{
-        getAccessToken().then(res=>{
-            sessionStorage.setItem("accessToken", res.data.data.accessToken)
+    const refreshAccessToken = () => {
+        getAccessToken().then(res => {
+            const accessToken = res.data.data.accessToken;
+            sessionStorage.setItem("accessToken", accessToken);
+            // 计算access token的过期时间，提前5分钟刷新
+            const expiresIn = res.data.data.expiresIn - 5 * 60;
+            setTimeout(refreshAccessToken, expiresIn * 1000);
         })
-    },1000 * 60 * 60)
+    };
+
+    refreshAccessToken();
 })
 
 </script>

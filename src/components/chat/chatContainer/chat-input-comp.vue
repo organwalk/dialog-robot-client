@@ -1,11 +1,17 @@
 <template>
     <el-card :body-style="{padding:'10px'}" shadow="never" style="border: none; background-color: #f7f7f7;">
-        <el-row :gutter="10">
-            <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22">
+        <el-row :gutter="15">
+            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="left">
+                <el-button :icon="MagicStick" size="large" circle color="#E6E8EB"
+                           :disabled="resOver"
+                           @click="clear()"/>
+            </el-col>
+            <el-col :xs="21" :sm="21" :md="21" :lg="21" :xl="21">
                 <el-input
                         class="chat-input"
                         v-model="orderContent"
                         placeholder="Talk to Xeno-Loader"
+                        autofocus
                         size="large"
                         clearable
                         @keyup.enter="sendOrder()"
@@ -15,8 +21,8 @@
                     </template>
                 </el-input>
             </el-col>
-            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center">
-                <el-button :icon="Promotion" style="border-radius: 10px;" size="large" color="#2C6AE3"
+            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="left">
+                <el-button :icon="Promotion" style="border-radius: 10px;" size="large" color="#2C6AE3" :disabled="resOver"
                            @click="sendOrder()"/>
             </el-col>
         </el-row>
@@ -24,7 +30,7 @@
 </template>
 
 <script setup>
-import {Link, Promotion} from '@element-plus/icons-vue'
+import {Link, Promotion,MagicStick} from '@element-plus/icons-vue'
 import {ref, defineEmits, defineProps, computed, watch} from "vue";
 import * as order from "@/api/server/order";
 import msg from "@/api/cloud/message"
@@ -35,18 +41,21 @@ import * as card from "@/api/cloud/card"
 
 const orderContent = ref('')
 const store = useStore()
-const emit = defineEmits(["user-input",
-    "res-orderType",
-    "send-emptyKeysList",
-    "send-cardStatus",
-    "send-status",  //不同事件下的消息状态
-    "reply-robot",
-    "send-name"])
+const emit = defineEmits(["user-input", //  传递用户输入文本事件
+    "res-orderType",    //  传递指令
+    "send-emptyKeysList",   // 传递空缺值
+    "send-cardStatus",  //  唤醒卡片回复
+    "send-status",  //  不同事件下的消息状态
+    "reply-robot",  //  唤醒机器人回复
+    "clear-chat",   //  清除聊天
+    ])   //  发送姓名
 const props = defineProps({
     missingValue: String,
-    recommend:String
+    recommend:String,
+    resOver:Boolean
 })
 
+const resOver = computed(()=>props.resOver)
 //  动态获取推荐提示语句
 const rcd = computed(()=>props.recommend)
 watch(rcd,(val)=>{
@@ -54,30 +63,38 @@ watch(rcd,(val)=>{
     sendOrder()
 })
 
+//  结束本轮对话
+const clear = ()=>{
+    let clear = true
+    emit('clear-chat',clear)
+}
+
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务
 const sendOrder = () => {
-
+    resOver.value = true
     let refresh = ''
     emit('user-input', orderContent.value)
     emit('send-cardStatus', refresh)
     emit('send-status',refresh)
     let missingValueObj = store.state.chat.missingKeyObj
     //判断是否存有上次对话记录的空缺值对象，如果不存在，则表明本轮对话为新一轮对话
-    if (Object.keys(missingValueObj).length === 0) {
-        //  处于新一轮对话
-        inNewConversation(orderContent.value)
-    } else {
-        //  如果不是新一轮对话则表明具有空缺值
-        //  如果空缺值为object，则需要进行人名或群组的确认
-        if (props.missingValue === 'object'){
-            let content = orderContent.value
-            objectIsMissingKey(content)
-        }else {
-            //  如果空缺值不为object则进行空缺值填充
-            let missingValue = props.missingValue
-            let content = orderContent.value
-            fillMissingValueFromContent(missingValue,content)
+    if (orderContent.value !== ''){
+        if (Object.keys(missingValueObj).length === 0) {
+            //  处于新一轮对话
+            inNewConversation(orderContent.value)
+        } else {
+            //  如果不是新一轮对话则表明具有空缺值
+            //  如果空缺值为object，则需要进行人名或群组的确认
+            if (props.missingValue === 'object'){
+                let content = orderContent.value
+                objectIsMissingKey(content)
+            }else {
+                //  如果空缺值不为object则进行空缺值填充
+                let missingValue = props.missingValue
+                let content = orderContent.value
+                fillMissingValueFromContent(missingValue,content)
+            }
         }
     }
     orderContent.value = ''
@@ -144,18 +161,40 @@ const useApiAboutByDirect = (ot,obj) => {
         msg(ot, getOrderResObject(obj))
         if (ot === 'OAMsg'){
             emit('send-cardStatus', ot)
+            emit('send-status','cardInteraction')
+        }else {
+            emit('send-status','orderType')
         }
-    } else if (manType.test(ot)) {
+    } else if (manType.test(ot) && ot !== 'GetPlanByMan') {
         if (ot === 'ModMan') {
             emit("send-cardStatus", ot)
+            emit('send-status','cardInteraction')
+        }else if (ot === 'GetMan'){
+            //  这里采取了折中的方案，将完整的值填入缺失值，以便于回复组件填充回复模板
+            let newObj = {
+                name:{
+                    uid:obj.uid
+                },
+                dept:obj.dept
+            }
+            store.dispatch('updataMissingKeyObj',newObj)
+            emit('send-status','orderType')
+        }else if (ot === 'GetManDept'){
+            let newObj = {
+                uid:obj.uid,
+                name:obj.name
+            }
+            store.dispatch('updataSearchUid',newObj)
+            emit('send-status','orderType')
         }
         emit('send-status','orderType')
         mp.man(ot, getOrderResObject(obj))
-    } else if (deptType.test(ot)) {
+    } else if (deptType.test(ot) && ot !== 'GetManDept') {
         emit('send-status','orderType')
         md.dept(ot, getOrderResObject(obj))
     } else {
         emit("send-cardStatus", ot)
+        emit('send-status','cardInteraction')
     }
 }
 

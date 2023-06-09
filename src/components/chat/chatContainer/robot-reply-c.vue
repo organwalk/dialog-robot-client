@@ -1,4 +1,11 @@
 <template>
+    <el-card shadow="never"
+             :body-style="{padding:'10px'}"
+             class="robot-chat-bubble"
+             style="display: inline-block;line-height: 1.5;"
+             v-if="robotReply">
+        <span v-html="robotReply"/>
+    </el-card><br/><br/>
     <el-row>
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
             <component
@@ -6,12 +13,6 @@
             />
         </el-col>
     </el-row>
-    <el-card shadow="never"
-             :body-style="{padding:'10px'}"
-             class="robot-chat-bubble"
-             v-if="robotReply">
-        <span v-html="robotReply"/>
-    </el-card>
 </template>
 
 <script setup>
@@ -82,7 +83,6 @@ onMounted(()=>{
 //  定义不同类别卡片回复状态机
 const component = ref()
 const cardComponent = () => {
-    console.log(cardStatus.value)
     switch (cardStatus.value) {
         case 'OAMsg':
             component.value =  OaMessageComp
@@ -91,6 +91,9 @@ const cardComponent = () => {
             component.value =  UpdataEmployeeComp
             break
         case 'GetPlan':
+            component.value = ScheduleListComp
+            break
+        case 'GetPlanByMan':
             component.value = ScheduleListComp
             break
         case 'AddPlan':
@@ -131,38 +134,43 @@ const getOrderTypeReply = () => {
 
     //获取人员详情
     if (orderType.value === 'GetManDept') {
-        const userName = store.state.chat.searchUid.name;
-        const deptName = store.state.chat.searchUid.dept
-        robotReply.value = reply.replace(/\${userName}/g, userName).replace(/\${deptName}/g, deptName.join("、"));
-        let refresh = ''
-        store.dispatch('updataSearchUid', refresh)
-        store.dispatch('updataMissingKeyObj', {})
+        const uid = store.state.chat.searchUid.uid
+        const userName= store.state.chat.searchUid.name
+        getUserDept(uid).then(res => {
+            const deptName = res.data.data.map(item => item.name)
+            robotReply.value = reply.replace(/\${userName}/g, userName).replace(/\${deptName}/g, deptName.join("、"));
+            let refresh = ''
+            store.dispatch('updataSearchUid', refresh)
+            store.dispatch('updataMissingKeyObj', {})
+        })
     } else if (orderType.value === 'GetMan') {
         let userId
-        if (store.state.chat.missingKeyObj.name.uid) {
-            userId = store.state.chat.missingKeyObj.name.uid
-        } else {
-            userId = store.state.chat.missingKeyObj.name[0]
-        }
-        const deptId = store.state.chat.missingKeyObj.dept
-        getUserDetail(userId, deptId).then(res => {
-            const userName = res.data.data.user.name
-            let job
-            if (job === undefined) {
-                job = "暂未设置"
-            } else {
-                job = res.data.data.user.title
+        if (store.state.chat.missingKeyObj) {
+            if (store.state.chat.missingKeyObj.name.uid){
+                userId = store.state.chat.missingKeyObj.name.uid
+            }else {
+                userId = store.state.chat.missingKeyObj.name[0]
             }
-            const mobile = res.data.data.user.mobile
-            getUserDept(userId).then(res => {
-                const deptName = res.data.data.map(item => item.name)
-                robotReply.value = reply.replace(/\${userName}/g, userName)
-                    .replace(/\${deptName}/g, deptName)
-                    .replace(/\${job}/g, job)
-                    .replace(/\${mobile}/g, mobile)
-                store.dispatch('updataMissingKeyObj', {})
+            const deptId = store.state.chat.missingKeyObj.dept
+            getUserDetail(userId, deptId).then(res => {
+                const userName = res.data.data.user.name
+                let job
+                if (res.data.data.user.title === undefined) {
+                    job = "暂未设置"
+                } else {
+                    job = res.data.data.user.title
+                }
+                const mobile = res.data.data.user.mobile
+                getUserDept(userId).then(res => {
+                    const deptName = res.data.data.map(item => item.name)
+                    robotReply.value = reply.replace(/\${userName}/g, userName)
+                        .replace(/\${deptName}/g, deptName)
+                        .replace(/\${job}/g, job)
+                        .replace(/\${mobile}/g, mobile)
+                    store.dispatch('updataMissingKeyObj', {})
+                })
             })
-        })
+        }
     } else {
         reply = template
     }
@@ -174,6 +182,7 @@ const getOrderTypeReply = () => {
 const getCardStatusReply = () => {
     const reply = robotReplyConfig[cardStatus.value]
     emitShowRecommend()
+    store.dispatch('updataCardSuccessReply',{})
     return reply
 }
 

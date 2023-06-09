@@ -33,15 +33,15 @@
 
 <script setup>
 import OnePageSendOamessage from "@/components/chat/interactiveCard/oa-message/one-page-send-oamessage.vue";
-import {reactive, ref, watch,defineEmits} from "vue";
+import {reactive, ref, watch} from "vue";
 import TwoPageSendOamessage from "@/components/chat/interactiveCard/oa-message/two-page-send-oamessage.vue";
 import * as card from "@/api/cloud/card"
+import {ElMessage} from "element-plus";
 
 const active = ref(0)
 const showNext = ref(false)
 const showBack = ref(false)
 const showSubmit = ref(false)
-const emit = defineEmits(['sendSuccess'])
 watch(active, (newVal) => {
     if (newVal) {
         showBack.value = true
@@ -62,11 +62,12 @@ watch(active, (newVal) => {
 const showPageOne = ref(true)
 
 const obj = reactive({
-    title:'',
-    subject:'',
-    summary:'',
-    image:'',
-    receivers:[]
+    title: '',
+    subject: '',
+    summary: '',
+    image: '',
+    receivers: [],
+    groupId: Number
 })
 const getPageOneData = (newMsg, newTit, newSum) => {
     obj.title = newMsg
@@ -75,20 +76,33 @@ const getPageOneData = (newMsg, newTit, newSum) => {
     showNext.value = !!(newMsg && newTit && newSum);
 }
 
-const getPageTwoData = (newFile,newRec) => {
-    obj.image='https://th.bing.com/th/id/OIP.ee1vF42zkXMEnJdn6bFOXAHaHa?pid=ImgDet&rs=1'
-    obj.receivers = newRec
-    showSubmit.value = (newFile.name)
+const getPageTwoData = (newFile, newRec) => {
+    obj.image = 'https://th.bing.com/th/id/OIP.ee1vF42zkXMEnJdn6bFOXAHaHa?pid=ImgDet&rs=1'
+    if (newRec) {
+        if (newRec.length > 1) {
+            obj.receivers = newRec
+            delete obj.groupId
+        } else {
+            obj.groupId = newRec
+            delete obj.receivers
+        }
+        showSubmit.value = (newFile.name && newRec)
+    }
+
 }
 
 
 const showPageTwo = ref(false)
-
 const showSuccess = ref(false)
 const submit = () => {
-    showSuccess.value = true
-    card.sendOAMsg(obj)
-    emit('sendSuccess',showSuccess.value)
+    card.sendOAMsg(obj).then(res => {
+        if (res.data.code === 200) {
+            showSuccess.value = true
+        }else if (res.data.message === "无法读取Body内容"){
+            ElMessage.error("请您重新检查表单填写")
+        }
+    })
+
 }
 </script>
 

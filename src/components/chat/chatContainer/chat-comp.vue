@@ -3,13 +3,26 @@
              style="border: none; background-color: #f7f7f7;height: 570px;overflow-y: auto">
         <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
-                <span style="font-size: 10px;color: #B5B8C0;font-weight: bolder" v-if="state.showToDay">{{ state.toDay }}</span>
+                <span style="font-size: 10px;color: #B5B8C0;font-weight: bolder" v-if="state.showToDay">{{
+                    state.toDay
+                    }}</span>
             </el-col>
         </el-row>
         <br/>
         <!--        展示推荐指令      -->
         <RecommendComp v-if="state.showRecommend" @send-recommend-text="getRecommendText"/>
         <div v-for="(item,index) in state.chatMessages" :key="index">
+            <el-row v-if="item.type === 'line'" align="middle" >
+                <el-col :xs="10" :sm="9" :md="10" :lg="10" :xl="10" align="left" >
+                    <div style="height:1px;background-color: #CDD0D6"/>
+                </el-col>
+                <el-col :xs="4" :sm="6" :md="4" :lg="4" :xl="4" align="center" >
+                    <span style="font-size: 10px;color: #909399">{{item.message}}</span>
+                </el-col>
+                <el-col :xs="10" :sm="9" :md="10" :lg="10" :xl="10" align="right">
+                    <div style="height:1px;background-color: #CDD0D6"/>
+                </el-col>
+            </el-row>
             <el-row v-if="!state.showRecommend && item.type === 'user'" justify="end" style="padding-left: 10%">
                 <!-- 用户 -->
                 <el-card shadow="never" class="user-chat-bubble"
@@ -20,16 +33,18 @@
             </el-row>
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
                 <!-- 对话机器人 -->
-                <!--                语言回复        -->
-                <robot-reply :order-type="state.orderType"
-                             :empty-keys-list="state.emptyKeysList"
-                             :card-status="state.cardStatus"
-                             :status="state.messageStatus"
-                             :msg="item.message"
-                             @send-miss-value-type="getMissValueType"
-                             @send-loading = "getLoading"
-                             @show-recommend="dontShowRec"/>
-            </el-row><br/>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
+                    <robot-reply :order-type="state.orderType"
+                                 :empty-keys-list="state.emptyKeysList"
+                                 :card-status="state.cardStatus"
+                                 :status="state.messageStatus"
+                                 :msg="item.message"
+                                 @send-miss-value-type="getMissValueType"
+                                 @send-loading="getLoading"
+                                 @show-recommend="dontShowRec"/>
+                </el-col>
+            </el-row>
+            <br/>
         </div>
         <el-row v-if="loading">
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
@@ -51,14 +66,16 @@
         </el-row>
     </el-card>
     <ChatInputComp
-        @user-input="onUserInput"
-        @res-order-type="getOrderType"
-        @send-empty-keys-list="getEmptyKeysList"
-        @send-card-status="getCardStatus"
-        @send-status="getMessageStatus"
-        @reply-robot = 'getReplyStatus'
-        :recommend = "state.recommendText"
-        :missing-value="state.missValueType"/>
+            @user-input="onUserInput"
+            @res-order-type="getOrderType"
+            @send-empty-keys-list="getEmptyKeysList"
+            @send-card-status="getCardStatus"
+            @send-status="getMessageStatus"
+            @reply-robot='getReplyStatus'
+            @clear-chat="clearChat"
+            :res-over="state.resOver"
+            :recommend="state.recommendText"
+            :missing-value="state.missValueType"/>
 </template>
 
 <script setup>
@@ -66,28 +83,31 @@ import ChatInputComp from "@/components/chat/chatContainer/chat-input-comp.vue";
 import RobotReply from "@/components/chat/chatContainer/robot-reply-c.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
-import {nextTick, reactive, ref} from "vue";
+import { nextTick, reactive, ref} from "vue";
+import {useStore} from "vuex";
+import {ElMessage} from "element-plus";
 
 const state = reactive({
     toDay: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate(),
-    showRecommend: true,
-    showRecommendTip: true,
-    showToDay: false,
-    chatMessages: [],
-    containerScrollTop: 0,
-    recommendList: [],
-    randomIndexes: new Set(),
-    messageStatus: '',
-    typeStatus: false,
-    orderType: '',
-    emptyKeysList: [],
-    missValueType: '',
-    cardStatus: '',
-    recommendText:'',
-    dontShowRec: true
+    showRecommend: true,    //  展示首屏推荐
+    showRecommendTip: true, //  展示回复语句下的推荐
+    showToDay: false,   //  展示顶部聊天日期
+    chatMessages: [],   //  聊天记录数组
+    containerScrollTop: 0,  //  滚动至聊天容器底部
+    recommendList: [],  //  推荐数组
+    randomIndexes: new Set(),   //  推荐数组索引
+    messageStatus: '',  //  回复组件所需中”总体回复状态机“所需参数
+    typeStatus: false,  //  机器人回复所用状态判定值
+    orderType: '',  //  指令类型
+    emptyKeysList: [],  //  空缺值数组
+    missValueType: '',  //空缺值类型
+    cardStatus: '', //  回复组件中所需”卡片回复状态机“所需参数
+    recommendText: '',  //  推荐语句
+    resOver:false,  //  未响应完成不可进行提交事件
+    dontShowRec: true   //  不展示推荐卡片
 })
 
-const loading = ref(false)
+const loading = ref(false)  //  加载语句
 //  用户输入
 const onUserInput = (userInput) => {
     // 当用户输入时,隐藏初始推荐输入卡片,显示今日日期
@@ -100,20 +120,22 @@ const onUserInput = (userInput) => {
             type: 'user',
             message: userInput
         })
+        state.resOver = true
         loading.value = true
         scrollBottom() //自动滚动至聊天容器底部
     }
 }
 
- // 机器人回复
+// 机器人回复
 let id = 1
 const getReplyStatus = (val) => {
     state.typeStatus = val
     if (state.typeStatus) {
         state.chatMessages.push({
             type: 'robot',
-            message: id ++
+            message: id++
         })
+        state.resOver = false
         loading.value = false
         state.showRecommendTip = true
         scrollBottom()
@@ -152,6 +174,23 @@ const getCardStatus = (val) => {
 const getMessageStatus = (val) => {
     state.messageStatus = val
 }
+const store = useStore()
+const clearChat = (val) => {
+    //  开启新对话意味着清除当前的问询状态
+    if (val){
+        if (state.chatMessages.length >= 2){
+            store.dispatch('updataMissingKeyObj',{})
+            //  同时增加一个分割线
+            state.chatMessages.push({
+                type: 'line',
+                message: 'Context cleared'
+            })
+            scrollBottom()
+        }else {
+            ElMessage('对话量不足以达成清除要求')
+        }
+    }
+}
 
 //  接收机器人回复事件中的数据
 const getMissValueType = (val) => {
@@ -160,12 +199,14 @@ const getMissValueType = (val) => {
 
 const dontShowRec = (val) => {
     state.dontShowRec = val
-    if (val){
-        setTimeout(()=>{
+    if (val) {
+        setTimeout(() => {
             getRecommendList()
-        },1000)
+        }, 1000)
     }
 }
+
+
 
 const getLoading = (val) => {
     loading.value = val

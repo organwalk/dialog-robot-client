@@ -197,6 +197,7 @@ const create = () => {
     allPageData.members = pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name}));
     //  如果存在sid则说明此次操作为修改操作
     if (sid.value){
+        console.log(222222)
         card.updataPlan(sid.value,allPageData).then(res=>{
            if (res.data.code !== 400){
                allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
@@ -221,6 +222,7 @@ const create = () => {
             const sid = res.data.data.scheduleId
             allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
             data.saveScheduleCount(sid,allPageData).then(res=>{
+                console.log(11111111111)
                 if (res.data.success){
                     setTimeout(()=>{
                         loading.value = false
