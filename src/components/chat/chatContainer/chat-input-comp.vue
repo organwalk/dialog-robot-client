@@ -227,7 +227,8 @@ const objectIsMissingKey = (content) => {
 //  从对话中提取信息填补缺失值
 const fillMissingValueFromContent = (msv,oc) => {
     // 当指令为AddMan时，此时用户提供的姓名作为Value，而无需转换为uid，因此可直接写入空缺值状态管理
-    if (store.state.chat.missingKeyObj.orderType === 'AddMan' && store.state.chat.missingKeyObj.name === ''){
+    let ot = store.state.chat.missingKeyObj.orderType
+    if (ot === 'AddMan' && store.state.chat.missingKeyObj.name === ''){
         const newObj = {
             ...store.state.chat.missingKeyObj,
             name:oc
@@ -236,8 +237,28 @@ const fillMissingValueFromContent = (msv,oc) => {
         sendMissingValues(filterEmptyKeys(newObj))  //  对空缺值进行过滤
         emit('send-status','missValue') //  发送当前状态为“空缺值”供回复组件状态机响应
         emit('reply-robot',newObj)  //  发送当前对象值，供聊天容器组件唤醒回复
-    }else {
-        //  如果指令不为AddMan，则获取空缺值属性处理结果
+    }
+    //  当指令为AddDept时，此时用户提供的部门名作为Value，而无需转换为deptId，因此可直接写入空缺值状态管理
+    else if (ot === 'AddDept'){
+        let obj = {
+            dept:oc
+        }
+        md.dept(ot,obj)
+        emit('send-status','orderType')
+        emit('res-orderType', ot)
+        emit('reply-robot',true)
+    }
+    else if (ot === 'DelDept'){
+        order.getDeptIdByName(oc).then(res => {
+            let deptId = res.data.data[0]
+            md.dept(ot,deptId)
+        })
+        emit('send-status','orderType')
+        emit('res-orderType', ot)
+        emit('reply-robot',true)
+    }
+    else {
+        //  获取空缺值属性处理结果
         userInputAoubtMissingValues(msv, oc).then(newObj => {
             //  如果过滤后的空缺值数组存在，则表明仍存在空缺值，应继续过滤
             if (filterEmptyKeys(newObj).length > 0) {

@@ -21,7 +21,9 @@ const getGroupIdByName = (nameArray) => {
 }
 
 const getDeptIdByName = (name) => {
-    return http.post('/dept/id/'+sessionStorage.getItem('mobile')+"?deptName="+encodeURIComponent(name))
+    return http.get('/data/dept/id/'+sessionStorage.getItem('mobile'),{
+        deptName:name
+    })
 }
 
 export {

@@ -12,7 +12,6 @@
                                 :limit="1"
                                 ref="photoRef"
                                 :on-remove="handleRemove"
-                                :http-request="uploadPic"
                         >
                             <el-icon ><Plus /></el-icon>
                         </el-upload>
@@ -115,8 +114,6 @@ const handleRemove = () => {
 }
 
 const checkType = ref('部门群')
-
-
 
 
 

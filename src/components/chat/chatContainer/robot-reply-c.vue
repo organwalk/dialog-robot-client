@@ -105,6 +105,9 @@ const cardComponent = () => {
         case 'GetNotes':
             component.value = NotificationListComp
             break
+        case 'GetNotesByMan':
+            component.value = NotificationListComp
+            break
         case 'ModNote':
             component.value = NotificationListComp
             break

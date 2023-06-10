@@ -75,6 +75,7 @@ import {Check} from "@element-plus/icons-vue";
 import {defineEmits, ref, watch, defineProps, onMounted, computed} from "vue";
 import * as card from "@/api/cloud/card";
 import * as data from "@/api/server/data"
+import {ElMessage} from "element-plus";
 
 const props = defineProps({
     showPageOne: Boolean,
@@ -149,6 +150,22 @@ watch([scheduleMembers], (newMem) => {
     if (newMem){
         sendPageOneData()
     }
+})
+
+watch(startTime, (newVal) => {
+
+    // 获取今天的时间戳
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = ('0' + (today.getMonth() + 1)).slice(-2);
+    const day = ('0' + today.getDate()).slice(-2);
+    const todayString = `${year}-${month}-${day}`;
+    if (todayString !== newVal.split(' ')[0]){
+        ElMessage.error("仅能在今日范围内发起事项告知")
+        startTime.value = ''
+    }
+
+
 })
 
 

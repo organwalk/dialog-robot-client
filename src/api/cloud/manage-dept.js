@@ -5,7 +5,9 @@ const dept = (type,obj)=>{
         case 'AddDept':
             addDept(obj)
             break
-
+        case 'DelDept':
+            delDept(obj)
+            break
     }
 }
 
@@ -15,7 +17,9 @@ const addDept = (name)=>{
         name:name.dept
     })
 }
-
+const delDept = (deptId) => {
+    return http.post(manBaseUrl + '/delete?deptId=' + Number(deptId))
+}
 export {
     dept
 }

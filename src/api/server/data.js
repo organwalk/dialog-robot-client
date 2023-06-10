@@ -88,6 +88,14 @@ const getNotificationCount = ()=>{
     return http.get('/data/notification/count/'+sessionStorage.getItem("uid"))
 }
 
+//释放redis资源
+const release = () => {
+    return http.post('/system/redis',{
+        action:"release",
+        mobile:sessionStorage.getItem("mobile")
+    })
+}
+
 export {
     getSchedule,
     getScheduleCount,
@@ -102,5 +110,6 @@ export {
     getNotificationByNid,
     cancelNotificationByNid,
     deleteNotificationByNid,
-    getNotificationCount
+    getNotificationCount,
+    release
 }

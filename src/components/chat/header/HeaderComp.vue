@@ -16,26 +16,31 @@
 <script setup>
 import {ArrowRight} from '@element-plus/icons-vue'
 import {ElMessage} from "element-plus";
+import {release} from "@/api/server/data";
 
 function logout(){
     ElMessage({
         message: '正在销毁本地Token并释放服务资源',
         type: 'warning',
     })
-    setTimeout(()=>{
-        sessionStorage.clear()
-    },1500)
-    //如果销毁请求成功
-    setTimeout(()=>{
-        ElMessage({
-            message: '操作成功，退出登录',
-            type: 'success',
-        })
-    },2000)
-    //返回登录页面
-    setTimeout(function(){
-        window.location.href = "/auth"
-    }, 2500);
+    release().then(res=>{
+        if (res.data.success){
+            setTimeout(()=>{
+                sessionStorage.clear()
+            },1500)
+            //如果销毁请求成功
+            setTimeout(()=>{
+                ElMessage({
+                    message: '操作成功，退出登录',
+                    type: 'success',
+                })
+            },2000)
+            //返回登录页面
+            setTimeout(function(){
+                window.location.href = "/auth"
+            }, 2500);
+        }
+    })
 }
 
 </script>
