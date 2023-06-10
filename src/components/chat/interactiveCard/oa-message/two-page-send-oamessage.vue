@@ -7,11 +7,15 @@
                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                         <el-upload
                                 v-model:file-list="fileList"
-                                :auto-upload="false"
+                                action="https://organwalk.ink/api/image"
+                                name="image"
+                                method="post"
+                                :auto-upload="true"
                                 list-type="picture-card"
                                 :limit="1"
                                 ref="photoRef"
                                 :on-remove="handleRemove"
+                                @change="handleChange"
                         >
                             <el-icon ><Plus /></el-icon>
                         </el-upload>
@@ -67,9 +71,9 @@ const groupId = ref()
 const receivers = ref([])
 const options = ref([])
 const groupList = ref([])
+const url = ref('')
 onMounted(()=>{
     auth.getGroupList().then(res=>{
-        console.log(res.data)
         let dept = res.data.data
         let opDept = dept.map(d => {
             return {
@@ -95,22 +99,29 @@ onMounted(()=>{
         })
     })
 })
-watch([fileList,receivers],([newFile,newRec]) => {
-    if (newFile.length === 1){
+watch([url,receivers],([newUrl,newRec]) => {
+    if (newUrl !== ""){
        uploadContinue.value = true
         groupId.value = []
-        emit('sendFileStatus',fileList.value[0],newRec)
+        emit('sendFileStatus',newUrl,newRec)
     }
 })
-watch([fileList,groupId],([newFile,newGroup]) => {
-    if (newFile.length === 1){
+watch([url,groupId],([newUrl,newGroup]) => {
+    if (newUrl !== ""){
         uploadContinue.value = true
-        emit('sendFileStatus',fileList.value[0],newGroup)
+        emit('sendFileStatus',newUrl,newGroup)
     }
 })
 
 const handleRemove = () => {
     fileList.value=[]
+}
+
+const handleChange = (res) => {
+    if (res.status === "success") {
+        url.value = res.response
+        console.log(url.value);
+    }
 }
 
 const checkType = ref('部门群')

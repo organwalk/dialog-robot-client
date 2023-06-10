@@ -12,24 +12,31 @@
         <!--        展示推荐指令      -->
         <RecommendComp v-if="state.showRecommend" @send-recommend-text="getRecommendText"/>
         <div v-for="(item,index) in state.chatMessages" :key="index">
-            <el-row v-if="item.type === 'line'" align="middle" >
-                <el-col :xs="10" :sm="9" :md="10" :lg="10" :xl="10" align="left" >
+            <el-row v-if="item.type === 'line'" align="middle">
+                <el-col :xs="10" :sm="9" :md="10" :lg="10" :xl="10" align="left">
                     <div style="height:1px;background-color: #CDD0D6"/>
                 </el-col>
-                <el-col :xs="4" :sm="6" :md="4" :lg="4" :xl="4" align="center" >
-                    <span style="font-size: 10px;color: #909399">{{item.message}}</span>
+                <el-col :xs="4" :sm="6" :md="4" :lg="4" :xl="4" align="center">
+                    <span style="font-size: 10px;color: #909399">{{ item.message }}</span>
                 </el-col>
                 <el-col :xs="10" :sm="9" :md="10" :lg="10" :xl="10" align="right">
                     <div style="height:1px;background-color: #CDD0D6"/>
                 </el-col>
             </el-row>
-            <el-row v-if="!state.showRecommend && item.type === 'user'" justify="end" style="padding-left: 10%">
+            <el-row v-if="!state.showRecommend && item.type === 'user' && checkImage(item.message)" justify="end" style="padding-left: 10%">
                 <!-- 用户 -->
                 <el-card shadow="never" class="user-chat-bubble"
                          :body-style="{padding:'10px'}"
                          align="left">
                     <span style="line-height: 1.5;color: white" v-html="item.message"/>
                 </el-card>
+            </el-row>
+            <el-row v-if="item.type === 'image'">
+                <!--图片-->
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
+                    <el-image style="width: 30%;border-radius: 15px;border: 1px solid var(--el-border-color);"
+                              :src="item.message" />
+                </el-col>
             </el-row>
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
                 <!-- 对话机器人 -->
@@ -73,6 +80,7 @@
             @send-status="getMessageStatus"
             @reply-robot='getReplyStatus'
             @clear-chat="clearChat"
+            @image-url="imageUrl"
             :res-over="state.resOver"
             :recommend="state.recommendText"
             :missing-value="state.missValueType"/>
@@ -83,7 +91,7 @@ import ChatInputComp from "@/components/chat/chatContainer/chat-input-comp.vue";
 import RobotReply from "@/components/chat/chatContainer/robot-reply-c.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
-import { nextTick, reactive, ref} from "vue";
+import {nextTick, reactive, ref} from "vue";
 import {useStore} from "vuex";
 import {ElMessage} from "element-plus";
 
@@ -103,7 +111,8 @@ const state = reactive({
     missValueType: '',  //空缺值类型
     cardStatus: '', //  回复组件中所需”卡片回复状态机“所需参数
     recommendText: '',  //  推荐语句
-    resOver:false,  //  未响应完成不可进行提交事件
+    imageUrl: '',    //图片url
+    resOver: false,  //  未响应完成不可进行提交事件
     dontShowRec: true   //  不展示推荐卡片
 })
 
@@ -124,6 +133,26 @@ const onUserInput = (userInput) => {
         loading.value = true
         scrollBottom() //自动滚动至聊天容器底部
     }
+}
+
+//  发送图片
+const imageUrl = (val) => {
+    state.imageUrl = val
+    state.showToDay = true
+    state.showRecommend = false
+    state.showRecommendTip = false
+    state.chatMessages.push({
+        type: 'image',
+        message: 'https://organwalk.ink/api/images/' + val
+    })
+    state.resOver = true
+    loading.value = true
+    scrollBottom()  //自动滚动至聊天容器底部
+}
+
+const checkImage = (val) => {
+    const reg = /https:\/\/organwalk\.ink\/api\/images\//
+    return !reg.test(val)
 }
 
 // 机器人回复
@@ -177,16 +206,16 @@ const getMessageStatus = (val) => {
 const store = useStore()
 const clearChat = (val) => {
     //  开启新对话意味着清除当前的问询状态
-    if (val){
-        if (state.chatMessages.length >= 2){
-            store.dispatch('updataMissingKeyObj',{})
+    if (val) {
+        if (state.chatMessages.length >= 2) {
+            store.dispatch('updataMissingKeyObj', {})
             //  同时增加一个分割线
             state.chatMessages.push({
                 type: 'line',
                 message: 'Context cleared'
             })
             scrollBottom()
-        }else {
+        } else {
             ElMessage('对话量不足以达成清除要求')
         }
     }
@@ -205,7 +234,6 @@ const dontShowRec = (val) => {
         }, 1000)
     }
 }
-
 
 
 const getLoading = (val) => {

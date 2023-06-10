@@ -77,7 +77,7 @@ const getPageOneData = (newMsg, newTit, newSum) => {
 }
 
 const getPageTwoData = (newFile, newRec) => {
-    obj.image = 'https://th.bing.com/th/id/OIP.ee1vF42zkXMEnJdn6bFOXAHaHa?pid=ImgDet&rs=1'
+    obj.image = 'https://organwalk.ink/api/images/' + newFile
     if (newRec) {
         if (newRec.length > 1) {
             obj.receivers = newRec
@@ -86,7 +86,7 @@ const getPageTwoData = (newFile, newRec) => {
             obj.groupId = newRec
             delete obj.receivers
         }
-        showSubmit.value = (newFile.name && newRec)
+        showSubmit.value = (newFile && newRec)
     }
 
 }
