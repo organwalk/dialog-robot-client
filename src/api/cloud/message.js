@@ -22,6 +22,9 @@ const msg = (msgType,object) =>{
         case 'SysMsg':
             sendSysMsg(object)
             break
+        case 'VoiceMsg':
+            sendVoice()
+            break
 
     }
 }
@@ -94,5 +97,16 @@ const sendSysMsg = (obj)=>{
     }
     delete newObj.title
     return http.post(msgBaseUrl,newObj)
+}
+
+const sendVoice = () => {
+    let obj = {
+        msgType:3,
+        message:"https://s5.ttsmaker.com/file/2023-06-16-173658_107726.mp3",
+        extraData:"{\"duration\":01}",
+        receivers:["1151800183169088"],
+        needPush:true
+    }
+    return http.post(msgBaseUrl,obj)
 }
 export default msg

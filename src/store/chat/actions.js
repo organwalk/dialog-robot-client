@@ -8,4 +8,7 @@ export default {
     updataSending({commit},sending){
         commit('setSending',sending)
     },
+    updataCreateStatus({commit},createStatus){
+        commit('setCreateStatus',createStatus)
+    }
 }

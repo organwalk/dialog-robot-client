@@ -19,14 +19,13 @@
                     <template #append>
                         <el-popover
                                 placement="bottom"
-                                title="Menu"
-                                trigger="click"
+                                trigger="hover"
                         >
                             <template #reference>
                                 <el-button color="white" :icon="Plus"/>
                             </template>
                             <el-row>
-                                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
                                     <el-upload
                                             v-model:file-list="fileList"
                                             action="https://organwalk.ink/api/image"
@@ -39,8 +38,11 @@
                                             :before-upload="beforeUpload"
                                             @change="handleChange"
                                     >
-                                        <el-button :icon="Link"/>
+                                        <el-button :icon="Link" circle/>
                                     </el-upload>
+                                </el-col>
+                                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
+                                    <el-button :icon="Microphone" circle @click="voice()" />
                                 </el-col>
                             </el-row>
                         </el-popover>
@@ -54,10 +56,19 @@
             </el-col>
         </el-row>
     </el-card>
+    <el-dialog
+        v-model="showVoice"
+        width="50%"
+        :show-close="false"
+    >
+        <el-card>
+
+        </el-card>
+    </el-dialog>
 </template>
 
 <script setup>
-import {Promotion, MagicStick, Plus, Link} from '@element-plus/icons-vue'
+import {Promotion, MagicStick, Plus, Link, Microphone} from '@element-plus/icons-vue'
 import {ref, defineEmits, defineProps, computed, watch} from "vue";
 import * as order from "@/api/server/order";
 import msg from "@/api/cloud/message"
@@ -66,6 +77,7 @@ import * as mp from "@/api/cloud/manage-person";
 import * as md from "@/api/cloud/manage-dept"
 import * as card from "@/api/cloud/card"
 import {dataURLtoFile} from "image-conversion";
+import {startVoice} from "@/optionConfig/voice-function";
 
 const orderContent = ref('')
 const store = useStore()
@@ -140,12 +152,18 @@ const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
         console.log(url.value);
-        emit('image-url',url.value)
+        emit('image-url', url.value)
         orderContent.value = 'https://organwalk.ink/api/images/' + url.value
         sendOrder()
     }
 }
 
+// 打印录音面板
+const showVoice = ref(false)
+const voice = () => {
+    showVoice.value = true
+    startVoice()
+}
 
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务

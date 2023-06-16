@@ -15,6 +15,7 @@
                                 :limit="1"
                                 ref="photoRef"
                                 :on-remove="handleRemove"
+                                :before-upload="beforeUpload"
                                 @change="handleChange"
                         >
                             <el-icon ><Plus /></el-icon>
@@ -31,6 +32,7 @@
                             <el-select-v2
                                 v-model="groupId"
                                 v-if="checkType === '部门群' "
+                                clearable
                                 filterable
                                 :options="options"
                                 placeholder="Please select group"
@@ -58,6 +60,7 @@ import {defineProps, ref, watch, defineEmits, onMounted} from 'vue'
 import {Plus} from '@element-plus/icons-vue'
 import * as card from '@/api/cloud/card'
 import * as auth from '@/api/cloud/auth'
+import {dataURLtoFile} from "image-conversion";
 defineProps({
     showPageTwo:Boolean
 })
@@ -100,27 +103,58 @@ onMounted(()=>{
     })
 })
 watch([url,receivers],([newUrl,newRec]) => {
-    if (newUrl !== ""){
+    if (newUrl !== "" && newRec.length > 0){
        uploadContinue.value = true
-        groupId.value = []
-        emit('sendFileStatus',newUrl,newRec)
+        emit('sendFileStatus',newUrl,newRec,'rec')
     }
 })
 watch([url,groupId],([newUrl,newGroup]) => {
-    if (newUrl !== ""){
+    if (newUrl !== "" && newGroup !== ''){
         uploadContinue.value = true
-        emit('sendFileStatus',newUrl,newGroup)
+        emit('sendFileStatus',newUrl,newGroup,'group')
     }
 })
 
 const handleRemove = () => {
     fileList.value=[]
 }
+const beforeUpload = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width; // 设置canvas宽高为图片原始尺寸
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(canvas.width / img.width, canvas.height / img.height); // 缩放
+                ctx.drawImage(img, 0, 0);
+                const max_size = 100 * 1024; // 将图片压缩到100kb
+                let quality = 0.9;
+                let base64 = canvas.toDataURL('image/jpeg', quality);
+                while (base64.length > max_size && quality > 0) {
+                    quality -= 0.05;
+                    base64 = canvas.toDataURL('image/jpeg', quality);
+                }
+                const compressedFile = dataURLtoFile(base64, file.name);
+                resolve(compressedFile);
+            };
+            img.onerror = (error) => {
+                reject(error);
+            };
+        };
+        reader.onerror = (error) => {
+            reject(error);
+        };
+    });
+};
 
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
-        console.log(url.value);
     }
 }
 

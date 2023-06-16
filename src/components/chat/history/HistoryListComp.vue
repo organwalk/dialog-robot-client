@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" style="border-top:none;height: 500px;overflow-y: auto">
+    <el-card shadow="never" style="border-top:none;height: 405px;overflow-y: auto">
     </el-card>
 </template>
 

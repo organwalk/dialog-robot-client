@@ -38,7 +38,7 @@ const props = defineProps({
 const notice_id = computed(()=>props.nid)
 
 //  向事项列表发送清除标记，用以返回事项列表组件
-const emit = defineEmits(["clearNid"])
+const emit = defineEmits(["clearNid","sendNotifiSuccess"])
 const backNotification = () => {
     let refresh = ''
     emit("clearNid",refresh)
@@ -84,6 +84,7 @@ const create = () => {
                             loading.value = false
                             showCreateForm.value = false
                             showSuccessTip.value = true
+                            emit('sendNotifiSuccess',showSuccessTip.value)
                         },1000)
                         setTimeout(()=>{
                             let refresh = ''

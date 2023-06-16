@@ -8,4 +8,7 @@ export default {
     setSending(state,sending){
         state.sending = sending
     },
+    setCreateStatus(state,createStatus){
+        state.createStatus = createStatus
+    }
 }

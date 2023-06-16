@@ -33,7 +33,7 @@
 
 <script setup>
 import OnePageSendOamessage from "@/components/chat/interactiveCard/oa-message/one-page-send-oamessage.vue";
-import {reactive, ref, watch} from "vue";
+import {reactive, ref, watch,defineEmits} from "vue";
 import TwoPageSendOamessage from "@/components/chat/interactiveCard/oa-message/two-page-send-oamessage.vue";
 import * as card from "@/api/cloud/card"
 import {ElMessage} from "element-plus";
@@ -76,13 +76,15 @@ const getPageOneData = (newMsg, newTit, newSum) => {
     showNext.value = !!(newMsg && newTit && newSum);
 }
 
-const getPageTwoData = (newFile, newRec) => {
+const getPageTwoData = (newFile, newRec,type) => {
     obj.image = 'https://organwalk.ink/api/images/' + newFile
+    console.log(type)
     if (newRec) {
-        if (newRec.length > 1) {
+        if (type === 'rec') {
             obj.receivers = newRec
             delete obj.groupId
-        } else {
+        }
+        else if (type === 'group'){
             obj.groupId = newRec
             delete obj.receivers
         }
@@ -94,10 +96,13 @@ const getPageTwoData = (newFile, newRec) => {
 
 const showPageTwo = ref(false)
 const showSuccess = ref(false)
+const emit = defineEmits(['sendOASuccess'])
 const submit = () => {
+    console.log(obj)
     card.sendOAMsg(obj).then(res => {
         if (res.data.code === 200) {
             showSuccess.value = true
+            emit('sendOASuccess',showSuccess.value)
         }else if (res.data.message === "无法读取Body内容"){
             ElMessage.error("请您重新检查表单填写")
         }
