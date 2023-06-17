@@ -62,7 +62,6 @@
         :show-close="false"
     >
         <el-card>
-
         </el-card>
     </el-dialog>
 </template>

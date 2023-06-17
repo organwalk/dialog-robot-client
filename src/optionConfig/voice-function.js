@@ -1,72 +1,82 @@
-import Recorder from 'recorder-js';
-import audioBufferToWav from 'audiobuffer-to-wav'
-import WaveformData from "waveform-data";
-
-
-// 创建一个音频上下文对象
-const audioContext = new AudioContext()
-
-// 创建一个Recorder实例
-const recorder = new Recorder(audioContext, {
-    // 设置录音格式为.wav
-    encoderPath: 'waveWorker.min.js'
-});
+import axios from "axios";
+import msg from "@/api/cloud/message";
+import {ref, watch} from "vue";
 
 const startVoice = () => {
-    // 获取用户的麦克风输入
     navigator.mediaDevices.getUserMedia({audio: true})
-        .then((stream) => {
-            // 开始录音
-            recorder.init(stream);
-            recorder.start();
-            console.log('Recording...');
-        })
-        .catch((err) => {
-            console.error('Could not get user media', err);
-        });
-    // 设置一个定时器，10秒后停止录音并上传
-    setTimeout(() => {
-        // 停止录音
-        recorder.stop()
-            .then(({blob, buffer}) => {
-                console.log(buffer)
-                let audioBuffer = audioContext.createBuffer(
-                    2,     // 双声道
-                    44100, // 44100采样点
-                    44100);
-                let float32Buffer = convertToFloat32(buffer);
-                audioBuffer.copyToChannel(float32Buffer, 0);
-                // 将音频缓冲区转换为.wav格式的Blob对象
-                let wavBlob = new Blob([audioBufferToWav(audioBuffer)], {type: 'audio/wav'});
-                // 创建一个表单数据对象
-                let formData = new FormData();
-                // 将音频文件添加到表单中，命名为file
-                formData.append('file', wavBlob, 'audio.wav');
-                console.log(wavBlob)
-                // 使用axios发送表单数据到后端API
-                console.log(blob)
-                // 根据音频缓冲区获取波纹数组和录音时长
-                let arrayBuffer = convertToArrayBuffer(buffer);
-                console.log(arrayBuffer)
-                let waveform = WaveformData.create(arrayBuffer);
-                let duration = buffer.duration;
-                // 打印波纹数组和录音时长
-                console.log('Waveform:', waveform.min.concat(waveform.max));
-                console.log('Duration:', duration);
+        .then(stream => {
+            //  实例化一个媒体录制接口
+            const mediaRecorder = new MediaRecorder(stream);
+            //  开始录制
+            mediaRecorder.start();
+            console.log('start.....')
+
+            //  监听是否产生可用音频数据，若有，则将该数据推到音频数据缓冲区中
+            const audioChunks = [];
+            mediaRecorder.addEventListener("dataavailable", event => {
+                audioChunks.push(event.data);
             });
-    }, 3000);
+
+            /**  监听停止录制事件，并进行如下处理:
+             1.  将音频数据缓冲区的数据转合并为 Blob 对象
+             2.  通过 Blob 对象生成一个完整的音频资源 URL
+             3.  创建一个 Audio 对象，该对象将存储一个完整可播放的音频资源
+             4.  监听音频是否可被完整播放，如果可被完整播放，则表明该音频资源完整
+             5.  上传音频文件，并获取到响应中给予的 download url
+             6.  获取音频总时长需要达成完整播放音频这一条件，再此使用了预加载实现
+             7.  预加载意味着生成一个随机的播放节点时间，以达成快进目的，不断循环新的节点时间，直到获取到完整时间
+             */
+            mediaRecorder.addEventListener("stop",  () => {
+                const audioBlob = new Blob(audioChunks);
+                const audio = new Audio(URL.createObjectURL(audioBlob));
+                const url = ref('')
+                const duration = ref()
+                getVoiceDownloadUrl(audioBlob).then(res => {
+                    url.value = res.data
+                })
+                audio.addEventListener('canplaythrough', async () => {
+                    new Promise(resolve => {
+                        let interval;
+                        interval = setInterval(() => {
+                            if (!isNaN(audio.duration) && audio.duration !== Infinity) {
+                                clearInterval(interval);
+                                resolve(audio.duration);
+                            }
+                        }, 200);
+                    }).then(dur => {
+                        console.log('音频的总时长:', dur);
+                        duration.value = Math.round(dur)
+                    })
+                    watch([url,duration],([newU,newD])=>{
+                        if (newU && newD){
+                            msg('VocMsg',{
+                                url:"https://organwalk.ink/api/voice/" + newU,
+                                duration:newD
+                            })
+                        }
+                    })
+                    await audio.play()
+                })
+            });
+            setTimeout(() => {
+                mediaRecorder.stop();
+                console.log('stop..........')
+            }, 5000);
+        });
 }
 
-const convertToFloat32 = (buffer) => {
-    // 把 buffer 数据复制到 float32Buffer
-    return new Float32Array(buffer.length);
+const getVoiceDownloadUrl = (audioBlob) => {
+    const formData = new FormData();
+    formData.append("voice", audioBlob, "recording.wav");
+    return axios.post("https://organwalk.ink/api/voice", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    })
 }
 
-const convertToArrayBuffer = (buffer) => {
-    let bufferView = new Uint8Array(buffer);
-    return bufferView.buffer;
-}
 
 export {
     startVoice
 }
+

@@ -8,17 +8,14 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "audiobuffer-to-wav": "^1.0.0",
     "axios": "^1.4.0",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.5",
     "html-to-image": "^1.11.11",
     "image-conversion": "^2.1.1",
-    "recorder-js": "^1.0.7",
     "vue": "^3.2.13",
     "vue-router": "^4.2.1",
-    "vuex": "^4.0.2",
-    "waveform-data": "^4.3.0"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
