@@ -58,16 +58,30 @@
     </el-card>
     <el-dialog
         v-model="showVoice"
-        width="50%"
+        width="30%"
         :show-close="false"
     >
-        <el-card>
+        <el-card shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <recording-comp style="width: 100%"/>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <el-button :icon="VideoPause" round
+                               size="large"
+                               color="#333"
+                               style="font-weight: bolder;font-family: 微软雅黑,serif"
+                               @click="stopVoice()">停止录音</el-button>
+                </el-col>
+            </el-row>
         </el-card>
     </el-dialog>
 </template>
 
 <script setup>
-import {Promotion, MagicStick, Plus, Link, Microphone} from '@element-plus/icons-vue'
+import {Promotion, MagicStick, Plus, Link, Microphone,VideoPause} from '@element-plus/icons-vue'
 import {ref, defineEmits, defineProps, computed, watch} from "vue";
 import * as order from "@/api/server/order";
 import msg from "@/api/cloud/message"
@@ -76,7 +90,8 @@ import * as mp from "@/api/cloud/manage-person";
 import * as md from "@/api/cloud/manage-dept"
 import * as card from "@/api/cloud/card"
 import {dataURLtoFile} from "image-conversion";
-import {startVoice} from "@/optionConfig/voice-function";
+import { usingVoice} from "@/optionConfig/voice-function";
+import RecordingComp from "@/components/chat/interactiveCard/using-voice/recording-comp.vue";
 
 const orderContent = ref('')
 const store = useStore()
@@ -157,12 +172,19 @@ const handleChange = (res) => {
     }
 }
 
-// 打印录音面板
+// 打开录音面板
 const showVoice = ref(false)
 const voice = () => {
     showVoice.value = true
-    startVoice()
+    usingVoice('start')
 }
+const stopVoice = () => {
+    showVoice.value = false
+    usingVoice('stop')
+}
+// const listenVoice = () => {
+//     playRecording()
+// }
 
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务

@@ -2,11 +2,22 @@ import axios from "axios";
 import msg from "@/api/cloud/message";
 import {ref, watch} from "vue";
 
-const startVoice = () => {
+let mediaRecorder
+let audio
+
+const usingVoice = (action) => {
+    if (action === 'start'){
+        startRecording()
+    }else if(action === 'stop'){
+        stopRecording()
+    }
+}
+
+const startRecording = () => {
     navigator.mediaDevices.getUserMedia({audio: true})
         .then(stream => {
             //  实例化一个媒体录制接口
-            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder = new MediaRecorder(stream);
             //  开始录制
             mediaRecorder.start();
             console.log('start.....')
@@ -26,16 +37,18 @@ const startVoice = () => {
              6.  获取音频总时长需要达成完整播放音频这一条件，再此使用了预加载实现
              7.  预加载意味着生成一个随机的播放节点时间，以达成快进目的，不断循环新的节点时间，直到获取到完整时间
              */
-            mediaRecorder.addEventListener("stop",  () => {
+
+
+            mediaRecorder.addEventListener("stop", () => {
                 const audioBlob = new Blob(audioChunks);
-                const audio = new Audio(URL.createObjectURL(audioBlob));
+                audio = new Audio(URL.createObjectURL(audioBlob));
                 const url = ref('')
                 const duration = ref()
                 getVoiceDownloadUrl(audioBlob).then(res => {
                     url.value = res.data
                 })
                 audio.addEventListener('canplaythrough', async () => {
-                    new Promise(resolve => {
+                    await new Promise(resolve => {
                         let interval;
                         interval = setInterval(() => {
                             if (!isNaN(audio.duration) && audio.duration !== Infinity) {
@@ -44,25 +57,29 @@ const startVoice = () => {
                             }
                         }, 200);
                     }).then(dur => {
-                        console.log('音频的总时长:', dur);
                         duration.value = Math.round(dur)
                     })
-                    watch([url,duration],([newU,newD])=>{
-                        if (newU && newD){
-                            msg('VocMsg',{
-                                url:"https://organwalk.ink/api/voice/" + newU,
-                                duration:newD
+                    watch([url, duration], ([newU, newD]) => {
+                        console.log(duration)
+                        if (newU && newD) {
+                            msg('VocMsg', {
+                                url: "https://organwalk.ink/api/voice/" + newU,
+                                duration: newD
                             })
                         }
                     })
-                    await audio.play()
                 })
             });
-            setTimeout(() => {
-                mediaRecorder.stop();
-                console.log('stop..........')
-            }, 5000);
-        });
+        })
+}
+
+const stopRecording = () => {
+    mediaRecorder.stop();
+    console.log('stop..........')
+}
+
+const playRecording = async () => {
+    await audio.play()
 }
 
 const getVoiceDownloadUrl = (audioBlob) => {
@@ -75,8 +92,8 @@ const getVoiceDownloadUrl = (audioBlob) => {
     })
 }
 
-
 export {
-    startVoice
+    usingVoice,
+    playRecording
 }
 

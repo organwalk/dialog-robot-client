@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import routes from "./router"
 
 const router =createRouter({
@@ -8,13 +8,16 @@ const router =createRouter({
 
 //beforeEach
 router.beforeEach((to, from, next) => {
-    if (!sessionStorage.getItem('accessToken')) {
+    if (!sessionStorage.getItem('uid')) {
         if (to.name === "auth"){
             next()
         }else {
             window.location.href = "/auth"
         }
     } else {
+        if (to.path === '/'){
+            window.location.href = "/chat"
+        }
         next()
     }
 })
