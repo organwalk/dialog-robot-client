@@ -10,5 +10,8 @@ export default {
     },
     setCreateStatus(state,createStatus){
         state.createStatus = createStatus
+    },
+    setVoiceObj(state,voiceObj){
+        state.voiceObj = voiceObj
     }
 }

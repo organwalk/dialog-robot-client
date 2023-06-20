@@ -60,8 +60,10 @@
         v-model="showVoice"
         width="30%"
         :show-close="false"
+        :close-on-press-escape="false"
+        :close-on-click-modal="false"
     >
-        <el-card shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+        <el-card v-loading="getVoiceUrl" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                     <recording-comp style="width: 100%"/>
@@ -102,7 +104,8 @@ const emit = defineEmits(["user-input", //  传递用户输入文本事件
     "send-status",  //  不同事件下的消息状态
     "reply-robot",  //  唤醒机器人回复
     "clear-chat",   //  清除聊天
-    "image-url" //  图片url
+    "image-url", //  图片url
+    "voice-info"    //语音数据
 ])   //  发送姓名
 const props = defineProps({
     missingValue: String,
@@ -165,7 +168,6 @@ const beforeUpload = (file) => {
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
-        console.log(url.value);
         emit('image-url', url.value)
         orderContent.value = 'https://organwalk.ink/api/images/' + url.value
         sendOrder()
@@ -174,17 +176,31 @@ const handleChange = (res) => {
 
 // 打开录音面板
 const showVoice = ref(false)
+const getVoiceUrl = ref(false)
 const voice = () => {
+    getVoiceUrl.value = false
     showVoice.value = true
     usingVoice('start')
 }
-const stopVoice = () => {
-    showVoice.value = false
+const stopVoice = async () => {
+    getVoiceUrl.value = true
     usingVoice('stop')
+    const url = computed(()=>store.state.chat.voiceObj.voiceUrl)
+    const duration = computed(()=> store.state.chat.voiceObj.duration)
+    const status = ref(false)
+    watch([url,duration],() =>{
+        status.value = true
+    })
+    watch(status,(newVal) => {
+        if (newVal){
+            emit("voice-info", store.state.chat.voiceObj);
+            orderContent.value = store.state.chat.voiceObj;
+            sendOrder();
+            showVoice.value = false;
+        }
+    })
+
 }
-// const listenVoice = () => {
-//     playRecording()
-// }
 
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务

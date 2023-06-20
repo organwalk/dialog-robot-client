@@ -10,5 +10,8 @@ export default {
     },
     updataCreateStatus({commit},createStatus){
         commit('setCreateStatus',createStatus)
+    },
+    updataVoiceObj({commit},voiceObj){
+        commit('setVoiceObj',voiceObj)
     }
 }

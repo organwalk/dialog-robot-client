@@ -23,7 +23,7 @@
                     <div style="height:1px;background-color: #CDD0D6"/>
                 </el-col>
             </el-row>
-            <el-row v-if="!state.showRecommend && item.type === 'user' && checkImage(item.message)" justify="end" style="padding-left: 10%">
+            <el-row v-if="!state.showRecommend && item.type === 'user' && checkImage(item.message) && checkVoice(item.message)" justify="end" style="padding-left: 10%">
                 <!-- 用户 -->
                 <el-card shadow="never" class="user-chat-bubble"
                          :body-style="{padding:'10px'}"
@@ -36,6 +36,12 @@
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
                     <el-image style="width: 30%;border-radius: 15px;border: 1px solid var(--el-border-color);"
                               :src="item.message" />
+                </el-col>
+            </el-row>
+            <el-row v-if="item.type === 'voice'">
+                <!--语音-->
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
+                    <el-button style="width: auto" :icon="VideoPlay" size="large" @click="playVoice(item.message)"></el-button>
                 </el-col>
             </el-row>
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
@@ -81,6 +87,7 @@
             @reply-robot='getReplyStatus'
             @clear-chat="clearChat"
             @image-url="imageUrl"
+            @voice-info="voiceInfo"
             :res-over="state.resOver"
             :recommend="state.recommendText"
             :missing-value="state.missValueType"/>
@@ -94,6 +101,8 @@ import recommendsData from "@/optionConfig/recommendText.json";
 import {nextTick, reactive, ref} from "vue";
 import {useStore} from "vuex";
 import {ElMessage} from "element-plus";
+import {VideoPlay} from '@element-plus/icons-vue'
+import {playRecording} from "@/optionConfig/voice-function";
 
 const state = reactive({
     toDay: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate(),
@@ -112,6 +121,8 @@ const state = reactive({
     cardStatus: '', //  回复组件中所需”卡片回复状态机“所需参数
     recommendText: '',  //  推荐语句
     imageUrl: '',    //图片url
+    voiceUrl:'',//录音文件Url
+    duration:Number,//时长
     resOver: false,  //  未响应完成不可进行提交事件
     dontShowRec: true   //  不展示推荐卡片
 })
@@ -150,9 +161,35 @@ const imageUrl = (val) => {
     scrollBottom()  //自动滚动至聊天容器底部
 }
 
+const voiceInfo = (obj) => {
+    console.log(obj)
+    state.voiceUrl = obj.voiceUrl
+    state.duration = obj.duration
+    state.showToDay = true
+    state.showRecommend = false
+    state.showRecommendTip = false
+    state.chatMessages.push({
+        type: 'voice',
+        message: 'https://organwalk.ink/api/voice/' + obj.voiceUrl
+    })
+    console.log(state.chatMessages)
+    state.resOver = true
+    loading.value = true
+    scrollBottom()  //自动滚动至聊天容器底部
+}
+
+const playVoice= (url) => {
+    playRecording(url)
+}
+
 const checkImage = (val) => {
     const reg = /https:\/\/organwalk\.ink\/api\/images\//
     return !reg.test(val)
+}
+
+const checkVoice = (val) => {
+    const reg = /\.wav$/
+    return !reg.test(val.voiceUrl)
 }
 
 // 机器人回复

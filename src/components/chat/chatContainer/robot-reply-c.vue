@@ -179,6 +179,7 @@ const getOrderTypeReply = () => {
     }
     emit('showRecommend', reply)
     store.dispatch('updataMissingKeyObj', {})
+    store.dispatch('updataVoiceObj',{})
     return reply
 }
 
