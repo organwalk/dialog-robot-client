@@ -100,7 +100,6 @@ const sendSysMsg = (obj)=>{
 }
 
 const sendVoice = (obj) => {
-    console.log(obj)
     obj['msgType'] = 3
     obj['extraData'] = "{\"duration\":" + Number(obj.voiceUrl.duration) + "}"
     obj['message'] = "https://organwalk.ink/api/voice/" + obj.voiceUrl.voiceUrl

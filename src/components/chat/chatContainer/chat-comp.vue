@@ -41,7 +41,9 @@
             <el-row v-if="item.type === 'voice'">
                 <!--语音-->
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
-                    <el-button style="width: auto" :icon="VideoPlay" size="large" @click="playVoice(item.message)"></el-button>
+                    <el-button style="width: auto;min-width: 100px;" color="#2C6AE3" :icon="VideoPlay" size="large" @click="playVoice(item.message.url)" round>
+                        {{item.message.time}} ''
+                    </el-button>
                 </el-col>
             </el-row>
             <el-row v-if="item.type === 'robot'" style="padding-right: 10%">
@@ -98,11 +100,11 @@ import ChatInputComp from "@/components/chat/chatContainer/chat-input-comp.vue";
 import RobotReply from "@/components/chat/chatContainer/robot-reply-c.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
-import {nextTick, reactive, ref} from "vue";
+import { nextTick, reactive, ref} from "vue";
 import {useStore} from "vuex";
 import {ElMessage} from "element-plus";
 import {VideoPlay} from '@element-plus/icons-vue'
-import {playRecording} from "@/optionConfig/voice-function";
+import {playRecording, playRecordingPause} from "@/optionConfig/voice-function";
 
 const state = reactive({
     toDay: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate(),
@@ -161,8 +163,8 @@ const imageUrl = (val) => {
     scrollBottom()  //自动滚动至聊天容器底部
 }
 
+// 语音信息
 const voiceInfo = (obj) => {
-    console.log(obj)
     state.voiceUrl = obj.voiceUrl
     state.duration = obj.duration
     state.showToDay = true
@@ -170,16 +172,28 @@ const voiceInfo = (obj) => {
     state.showRecommendTip = false
     state.chatMessages.push({
         type: 'voice',
-        message: 'https://organwalk.ink/api/voice/' + obj.voiceUrl
+        message: {
+            url:'https://organwalk.ink/api/voice/' + obj.voiceUrl,
+            time:obj.duration
+        }
     })
-    console.log(state.chatMessages)
     state.resOver = true
     loading.value = true
     scrollBottom()  //自动滚动至聊天容器底部
 }
 
+//  播放语音
+const voiceMark = ref(1)
 const playVoice= (url) => {
-    playRecording(url)
+    if (voiceMark.value === 1){
+        playRecording(url)
+        voiceMark.value ++
+    }else {
+        playRecordingPause()
+        voiceMark.value = 1
+    }
+
+
 }
 
 const checkImage = (val) => {

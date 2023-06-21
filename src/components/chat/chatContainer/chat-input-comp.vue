@@ -165,11 +165,12 @@ const beforeUpload = (file) => {
     });
 };
 
+const imageResource = "https://organwalk.ink/api/images/"
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
         emit('image-url', url.value)
-        orderContent.value = 'https://organwalk.ink/api/images/' + url.value
+        orderContent.value = imageResource + url.value
         sendOrder()
     }
 }
@@ -215,7 +216,19 @@ const sendOrder = () => {
     if (orderContent.value !== '') {
         if (Object.keys(missingValueObj).length === 0) {
             //  处于新一轮对话
-            inNewConversation(orderContent.value)
+            if (orderContent.value['voiceUrl']){
+                inNewConversation(JSON.stringify(orderContent.value))
+            }
+            else if (orderContent.value.includes(imageResource)){
+                let obj = {
+                    imageUrl:orderContent.value
+                }
+                inNewConversation(JSON.stringify(obj))
+            }
+            else {
+                inNewConversation(orderContent.value)
+            }
+
         } else {
             //  如果不是新一轮对话则表明具有空缺值
             //  如果空缺值为object，则需要进行人名或群组的确认

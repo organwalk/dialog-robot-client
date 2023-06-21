@@ -16,6 +16,7 @@ const usingVoice = (action) => {
 }
 
 const startRecording = () => {
+    console.log(audioChunks.length)
     navigator.mediaDevices.getUserMedia({audio: true})
         .then(stream => {
             //  实例化一个媒体录制接口
@@ -24,7 +25,10 @@ const startRecording = () => {
             mediaRecorder.start();
             //  监听是否产生可用音频数据，若有，则将该数据推到音频数据缓冲区中
             mediaRecorder.addEventListener("dataavailable", event => {
-                audioChunks.push(event.data);
+                if (audioChunks.length === 1){
+                    audioChunks = []
+                }
+                audioChunks.push(event.data)
             });
         })
 }
@@ -39,6 +43,7 @@ const startRecording = () => {
  6.  获取音频总时长需要达成完整播放音频这一条件，再此使用了预加载实现
  7.  预加载意味着生成一个随机的播放节点时间，以达成快进目的，不断循环新的节点时间，直到获取到完整时间
  */
+
 const stopRecording = () => {
     mediaRecorder.stop();
     mediaRecorder.addEventListener("stop", () => {
@@ -68,19 +73,16 @@ const stopRecording = () => {
     });
 }
 
-
-
-let voice_audio = null; // 定义一个全局变量来保存当前的语音对象
+let voice_audio
 const playRecording = async (voiceUrl) => {
-    if (voice_audio) { // 如果已经有一个语音对象存在
-        voice_audio.pause(); // 暂停它
-        voice_audio.currentTime = 0; // 把它的时间设置为0
-    }
     voice_audio = new Audio(voiceUrl); // 创建一个新的语音对象
     voice_audio.type = 'audio/wav';
     await voice_audio.play(); // 播放新的语音
 }
 
+const playRecordingPause = () => {
+    voice_audio.pause()
+}
 
 const getVoiceDownloadUrl = (audioBlob) => {
     const formData = new FormData();
@@ -94,7 +96,8 @@ const getVoiceDownloadUrl = (audioBlob) => {
 
 export {
     usingVoice,
-    playRecording
+    playRecording,
+    playRecordingPause
 }
 
 
