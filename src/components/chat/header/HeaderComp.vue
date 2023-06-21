@@ -1,7 +1,9 @@
 <template>
     <el-card style="background-color: #333333;border-radius: 15px 15px 0 0 ;" :body-style="{padding:'10px'}">
         <el-row>
-            <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20">
+            <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4" align="center">
+            </el-col>
+            <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16" align="center">
                 <span class="head-text">Xeno-Loader</span>
             </el-col>
             <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4" align="right">

@@ -1,12 +1,19 @@
 <template>
     <el-card :body-style="{padding:'10px'}" shadow="never" style="border: none; background-color: #f7f7f7;">
-        <el-row :gutter="15">
+        <el-row :gutter="20">
             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="left">
                 <el-button :icon="MagicStick" size="large" circle color="#E6E8EB"
                            :disabled="resOver"
                            @click="clear()"/>
             </el-col>
-            <el-col :xs="21" :sm="21" :md="21" :lg="21" :xl="21">
+            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="center">
+                <el-button :icon="Microphone"
+                           :disabled="resOver"
+                           circle color="#2C6AE3"
+                           @click="whisper()"
+                           size="large"/>
+            </el-col>
+            <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20">
                 <el-input
                         class="chat-input"
                         v-model="orderContent"
@@ -80,6 +87,30 @@
             </el-row>
         </el-card>
     </el-dialog>
+    <el-dialog
+        v-model="showWhisper"
+        width="30%"
+        :show-close="false"
+        :close-on-press-escape="false"
+        :close-on-click-modal="false"
+    >
+        <el-card v-loading="getWhisperVal" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <recording-comp style="width: 100%"/>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <el-button :icon="VideoPause" round
+                               size="large"
+                               color="#333"
+                               style="font-weight: bolder;font-family: 微软雅黑,serif"
+                               @click="stopWhisper()">停止录音</el-button>
+                </el-col>
+            </el-row>
+        </el-card>
+    </el-dialog>
 </template>
 
 <script setup>
@@ -94,6 +125,8 @@ import * as card from "@/api/cloud/card"
 import {dataURLtoFile} from "image-conversion";
 import { usingVoice} from "@/optionConfig/voice-function";
 import RecordingComp from "@/components/chat/interactiveCard/using-voice/recording-comp.vue";
+import {useWhisper} from "@/api/whisper/use-whisper";
+import {ElMessage} from "element-plus";
 
 const orderContent = ref('')
 const store = useStore()
@@ -201,6 +234,38 @@ const stopVoice = async () => {
         }
     })
 
+}
+
+// 调用whisper
+const showWhisper = ref(false)  //展示录音框
+const getWhisperVal = ref(false)    //控制加载
+// 开始录音
+const whisper = () => {
+    showWhisper.value = true
+    getWhisperVal.value = false
+    usingVoice('start')
+}
+const stopWhisper = () => {
+    getWhisperVal.value = true
+    usingVoice('stop')
+    const url = computed(()=>store.state.chat.voiceObj.voiceUrl)
+    const status = ref(false)
+    watch(url,() =>{
+        status.value = true
+    })
+    watch(status,(newVal) => {
+        if (newVal){
+            useWhisper(url.value).then(res => {
+                if (res.data.success){
+                    orderContent.value = res.data.whisper_chinese
+                    showWhisper.value = false
+                }else {
+                    ElMessage.error("语音识别失败")
+                    showWhisper.value = false
+                }
+            })
+        }
+    })
 }
 
 // 向聊天容器发送聊天内容
