@@ -3,9 +3,20 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import router_index from '@/router/index'
 import store from '@/store'
+import btn from '@/optionConfig/button-auto-lose-focus'
 import App from './App.vue'
 
 const app = createApp(App)
+app.use(ElementPlus)
+app.use(router_index)
+app.use(store)
+app.use(btn)
+app.mount('#app')
+
+/**
+ * ----- 此处无需维护 -----
+ * 用以解决ElementPlus循环渲染导致的BUG提示
+ */
 const debounce = (fn, delay) => {
     let timer = null;
     return function () {
@@ -17,7 +28,6 @@ const debounce = (fn, delay) => {
         }, delay);
     }
 }
-
 const _ResizeObserver = window.ResizeObserver;
 window.ResizeObserver = class ResizeObserver extends _ResizeObserver{
     constructor(callback) {
@@ -25,9 +35,3 @@ window.ResizeObserver = class ResizeObserver extends _ResizeObserver{
         super(callback);
     }
 }
-
-
-app.use(ElementPlus)
-app.use(router_index)
-app.use(store)
-app.mount('#app')

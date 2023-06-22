@@ -70,7 +70,8 @@ import {ElMessage} from "element-plus";
 
 const scheduleList = ref([])
 const props = defineProps({
-    clickDay: String
+    clickDay: String,
+    refreshSchedule:Boolean
 })
 const uid = sessionStorage.getItem("uid")
 onMounted(() => {
@@ -209,6 +210,12 @@ const getToDayDate = () => {
         })
     })
 }
+const refreshSchedule = computed(() => props.refreshSchedule)
+watch(refreshSchedule,(newVal) => {
+    if (newVal){
+        getToDayDate()
+    }
+})
 </script>
 
 <style scoped>

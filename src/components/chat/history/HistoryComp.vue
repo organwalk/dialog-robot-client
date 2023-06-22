@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" style="border-top: none;border-bottom: none">
+    <el-card shadow="never" class="history" style="border-top: none;border-bottom: none;border-radius: 0" >
         <el-row >
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                 <el-card shadow="never" style="border-radius: 10px">
@@ -13,12 +13,12 @@
                             <el-card shadow="never" style="border: none">
                                 <el-row>
                                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                                        <el-button  size="large" :icon="ChatDotRound" circle :color="chat" @click="onChat"></el-button>
+                                        <el-button  size="large" :icon="ChatDotRound" circle :color="chat" @click="onChat" v-btn></el-button>
                                     </el-col>
                                 </el-row><br/>
                                 <el-row>
                                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                                        <el-button  size="large" :icon="Monitor" circle :color="work" @click="onWork"></el-button>
+                                        <el-button  size="large" :icon="Monitor" circle :color="work" @click="onWork" v-btn></el-button>
                                     </el-col>
                                 </el-row>
                             </el-card>

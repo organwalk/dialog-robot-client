@@ -21,7 +21,7 @@
             </el-row>
             <br/><br/>
 
-<!--            创建日程的页面     -->
+            <!--            创建日程的页面     -->
             <one-create-schedule :showPageOne="showPageOne" :sid="sid"
                                  @getPageOneData="getPageOneData"/>
             <two-create-schedule :showPageTwo="showPageTwo" :sid="sid" @getPageTwoData="getPageTwoData"/>
@@ -199,22 +199,22 @@ const create = () => {
     if (sid.value){
         console.log(222222)
         card.updataPlan(sid.value,allPageData).then(res=>{
-           if (res.data.code !== 400){
-               allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
-               data.updataSchedule(sid.value,allPageData).then(res=>{
-                   if (res.data.success){
-                       setTimeout(()=>{
-                           loading.value = false
-                           showCreateForm.value = false
-                           showSuccessTip.value = true
-                       },1000)
-                       setTimeout(()=>{
-                           let refresh = ''
-                           emit("clearSid",refresh)
-                       },2000)
-                   }
-               })
-           }
+            if (res.data.code !== 400){
+                allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
+                data.updataSchedule(sid.value,allPageData).then(res=>{
+                    if (res.data.success){
+                        setTimeout(()=>{
+                            loading.value = false
+                            showCreateForm.value = false
+                            showSuccessTip.value = true
+                        },1000)
+                        setTimeout(()=>{
+                            let refresh = ''
+                            emit("clearSid",refresh)
+                        },2000)
+                    }
+                })
+            }
         })
     }else {
         //若没有sid则为创建操作

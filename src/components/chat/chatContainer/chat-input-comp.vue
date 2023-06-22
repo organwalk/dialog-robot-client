@@ -1,17 +1,30 @@
 <template>
-    <el-card :body-style="{padding:'10px'}" shadow="never" style="border: none; background-color: #f7f7f7;">
+    <el-card :body-style="{padding:'10px'}" shadow="never" style="border: none; background-color: #f7f7f7;border-radius: 0">
         <el-row :gutter="20">
             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="left">
+                <el-tooltip
+                    effect="dark"
+                    content="中断当前对话流程"
+                    placement="top"
+                >
                 <el-button :icon="MagicStick" size="large" circle color="#E6E8EB"
                            :disabled="resOver"
                            @click="clear()"/>
+                </el-tooltip>
             </el-col>
             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="center">
-                <el-button :icon="Microphone"
-                           :disabled="resOver"
-                           circle color="#2C6AE3"
-                           @click="whisper()"
-                           size="large"/>
+                <el-tooltip
+                    effect="dark"
+                    content="语音转文字"
+                    placement="top"
+                >
+                    <el-button :icon="Microphone"
+                               :disabled="resOver"
+                               circle color="#2C6AE3"
+                               v-btn
+                               @click="whisper()"
+                               size="large"/>
+                </el-tooltip>
             </el-col>
             <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20">
                 <el-input
@@ -56,7 +69,7 @@
                     </template>
                 </el-input>
             </el-col>
-            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="left">
+            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="center">
                 <el-button :icon="Promotion" style="border-radius: 10px;" size="large" color="#2C6AE3"
                            :disabled="resOver"
                            @click="sendOrder()"/>
@@ -70,10 +83,15 @@
         :close-on-press-escape="false"
         :close-on-click-modal="false"
     >
-        <el-card v-loading="getVoiceUrl" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+        <el-card  v-loading="getVoiceUrl" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
-                    <recording-comp style="width: 100%"/>
+                    <h2>请说话</h2>
+                </el-col>
+            </el-row>
+            <el-row >
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <recording-comp  style="width: 100%"/>
                 </el-col>
             </el-row>
             <el-row>
@@ -94,10 +112,15 @@
         :close-on-press-escape="false"
         :close-on-click-modal="false"
     >
-        <el-card v-loading="getWhisperVal" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+        <el-card  v-loading="getWhisperVal"   shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
-                    <recording-comp style="width: 100%"/>
+                    <h2>请说话</h2>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <recording-comp  style="width: 100%"/>
                 </el-col>
             </el-row>
             <el-row>
@@ -107,6 +130,11 @@
                                color="#333"
                                style="font-weight: bolder;font-family: 微软雅黑,serif"
                                @click="stopWhisper()">停止录音</el-button>
+                </el-col>
+            </el-row><br/>
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
+                    <span style="color: #A8ABB2;font-size: 10px">© Open AI.Whisper</span>
                 </el-col>
             </el-row>
         </el-card>

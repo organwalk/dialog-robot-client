@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" style="border: none;background-color: #f7f7f7;height: 630px;overflow-y: auto">
+    <el-card shadow="never" style="background-color: #f7f7f7;height: 630px;overflow-y: auto">
         <el-row :gutter="10">
             <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
                 <el-card style="border-radius: 10px">
@@ -21,7 +21,7 @@
                             <el-button style="width: 100%" text :bg="!snCardColor" @click="clickNotification">事项</el-button>
                         </el-col>
                     </el-row><br/>
-                    <a-schedule v-if="snCard === '日程' "/>
+                    <a-schedule :refresh-schedule="refreshSchedule" v-if="snCard === '日程' "/>
                     <a-notification v-if="snCard === '事项' "/>
                 </el-card>
             </el-col>
@@ -119,7 +119,9 @@ watch(dialogVisible,(newVal) => {
     }
 })
 
+const refreshSchedule = ref(false)
 const getSuccess = (val) => {
+    refreshSchedule.value = true
     letDialogVisibleValueToFalse(val)
 }
 
