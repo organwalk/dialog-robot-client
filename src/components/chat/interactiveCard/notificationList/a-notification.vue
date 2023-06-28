@@ -82,6 +82,43 @@ watch(clickDay,(newVal)=>{
     unShowInOtherDay.value = newVal === today;
 })
 
+watch(clickDay, (newVal) => {
+    if (newVal) {
+        loading.value = true
+        const timestamp = new Date(props.clickDay).getTime();
+        const utcDate = new Date(timestamp).toUTCString();
+        const unixTimestamp = Date.parse(utcDate);
+        const clickObj = {
+            remind_time: String(unixTimestamp)
+        }
+        //且换到新的日期时，获取新的日程列表
+        data.getNotification(clickObj).then(res => {
+            //  取出事项列表数据
+            if (res.data.notificationData.length !== 0 ){
+                showEmpty.value = false
+                notificationList.value = res.data.notificationData.map(item => {
+                    const Time = new Date(Number(item.remind_time)).toLocaleString('en-US',
+                        { timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit' }); // 将UTC时间转换为北京时间
+                    return {
+                        uid:item.uid,
+                        name:item.name,
+                        notice_id:item.notice_id,
+                        content:item.content,
+                        remind_time: Time,
+                        is_push_mail:item.is_push_mail,
+                        members:item.members,
+                        action:item.action
+                    }
+                })
+                loading.value = false   //关闭加载
+            }else {
+                loading.value = false
+                showEmpty.value= true
+            }
+        })
+    }
+})
+
 //  当该值为空时，表明处于列表，不为空则进入相应修改页面
 const notice_id = ref('')
 //  接收子组件发送的标记，用于清除nid，以达成返回操作

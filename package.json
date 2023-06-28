@@ -3,28 +3,37 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "nodemon --watch main.js --exec npm run build",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build ",
     "lint": "vue-cli-service lint"
   },
+  "main": "main.js",
   "dependencies": {
     "axios": "^1.4.0",
     "core-js": "^3.8.3",
-    "element-plus": "^2.3.5",
+    "element-plus": "^2.3.6",
     "html-to-image": "^1.11.11",
     "image-conversion": "^2.1.1",
     "vue": "^3.2.13",
     "vue-router": "^4.2.1",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "@electron/remote": "^2.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@electron/rebuild": "^3.2.13",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "electron": "^25.2.0",
+    "electron-builder": "^24.4.0",
+    "electron-package": "^0.1.0",
+    "electron-updater": "^6.1.1",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "eslint-plugin-vue": "^8.0.3",
+    "path-browserify": "^1.0.1"
   },
   "eslintConfig": {
     "root": true,
@@ -45,5 +54,19 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "build": {
+    "appId": "Xeno-loader-beta-1.0",
+    "copyright": "©Xeno-onloaded",
+    "productName": "Xeno-loader",
+    "dmg": {
+      "window": {
+        "x": 100,
+        "y": 100,
+        "width": 500,
+        "height": 300
+      }
+    },
+    "win": {}
+  }
 }

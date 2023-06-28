@@ -1,0 +1,48 @@
+#xeno-header,#xeno-login {
+    -webkit-app-region: drag;
+}
+.xeno-handle-area,#xeno-handle-area{
+    -webkit-app-region: no-drag;
+}
+/* textarea {
+    -webkit-app-region: no-drag;
+} */
+/* body {
+    width: 100vw;
+    height: 100vh;
+} */
+.btns_w_container {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+.btns_w_box {
+    width: 150px;
+    height: 50px;
+    float: right;
+}
+.btns_w_box ul li {
+    list-style: none;
+    float: right;
+    cursor: pointer;
+}
+.btn_circle{
+    text-align: center;
+    line-height: 18px;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+    background: #000;
+}
+.btn_circle_min {
+    background: #26ca41;
+}
+.btn_circle_max {
+    background: #febf02;
+}
+.btn_circle_close {
+    background: #fe6159;
+}

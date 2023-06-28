@@ -1,10 +1,10 @@
 <template>
-    <el-card style="background-color: #333333;border-radius: 15px 15px 0 0 ;" :body-style="{padding:'10px'}">
+    <el-card style="background-color: #333333;border-radius: 15px 15px 0 0 ;border: none;" :body-style="{padding:'10px'}">
         <el-row>
             <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4" align="center">
             </el-col>
-            <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16" align="center">
-                <span class="head-text">Xeno-Loader</span>
+            <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16" align="center" id="xeno-header">
+                <span class="head-text">Xeno-loader</span>
             </el-col>
             <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4" align="right">
                 <el-button :icon=" ArrowRight " style="font-weight: bolder;font-family: 微软雅黑" size="large" color="#333" round @click="logout()">Log out</el-button>

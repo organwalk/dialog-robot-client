@@ -6,8 +6,20 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <link type="text/css" rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
   </head>
   <body>
+    <div class="btns_w_container">
+      <div id="btns-main-window" class="btns_w_box">
+          <ul style="display: none;">
+              <li class="btn_circle btn_circle_close"><i class="fa fa-close" aria-hidden="true" style="color:#fff;display: none;"></i></li>
+              <li class="btn_circle btn_circle_max" style="line-height: 16px;"><i class="fa fa-circle" aria-hidden="true" style="font-size: 12px; color:#fff;display: none;"></i></li>
+              <li class="btn_circle btn_circle_min" style="line-height: 20px;"><i class="fa fa-caret-down" aria-hidden="true" style="color:#fff;display: none;"></i></li>
+          </ul>
+      </div>
+    </div>
+    <script src="index.js"></script>
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>

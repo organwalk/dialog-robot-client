@@ -1,15 +1,15 @@
 <template>
-    <el-row>
+    <el-row class="header-box">
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
             <HeaderComp/>
         </el-col>
     </el-row>
-    <el-row>
-        <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6">
+    <el-row class="main-area">
+        <el-col class="history-area" :xs="6" :sm="6" :md="6" :lg="6" :xl="6">
             <HistoryComp @get-tab-status="getTabStatus"/>
             <HistoryListComp/>
         </el-col>
-        <el-col :xs="18" :sm="18" :md="18" :lg="18" :xl="18">
+        <el-col class="handle-area"  :xs="18" :sm="18" :md="18" :lg="18" :xl="18">
             <ChatComp v-if="showChat"/>
             <WorkComp v-if="!showChat"/>
         </el-col>
@@ -22,7 +22,7 @@ import HistoryComp from "@/components/chat/history/HistoryComp.vue";
 import HistoryListComp from "@/components/chat/history/HistoryListComp.vue";
 import ChatComp from "@/components/chat/chatContainer/chat-comp.vue";
 import WorkComp from "@/components/chat/workContainer/work-comp.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 
 const showChat = ref(true)
 const getTabStatus = (val) => {
@@ -32,7 +32,37 @@ const getTabStatus = (val) => {
         showChat.value = false
     }
 }
+onMounted(()=> {
+    window.currentWindow.center()
+    window.currentWindow.setSize(1500, 860)
+})
 </script>
 
-<style>
+<style scoped>
+    .main-area{
+        /* height: 630px; */
+        height: calc(100% - 40px);
+    }
+    .header-box {
+        z-index: 99;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+    .history-area {
+        height: 100%;
+        position: fixed;
+        z-index: 99; 
+        top: 60px; 
+        width: 100%;
+    }
+    .handle-area {
+        height: 100%;
+        position: fixed;
+        z-index: 98; 
+        top: 60px; 
+        right: 0;
+        width: 100%;
+    }
 </style>

@@ -5,9 +5,6 @@
   { "recommend": "我想创建一个事项告知" },
   { "recommend": "我想管理部门成员" },
   { "recommend": "我想取消一个事项" },
-  { "recommend": "发送语音消息" },
-  { "recommend": "发送图片消息" },
-  { "recommend": "发送名片消息" },
   { "recommend": "我想看看我的日程列表" },
   { "recommend": "我想看看我的事项列表" },
   { "recommend": "我想删除一个日程" },
@@ -15,7 +12,5 @@
   { "recommend": "我想修改一个日程" },
   { "recommend": "我想删除一个事项告知" },
   { "recommend": "我想管理我的事项" },
-  { "recommend": "我想修改一个事项" },
-  { "recommend": "发送文字消息" },
-  { "recommend": "发送图文消息" }
+  { "recommend": "我想修改一个事项" }
 ]

@@ -91,11 +91,7 @@ const clickDay = computed(() => props.clickDay)
 const today = new Date().toISOString().substring(0,10)
 const unShowInOtherDay = ref(true)
 watch(clickDay,(newVal)=>{
-    if (newVal !== today){
-        unShowInOtherDay.value = false
-    }else {
-        unShowInOtherDay.value = true
-    }
+    unShowInOtherDay.value = newVal === today;
 })
 
 

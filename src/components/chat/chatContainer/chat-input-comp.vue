@@ -1,5 +1,5 @@
 <template>
-    <el-card :body-style="{padding:'10px'}" shadow="never" style="border: none; background-color: #f7f7f7;border-radius: 0">
+    <el-card :body-style="{padding:'10px'}" shadow="never" style="border: none; background-color: #f7f7f7;border-radius: 0 0 15px 0">
         <el-row :gutter="20">
             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="left">
                 <el-tooltip
@@ -33,6 +33,7 @@
                         placeholder="Talk to Xeno-Loader"
                         autofocus
                         size="large"
+                        :readonly="resOver"
                         clearable
                         @keyup.enter="sendOrder()"
                 >
@@ -498,7 +499,7 @@ const fillMissingValueFromContent = (msv, oc) => {
         emit('reply-robot', true)
     } else {
         //  获取空缺值属性处理结果
-        userInputAoubtMissingValues(msv, oc).then(newObj => {
+        userInputAboutMissingValues(msv, oc).then(newObj => {
             //  如果过滤后的空缺值数组存在，则表明仍存在空缺值，应继续过滤
             if (filterEmptyKeys(newObj).length > 0) {
                 sendMissingValues(filterEmptyKeys(newObj))
@@ -555,7 +556,7 @@ const sendMissingValues = (emptyKeysList) => {
 }
 
 //将用户对空缺值的补充填补进空缺对象中
-const userInputAoubtMissingValues = async (type, val) => {
+const userInputAboutMissingValues = async (type, val) => {
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
     let userinfo = {}

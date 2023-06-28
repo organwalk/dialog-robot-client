@@ -100,14 +100,13 @@ const sendSysMsg = (obj)=>{
 }
 
 const sendVoice = (obj) => {
-    obj['msgType'] = 3
-    obj['extraData'] = "{\"duration\":" + Number(obj.voiceUrl.duration) + "}"
-    obj['message'] = "https://organwalk.ink/api/voice/" + obj.voiceUrl.voiceUrl
-    obj['needPush'] = true
     let newObj = {
-        ...obj,
+        msgType:3,
+        message:obj.url,
+        extraData:"{\"duration\":" + obj.duration + "}",
+        receivers:["1151800183169088"],
+        needPush:true
     }
-    delete newObj.voiceUrl
     return http.post(msgBaseUrl,newObj)
 }
 export default msg

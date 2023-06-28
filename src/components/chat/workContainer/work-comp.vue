@@ -1,5 +1,5 @@
 <template>
-    <el-card shadow="never" style="background-color: #f7f7f7;height: 630px;overflow-y: auto">
+    <el-card shadow="never" style="background-color: #f7f7f7;height: calc(100% - 62px);overflow-y: auto; border-radius: 0 0 15px 0;">
         <el-row :gutter="10">
             <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
                 <el-card style="border-radius: 10px">

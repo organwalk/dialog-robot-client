@@ -1,18 +1,19 @@
 <template>
-    <el-row  id="xeno-login">
-            <el-card shadow="never" style="border-radius: 15px;margin-top: 0%" align="center" v-loading="loading">
+    <el-row :gutter="10" id="xeno-login">
+        <el-col :xs="1" :sm="2" :md="8" :lg="8" :xl="8"/>
+        <el-col :xs="22" :sm="20" :md="8" :lg="8" :xl="8">
+            <el-card shadow="never" style="border-radius: 15px;margin-top: 15%" align="center" v-loading="loading">
                 <el-row>
                     <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22"/>
                     <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" class="xeno-handle-area">
                         <el-button
                         :icon="Close"
                         :circle="true"
-                        color="#fa5151"
-                        @click="handleClose"
+                        color="#2c6ae3"
+                        :click="handleClose"
                         plain
                         />
-                        <!-- <el-icon color="#2c6ae3" :size="20"><Close /></el-icon> -->
-                    </el-col>
+                        <el-icon color="#2c6ae3" :size="20"><Close /></el-icon></el-col>
                 </el-row>
                 <el-row>
                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
@@ -69,16 +70,19 @@
                     </el-row>
                 </el-card>
             </el-card>
+        </el-col>
+        <el-col :xs="1" :sm="2" :md="8" :lg="8" :xl="8" />
     </el-row>
 </template>
 
 <script setup>
-// import currentWindow from './auth'
-import {onMounted, reactive, ref} from "vue";
+
+import {reactive, ref} from "vue";
 import {Iphone, Close} from "@element-plus/icons-vue"
 import * as auth from '@/api/cloud/auth'
 import * as save from "@/api/server/save-data";
 import {ElMessage} from "element-plus";
+// import closeWin from './auth'
 
 
 // ---------------本组件内容无需维护-----------------------------
@@ -179,14 +183,10 @@ const redisError = () => {
     ElMessage.error("缓存服务器出错，请重试")
 }
 
-const handleClose = ()=> {
-    window.currentWindow.close()
-}
+// const handleClose = ()=>{
+//     closeWin()
+// }
 
-onMounted(()=> {
-    window.currentWindow.center()
-    window.currentWindow.setSize(460, 500)
-})
 </script>
 
 <style scoped>
