@@ -185,7 +185,7 @@ const handleClose = ()=> {
 
 onMounted(()=> {
     window.currentWindow.center()
-    window.currentWindow.setSize(460, 500)
+    window.currentWindow.setSize(460, 490)
 })
 </script>
 

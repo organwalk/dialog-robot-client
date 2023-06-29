@@ -168,10 +168,11 @@ const emit = defineEmits(["user-input", //  传递用户输入文本事件
     "clear-chat",   //  清除聊天
     "image-url", //  图片url
     "voice-info"    //语音数据
-])   //  发送姓名
+])
 const props = defineProps({
     missingValue: String,
     recommend: String,
+    objectNameFromRec:String,
     resOver: Boolean
 })
 
@@ -179,9 +180,17 @@ const resOver = computed(() => props.resOver)
 //  动态获取推荐提示语句
 const rcd = computed(() => props.recommend)
 watch(rcd, (val) => {
+    getRecAndToSend(val)
+})
+// 动态获取推荐人名
+const objectName = computed(() => props.objectNameFromRec)
+watch(objectName,(val) => {
+    getRecAndToSend(val)
+})
+const getRecAndToSend = (val) => {
     orderContent.value = val
     sendOrder()
-})
+}
 
 //  结束本轮对话
 const clear = () => {
@@ -453,7 +462,7 @@ const objectIsMissingKey = (content) => {
         store.dispatch('updataMissingKeyObj', newObject)
         emit('send-status', 'missValue')
         emit('reply-robot', newObject)
-    } else if (content === '人') {
+    } else if (content === '职员') {
         const newObject = {
             ...store.state.chat.missingKeyObj,
             receivers: []
@@ -568,7 +577,11 @@ const userInputAboutMissingValues = async (type, val) => {
             case 'receivers':
             case 'groupId':
                 data = await objectIdByName(type, val)
-                newObj = {...oldObj, [type]: data}
+                if (data.length === 1 && data[0] === ""){
+                    newObj = {...oldObj, [type]: ""}
+                }else {
+                    newObj = {...oldObj, [type]: data}
+                }
                 break
             case 'name':
                 data = await objectIdByName(type, val)

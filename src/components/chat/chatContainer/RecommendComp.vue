@@ -23,7 +23,7 @@
                 <el-card shadow="never"  v-for = "(item,index) in limitationsList"
                           :key="index"
                           class="rec-card">
-                    <span style="line-height: 2;" v-html="item.limitation"/>
+                    <span style="line-height: 2;" v-html="item"/>
                 </el-card>
             </el-card>
 
@@ -47,27 +47,17 @@ const limitationsList = ref([])
 const emit = defineEmits(['send-recommend-text'])
 
 const sendRecommendText = (recommend) => {
-    console.log(recommend)
    emit('send-recommend-text',recommend)
 }
 
 onMounted(()=>{
     while (randomIndexes.size < 3) {
-        randomIndexes.add(Math.floor(Math.random() * recommendsData.length));
+        randomIndexes.add(Math.floor(Math.random() * recommendsData.recommend.length));
     }
     for (const index of randomIndexes) {
-        recommendList.value.push(recommendsData[index].recommend);
+        recommendList.value.push(recommendsData.recommend[index]);
     }
-
-    limitationsList.value.push(
-        {
-            limitation: "本对话机器人基于自然语言处理模型与移动云云空间完成办公功能",
-        },
-        {
-            limitation: "本对话机器人无法对超出内部所定义的办公功能作出有效回应",
-        },
-    )
-
+    Array.prototype.push.apply(limitationsList.value,recommendsData.limitation)
 })
 
 </script>

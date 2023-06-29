@@ -56,7 +56,8 @@
                                  :msg="item.message"
                                  @send-miss-value-type="getMissValueType"
                                  @send-loading="getLoading"
-                                 @show-recommend="dontShowRec"/>
+                                 @show-recommend="dontShowRec"
+                                 @show-object-rec="showObjectRec"/>
                 </el-col>
             </el-row>
             <br/>
@@ -66,6 +67,27 @@
                 <el-card :body-style="{padding:'0'}" shadow="never" style="border: none;background-color:#f7f7f7;">
                     <span style="font-size: 10px;font-family: 微软雅黑,serif;user-select: none;">Responding...</span>
                 </el-card>
+            </el-col>
+        </el-row>
+<!--        问询操作对象时推荐-->
+        <el-row style="margin-top: -4%" v-if="state.showObjectNameFromRec">
+            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="left">
+                <el-tooltip
+                    effect="dark"
+                    content="为您推荐"
+                    placement="bottom"
+                >
+                    <el-button :icon="More" circle v-btn/>
+                </el-tooltip>
+            </el-col>
+            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"
+                    v-for="(item,index) in objectRecommend.slice(0,3)"
+                    :key="index"
+            >
+                <el-button style="width: 95%;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                           round v-btn @click="sendObjectNameToInput(item.name)">
+                    {{ item.name }}
+                </el-button>
             </el-col>
         </el-row>
         <!--        在对话下展示推荐指令  -->
@@ -92,6 +114,7 @@
             @voice-info="voiceInfo"
             :res-over="state.resOver"
             :recommend="state.recommendText"
+            :object-name-from-rec="state.objectNameFromRec"
             :missing-value="state.missValueType"/>
 </template>
 
@@ -100,16 +123,18 @@ import ChatInputComp from "@/components/chat/chatContainer/chat-input-comp.vue";
 import RobotReply from "@/components/chat/chatContainer/robot-reply-c.vue";
 import RecommendComp from "@/components/chat/chatContainer/RecommendComp.vue";
 import recommendsData from "@/optionConfig/recommendText.json";
-import { nextTick, reactive, ref} from "vue";
+import {nextTick, reactive, ref} from "vue";
 import {useStore} from "vuex";
 import {ElMessage} from "element-plus";
-import {VideoPlay} from '@element-plus/icons-vue'
+import {VideoPlay,More} from '@element-plus/icons-vue'
 import {playRecording, playRecordingPause} from "@/optionConfig/voice-function";
+import {getDeptList, getPersonDept} from "@/api/cloud/manage-person";
 
 const state = reactive({
     toDay: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate(),
     showRecommend: true,    //  展示首屏推荐
     showRecommendTip: true, //  展示回复语句下的推荐
+    showObjectNameFromRec: false, // 展示操作对象推荐
     showToDay: false,   //  展示顶部聊天日期
     chatMessages: [],   //  聊天记录数组
     containerScrollTop: 0,  //  滚动至聊天容器底部
@@ -122,6 +147,7 @@ const state = reactive({
     missValueType: '',  //空缺值类型
     cardStatus: '', //  回复组件中所需”卡片回复状态机“所需参数
     recommendText: '',  //  推荐语句
+    objectNameFromRec: '', // 推荐人名
     imageUrl: '',    //图片url
     voiceUrl:'',//录音文件Url
     duration:Number,//时长
@@ -137,6 +163,7 @@ const onUserInput = (userInput) => {
         state.showToDay = true
         state.showRecommend = false
         state.showRecommendTip = false
+        state.showObjectNameFromRec = false
         // 显示用户输入
         state.chatMessages.push({
             type: 'user',
@@ -229,15 +256,53 @@ const scrollBottom = () => {
     })
 }
 
+// 推荐操作对象并提供点击事件
+const objectRecommend = ref([])
+const getObjectRecommendUserList = ( type ) => {
+    objectRecommend.value = []
+    if ( type === "name"){
+        getPersonDept(Number(sessionStorage.getItem("deptId"))).then(res => {
+            const users = res.data.data.users
+            const randomIndexes = []
+            while (randomIndexes.length < 3) {
+                const randomIndex = Math.floor(Math.random() * users.length)
+                if (!randomIndexes.includes(randomIndex)) {
+                    randomIndexes.push(randomIndex)
+                }
+            }
+            randomIndexes.forEach(index => {
+                objectRecommend.value.push(users[index])
+            })
+        })
+    }else if (type === "group"){
+        getDeptList().then(res => {
+            res.data.data.departments.forEach((dept) => {
+                objectRecommend.value.push(dept)
+                loading.value = false
+            })
+        })
+    }
+}
+const sendObjectNameToInput = (name) => {
+    state.objectNameFromRec = name
+    state.showObjectNameFromRec = false
+}
+const showObjectRec = (val) => {
+    state.showObjectNameFromRec = true
+    getObjectRecommendUserList(val)
+}
+
 const getRecommendList = () => {
     state.randomIndexes.clear();
     state.recommendList = [];
     while (state.randomIndexes.size < 3) {
-        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.length));
+        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.MsgAbout.length));
     }
+    const randomRecommendIndex = Math.floor(Math.random() * recommendsData.recommend.length);
     for (const index of state.randomIndexes) {
-        state.recommendList.push(recommendsData[index].recommend);
+        state.recommendList.push(recommendsData.MsgAbout[index]);
     }
+    state.recommendList.push(recommendsData.recommend[randomRecommendIndex]);
 }
 
 

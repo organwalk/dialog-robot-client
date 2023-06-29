@@ -48,11 +48,12 @@ const cardStatus = computed(() => props.cardStatus)
  * 提交‘展示推荐卡片’、‘缺失值Key’
  * @type {EmitFn<(string)[]>}
  */
-const emit = defineEmits(['showRecommend', 'send-miss-value-type','send-loading'])
+const emit = defineEmits(['showRecommend', 'showObjectRec', 'send-miss-value-type','send-loading'])
 const store = useStore()
 
 //  初始化文字回复
 const robotReply = ref('')
+const nameAndGroupMark = ref(0)
 
 //  定义总体回复状态机
 const getReply = () => {
@@ -67,6 +68,7 @@ const getReply = () => {
             robotReply.value = getMissValueReply()
             break;
         case 'orderType':
+            nameAndGroupMark.value = 0
             robotReply.value = getOrderTypeReply()
             break;
         case 'cardInteraction':
@@ -128,7 +130,20 @@ const getMissValueReply = () => {
     //发送缺失值key
     emit('send-miss-value-type', missValue.value)
     emit('showRecommend', !missValue.value)
-    return robotReplyConfig[missValue.value + 'Missing'];
+    if (missValue.value === "receivers"){
+        nameAndGroupMark.value  = nameAndGroupMark.value + 1
+        emit('showObjectRec','name')
+    }else if (missValue.value === "groupId"){
+        nameAndGroupMark.value  = nameAndGroupMark.value + 1
+        emit('showRecommend', false)
+        emit('showObjectRec','group')
+    }
+    if (nameAndGroupMark.value >= 1){
+        return robotReplyConfig[missValue.value + 'Error']
+    }else {
+        return robotReplyConfig[missValue.value + 'Missing'];
+    }
+
 }
 
 const getOrderTypeReply = () => {
