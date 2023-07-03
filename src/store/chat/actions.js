@@ -13,5 +13,20 @@ export default {
     },
     updataVoiceObj({commit},voiceObj){
         commit('setVoiceObj',voiceObj)
+    },
+    updataNameAndGroupMarkNum({commit},nameAndGroupMarkNum){
+        commit('setNameAndGroupMarkNum',nameAndGroupMarkNum)
+    },
+    updataTimeQueryPlanData({commit},timeQueryPlanData){
+        commit('setTimeQueryPlanData',timeQueryPlanData)
+    },
+    updataNameQueryPlanData({commit},nameQueryPlanData){
+        commit('setNameQueryPlanData',nameQueryPlanData)
+    },
+    updataContentQueryPlanData({commit},contentQueryPlanData){
+        commit('setContentQueryPlanData',contentQueryPlanData)
+    },
+    updataFastQueryNotesData({commit},fastQueryNotesData){
+        commit('setFastQueryNotesData',fastQueryNotesData)
     }
 }

@@ -156,6 +156,8 @@ import { usingVoice} from "@/optionConfig/voice-function";
 import RecordingComp from "@/components/chat/interactiveCard/using-voice/recording-comp.vue";
 import {useWhisper} from "@/api/whisper/use-whisper";
 import {ElMessage} from "element-plus";
+import * as data from "@/api/server/data";
+
 
 const orderContent = ref('')
 const store = useStore()
@@ -331,7 +333,6 @@ const sendOrder = () => {
             else {
                 inNewConversation(orderContent.value)
             }
-
         } else {
             //  如果不是新一轮对话则表明具有空缺值
             //  如果空缺值为object，则需要进行人名或群组的确认
@@ -377,11 +378,54 @@ const intentionIsNotNull = (ot, obj) => {
     emit("res-orderType", ot)
     //然后判断指令体对象中是否存在空值
     if (filterEmptyKeys(obj).length > 0) {
-        //  如果存在空值则处理空值
-        missingKeyIsExist(ot, obj)
+        if ("timeQueryPlanData" in obj){
+            store.dispatch('updataTimeQueryPlanData',obj.timeQueryPlanData)
+            emit("send-status","orderType")
+        }else if ("nameQueryPlanData" in obj){
+            store.dispatch('updataNameQueryPlanData',obj.nameQueryPlanData)
+            emit("send-status","orderType")
+        }else if ("contentQueryPlanData" in obj){
+            store.dispatch('updataContentQueryPlanData',obj.contentQueryPlanData)
+            emit("send-status","orderType")
+        } else {
+            //  如果存在空值则处理空值
+            missingKeyIsExist(ot, obj)
+        }
     } else {
-        //  如果不存在空值则直接调用接口
-        useApiAboutByDirect(ot, obj)
+        if (ot === "SendMsg"){
+            emit('send-status', 'orderType')
+        }else if (ot === "TimeQueryPlan"){
+            if ("timeQueryPlanData" in obj){
+                store.dispatch('updataTimeQueryPlanData',obj.timeQueryPlanData)
+                emit("send-status","orderType")
+            }else if ("timeQueryPlanNone" in obj){
+                emit('send-cardStatus', ot + "None")
+                emit("send-status","cardInteraction")
+            }
+        }else if (ot === "NameQueryPlan"){
+            if ("nameQueryPlanData" in obj){
+                store.dispatch('updataNameQueryPlanData',obj.nameQueryPlanData)
+                emit("send-status","orderType")
+            }else if ("nameQueryPlanDataNone" in obj){
+                emit('send-cardStatus', ot + "None")
+                emit("send-status","cardInteraction")
+            }
+        }else if (ot === "ContentQueryPlan"){
+            if ("contentQueryPlanData" in obj){
+                store.dispatch('updataContentQueryPlanData',obj.contentQueryPlanData)
+                emit("send-status","orderType")
+            }else if ("contentQueryPlanNone" in obj){
+                emit('send-cardStatus', ot + "None")
+                emit("send-status","cardInteraction")
+            }
+        }else if (ot === "FastQueryNotes"){
+            store.dispatch("updataFastQueryNotesData",obj.fastQueryNotesData)
+            emit("send-status","orderType")
+        }
+        else {
+            //  如果不存在空值则直接调用接口
+            useApiAboutByDirect(ot, obj)
+        }
     }
 }
 
@@ -443,7 +487,19 @@ const useApiAboutByDirect = (ot, obj) => {
     } else if (deptType.test(ot) && ot !== 'GetManDept') {
         emit('send-status', 'orderType')
         md.dept(ot, getOrderResObject(obj))
-    } else {
+    } else if (ot === "FastAddNotes"){
+        delete obj.orderType
+        card.addNotes(obj).then(res=>{
+            let nid = res.data.data.noticeId
+            obj["members"] = JSON.stringify(obj.members)
+            if (nid) {
+                data.addNotes(nid, obj)
+            }
+        })
+        emit('send-status', 'orderType')
+        console.log(obj)
+    }
+    else {
         emit("send-cardStatus", ot)
         emit('send-status', 'cardInteraction')
     }
@@ -524,6 +580,17 @@ const fillMissingValueFromContent = (msv, oc) => {
                 const mType = /Man/
                 if (mType.test(orderType)) {
                     mp.man(orderType, getOrderResObject(store.state.chat.missingKeyObj))
+                }else if (ot === "FastAddNotes"){
+                    let obj = getOrderResObject(store.state.chat.missingKeyObj)
+                    card.addNotes(obj).then(res=>{
+                        let nid = res.data.data.noticeId
+                        obj["members"] = JSON.stringify(obj.members)
+                        if (nid) {
+                            data.addNotes(nid, obj)
+                        }
+                    })
+                    emit('send-status', 'orderType')
+                    console.log(obj)
                 }
                 emit('send-status', 'orderType')
                 emit('res-orderType', orderType)

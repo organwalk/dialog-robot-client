@@ -91,7 +91,7 @@
             </el-col>
         </el-row>
         <!--        在对话下展示推荐指令  -->
-        <el-row v-if="state.showRecommendTip" style="margin-top: -1%">
+        <el-row v-if="state.showRecommendTip || state.dontShowRec" style="margin-top: -1%">
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                 <el-button v-for="(recommend,index) in state.recommendList" :key="index"
                            @click="getRecommendTip(recommend)"
@@ -163,6 +163,7 @@ const onUserInput = (userInput) => {
         state.showToDay = true
         state.showRecommend = false
         state.showRecommendTip = false
+        state.dontShowRec = false
         state.showObjectNameFromRec = false
         // 显示用户输入
         state.chatMessages.push({
@@ -181,6 +182,7 @@ const imageUrl = (val) => {
     state.showToDay = true
     state.showRecommend = false
     state.showRecommendTip = false
+    state.dontShowRec = false
     state.chatMessages.push({
         type: 'image',
         message: 'https://organwalk.ink/api/images/' + val
@@ -197,6 +199,7 @@ const voiceInfo = (obj) => {
     state.showToDay = true
     state.showRecommend = false
     state.showRecommendTip = false
+    state.dontShowRec = false
     state.chatMessages.push({
         type: 'voice',
         message: {
@@ -244,7 +247,7 @@ const getReplyStatus = (val) => {
         })
         state.resOver = false
         loading.value = false
-        state.showRecommendTip = true
+        // state.showRecommendTip = true
         scrollBottom()
     }
 }
@@ -295,16 +298,209 @@ const showObjectRec = (val) => {
 const getRecommendList = () => {
     state.randomIndexes.clear();
     state.recommendList = [];
-    while (state.randomIndexes.size < 3) {
-        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.MsgAbout.length));
+    if (state.orderType === "SendMsg"){
+        whenOrderTypeIsSendMsg()
+    } else if (/\w+Plan$/.test(state.orderType) ||
+        state.orderType === "GetPlanByMan"){
+        if (/\w+QueryPlan$/.test(state.orderType)){
+            whenOrderTypeIsQueryPlan()
+        }else {
+            whenOrderTypeAboutPlanOrNote("plan")
+        }
+    } else if (state.orderType === "FastQueryNotes"){
+        whenOrderTypeIsQueryNotes()
+    } else if (/\w+Note$/.test(state.orderType) ||
+        state.orderType === "GetNotes" ||
+        state.orderType === "GetNotesByMan" ||
+        state.orderType === "FastAddNotes"){
+        whenOrderTypeAboutPlanOrNote("note")
     }
-    const randomRecommendIndex = Math.floor(Math.random() * recommendsData.recommend.length);
+    else {
+        whenNormalTalking()
+    }
+}
+
+const whenNormalTalking = () => {
+    while (state.randomIndexes.size < 2) {
+        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.MsgAbout.length))
+    }
+    let randomRecommendIndex = new Set()
+    while (randomRecommendIndex.size < 2) {
+        randomRecommendIndex.add(Math.floor(Math.random() * recommendsData.recommend.length))
+    }
     for (const index of state.randomIndexes) {
         state.recommendList.push(recommendsData.MsgAbout[index]);
     }
-    state.recommendList.push(recommendsData.recommend[randomRecommendIndex]);
+    for (const rIndex of randomRecommendIndex) {
+        state.recommendList.push(recommendsData.recommend[rIndex])
+    }
+}
+const whenOrderTypeIsSendMsg = () => {
+    state.recommendList.push(recommendsData.MsgAbout[0]);
+    while (state.randomIndexes.size < 3) {
+        state.randomIndexes.add(Math.floor(Math.random() * (recommendsData.MsgAbout.length - 1)) + 1);
+    }
+    for (const index of state.randomIndexes) {
+        state.recommendList.push(recommendsData.MsgAbout[index]);
+    }
 }
 
+const whenOrderTypeAboutPlanOrNote = (type) => {
+    let randomRecommendIndex = new Set()
+    while (randomRecommendIndex.size < 2) {
+        randomRecommendIndex.add(Math.floor(Math.random() * recommendsData.recommend.length))
+    }
+    while (state.randomIndexes.size < 1) {
+        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.MsgAbout.length))
+    }
+    for (const rIndex of randomRecommendIndex) {
+        state.recommendList.push(recommendsData.recommend[rIndex])
+    }
+    for (const index of state.randomIndexes) {
+        state.recommendList.push(recommendsData.MsgAbout[index]);
+    }
+    if (type === "plan"){
+        getIndexOfQueryPlanByLength(1)
+    }else if (type === "note"){
+        getIndexOfQueryNotesByLength(1)
+    }
+
+}
+
+const whenOrderTypeIsQueryPlan = () => {
+    let type
+    const chatState = store.state.chat
+    if ((chatState.timeQueryPlanData === '' && state.orderType === "TimeQueryPlan") ||
+        (chatState.nameQueryPlanData === '' && state.orderType === "NameQueryPlan") ||
+        (chatState.contentQueryPlanData === '' && state.orderType === "ContentQueryPlan")){
+        type = "Missing"
+    }else {
+        type = ""
+    }
+    if (type === "Missing") {
+        getIndexOfQueryPlanByLength(3)
+    } else {
+        getIndexOfQueryPlanByLength(2)
+    }
+}
+
+const whenOrderTypeIsQueryNotes = () => {
+    getIndexOfQueryNotesByLength(2)
+}
+
+const getIndexOfQueryPlanByLength = (num) => {
+    let randomIndexes = []
+    let dateTimeIndexes = []
+    let randomIndex
+    if (num === 3){
+        state.recommendList.push(recommendsData.QueryPlanAbout[1])
+        while (randomIndexes.length < 3) {
+            randomIndex = Math.floor(Math.random() * (recommendsData.QueryPlanAbout.length -2)) + 2;
+            if (!randomIndexes.includes(randomIndex)) {
+                randomIndexes.push(randomIndex);
+            }
+        }
+        while (dateTimeIndexes.length < 3) {
+            randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+            if (!dateTimeIndexes.includes(randomIndex)) {
+                dateTimeIndexes.push(randomIndex);
+            }
+        }
+    } else if (num === 1){
+        while (randomIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * (recommendsData.QueryPlanAbout.length -2)) + 2;
+            if (!randomIndexes.includes(randomIndex)) {
+                randomIndexes.push(randomIndex);
+            }
+        }
+        while (dateTimeIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+            if (!dateTimeIndexes.includes(randomIndex)) {
+                dateTimeIndexes.push(randomIndex);
+            }
+        }
+    }
+    else {
+        for (let i = 0; i < 2; i++) {
+            state.recommendList.push(recommendsData.QueryPlanAbout[i])
+        }
+        while (randomIndexes.length < 2) {
+            randomIndex = Math.floor(Math.random() * (recommendsData.QueryPlanAbout.length - 2)) + 2
+            if (!randomIndexes.includes(randomIndex)) {
+                randomIndexes.push(randomIndex);
+            }
+        }
+        while (dateTimeIndexes.length < 2) {
+            randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+            if (!dateTimeIndexes.includes(randomIndex)) {
+                dateTimeIndexes.push(randomIndex);
+            }
+        }
+    }
+    for (const index of randomIndexes) {
+        const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
+        const queryPlanElement = recommendsData.QueryPlanAbout[index];
+        const recommendElement = `${dateTimeElement}${queryPlanElement}`;
+        state.recommendList.push(recommendElement);
+    }
+}
+
+const getIndexOfQueryNotesByLength = (num) => {
+    let randomIndexes = []
+    let dateTimeIndexes = []
+    let randomIndex
+    if (num === 2){
+        for (let i = 0; i < 2; i++) {
+            state.recommendList.push(recommendsData.QueryNotesAbout[i])
+        }
+        while (randomIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * (recommendsData.QueryNotesAbout.length - 2)) + 2
+            if (!randomIndexes.includes(randomIndex)) {
+                randomIndexes.push(randomIndex);
+            }
+        }
+        while (dateTimeIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+            if (!dateTimeIndexes.includes(randomIndex)) {
+                dateTimeIndexes.push(randomIndex);
+            }
+        }
+    } else if (num === 1){
+        while (randomIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * (recommendsData.QueryNotesAbout.length - 2)) + 2
+            if (!randomIndexes.includes(randomIndex)) {
+                randomIndexes.push(randomIndex);
+            }
+        }
+        while (dateTimeIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+            if (!dateTimeIndexes.includes(randomIndex)) {
+                dateTimeIndexes.push(randomIndex);
+            }
+        }
+    }
+    for (const index of randomIndexes) {
+        const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
+        const queryNotesElement = recommendsData.QueryNotesAbout[index];
+        const recommendElement = `${dateTimeElement}${queryNotesElement}`;
+        state.recommendList.push(recommendElement);
+    }
+    while (state.randomIndexes.size < 1) {
+        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.QueryPlanAbout.length))
+    }
+    while (dateTimeIndexes.length < 1) {
+        randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+        if (!dateTimeIndexes.includes(randomIndex)) {
+            dateTimeIndexes.push(randomIndex);
+        }
+    }
+    for (const index of randomIndexes) {
+        const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
+        const queryPlanElement = recommendsData.QueryPlanAbout[index];
+        const recommendElement = `${dateTimeElement}${queryPlanElement}`;
+        state.recommendList.push(recommendElement);
+    }
+}
 
 //  接收用户发送事件的数据
 const getOrderType = (val) => {

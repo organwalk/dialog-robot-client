@@ -3,5 +3,10 @@ export default {
     searchUid:Object,
     sending:true,
     createStatus:'',
-    voiceObj:{}
+    voiceObj:{},
+    nameAndGroupMarkNum:0,
+    timeQueryPlanData:'',
+    nameQueryPlanData:'',
+    contentQueryPlanData:'',
+    fastQueryNotesData:''
 }

@@ -13,5 +13,20 @@ export default {
     },
     setVoiceObj(state,voiceObj){
         state.voiceObj = voiceObj
+    },
+    setNameAndGroupMarkNum(state,nameAndGroupMarkNum){
+        state.nameAndGroupMarkNum = nameAndGroupMarkNum
+    },
+    setTimeQueryPlanData(state,timeQueryPlanData){
+        state.timeQueryPlanData = timeQueryPlanData
+    },
+    setNameQueryPlanData(state,nameQueryPlanData){
+        state.nameQueryPlanData = nameQueryPlanData
+    },
+    setContentQueryPlanData(state,contentQueryPlanData){
+        state.contentQueryPlanData = contentQueryPlanData
+    },
+    setFastQueryNotesData(state,fastQueryNotesData){
+        state.fastQueryNotesData = fastQueryNotesData
     }
 }

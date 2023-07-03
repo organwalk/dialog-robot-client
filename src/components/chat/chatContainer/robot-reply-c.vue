@@ -4,7 +4,7 @@
              class="robot-chat-bubble"
              style="display: inline-block;line-height: 1.5;"
              v-if="robotReply">
-        <span v-html="robotReply"/>
+        <span style="user-select: none" v-html="robotReply"/>
     </el-card><br/><br/>
     <el-row>
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
@@ -53,7 +53,6 @@ const store = useStore()
 
 //  初始化文字回复
 const robotReply = ref('')
-const nameAndGroupMark = ref(0)
 
 //  定义总体回复状态机
 const getReply = () => {
@@ -68,7 +67,7 @@ const getReply = () => {
             robotReply.value = getMissValueReply()
             break;
         case 'orderType':
-            nameAndGroupMark.value = 0
+            store.dispatch('updataNameAndGroupMarkNum',0)
             robotReply.value = getOrderTypeReply()
             break;
         case 'cardInteraction':
@@ -104,6 +103,15 @@ const cardComponent = () => {
         case 'ModPlan':
             component.value = ScheduleListComp
             break
+        case 'TimeQueryPlanNone':
+            component.value = ScheduleListComp
+            break
+        case 'NameQueryPlanNone':
+            component.value = ScheduleListComp
+            break
+        case 'ContentQueryPlanNone':
+            component.value = ScheduleListComp
+            break
         case 'GetNotes':
             component.value = NotificationListComp
             break
@@ -129,25 +137,22 @@ const getInitialReply = () => {
 const getMissValueReply = () => {
     //发送缺失值key
     emit('send-miss-value-type', missValue.value)
-    emit('showRecommend', !missValue.value)
+    emit('showRecommend', false)
     if (missValue.value === "receivers"){
-        nameAndGroupMark.value  = nameAndGroupMark.value + 1
+        store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
         emit('showObjectRec','name')
     }else if (missValue.value === "groupId"){
-        nameAndGroupMark.value  = nameAndGroupMark.value + 1
-        emit('showRecommend', false)
         emit('showObjectRec','group')
     }
-    if (nameAndGroupMark.value >= 1){
+    if (store.state.chat.nameAndGroupMarkNum > 1){
         return robotReplyConfig[missValue.value + 'Error']
     }else {
         return robotReplyConfig[missValue.value + 'Missing'];
     }
-
 }
 
 const getOrderTypeReply = () => {
-    const template = robotReplyConfig[orderType.value]
+    let template = robotReplyConfig[orderType.value]
     let reply = template
 
     //获取人员详情
@@ -189,7 +194,40 @@ const getOrderTypeReply = () => {
                 })
             })
         }
-    } else {
+    } else if (orderType.value === 'TimeQueryPlan'){
+        if (store.state.chat.timeQueryPlanData.length === 0){
+            emit('showRecommend', robotReplyConfig[orderType.value + "Missing"])
+            return robotReplyConfig[orderType.value + "Missing"]
+        } else {
+            emit('showRecommend', reply)
+            return reply.replace("${content}",store.state.chat.timeQueryPlanData.join(''))
+        }
+    }else if (orderType.value === 'NameQueryPlan'){
+        if (store.state.chat.nameQueryPlanData.length === 0){
+            emit('showRecommend', robotReplyConfig[orderType.value + "Missing"])
+            return robotReplyConfig[orderType.value + "Missing"]
+        }else {
+            emit('showRecommend', reply)
+            return reply.replace("${content}",store.state.chat.nameQueryPlanData.join(''))
+        }
+    } else if (orderType.value === 'ContentQueryPlan'){
+        if (store.state.chat.contentQueryPlanData.length === 0){
+            emit('showRecommend', robotReplyConfig[orderType.value + "Missing"])
+            return robotReplyConfig[orderType.value + "Missing"]
+        }else {
+            emit('showRecommend', reply)
+            return reply.replace("${content}",store.state.chat.contentQueryPlanData.join(''))
+        }
+    } else if (orderType.value === 'FastQueryNotes'){
+        if (store.state.chat.fastQueryNotesData.length === 0){
+            emit('showRecommend', robotReplyConfig[orderType.value + "Missing"])
+            return robotReplyConfig[orderType.value + "Missing"]
+        }else {
+            emit('showRecommend', reply)
+            return reply.replace("${content}",store.state.chat.fastQueryNotesData.join(''))
+        }
+    }
+    else {
         reply = template
     }
     emit('showRecommend', reply)
@@ -208,6 +246,7 @@ const getCardStatusReply = () => {
 const emitShowRecommend = () => {
     emit('showRecommend', cardStatus.value)
 }
+
 </script>
 
 <style scoped>
