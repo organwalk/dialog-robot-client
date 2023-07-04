@@ -72,13 +72,15 @@ import * as mp from "@/api/cloud/manage-person"
 const props = defineProps(
     {
         deptId:String,
-        deptName:String
+        deptName:String,
+        ifChangeDeptName:String
     }
 )
 
 const employeeList = ref([])
 const deptId = computed(()=>props.deptId)
 const deptName = computed(()=>props.deptName)
+const ifChangeDeptName = computed(()=>props.ifChangeDeptName)
 
 //实现人员列表加载
 onMounted(()=>{
@@ -101,6 +103,18 @@ watch(deptId,(newVal)=>{
             loading.value = false
         })
     })
+})
+watch(ifChangeDeptName,(newVal)=>{
+    if (newVal){
+        loading.value = true
+        mp.getPersonDept(deptId.value).then(res=>{
+            res.data.data.users.forEach((user) => {
+                user.deptName = deptName.value
+                employeeList.value.push(user)
+                loading.value = false
+            })
+        })
+    }
 })
 
 //实现人员搜索

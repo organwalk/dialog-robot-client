@@ -226,6 +226,24 @@ const getOrderTypeReply = () => {
             emit('showRecommend', reply)
             return reply.replace("${content}",store.state.chat.fastQueryNotesData.join(''))
         }
+    }else if (orderType.value === 'FastContentQueryNotes'){
+        if (store.state.chat.fastContentQueryNotesData.data.length === 0){
+            emit('showRecommend', robotReplyConfig[orderType.value + "Missing"])
+            return robotReplyConfig[orderType.value + "Missing"]
+        }else {
+            emit('showRecommend', reply)
+            let status = store.state.chat.fastContentQueryNotesData.status
+            if (Array.isArray(status)){
+                return reply.replace("${status}","相关条目较多").replace("${content}",store.state.chat.fastContentQueryNotesData.data.join(''))
+            }else {
+                if (status === "save"){
+                    status = "您还未完成"
+                }else {
+                    status = "您已完成"
+                }
+                return reply.replace("${status}",status).replace("${content}",store.state.chat.fastContentQueryNotesData.data.join(''))
+            }
+        }
     }
     else {
         reply = template

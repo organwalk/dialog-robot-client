@@ -8,5 +8,9 @@ export default {
     timeQueryPlanData:'',
     nameQueryPlanData:'',
     contentQueryPlanData:'',
-    fastQueryNotesData:''
+    fastQueryNotesData:'',
+    fastContentQueryNotesData:{
+        status:'',
+        data:[]
+    }
 }

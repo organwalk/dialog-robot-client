@@ -387,7 +387,14 @@ const intentionIsNotNull = (ot, obj) => {
         }else if ("contentQueryPlanData" in obj){
             store.dispatch('updataContentQueryPlanData',obj.contentQueryPlanData)
             emit("send-status","orderType")
-        } else {
+        }else if ("fastQueryNotesData" in obj){
+            store.dispatch("updataFastQueryNotesData",obj.fastQueryNotesData)
+            emit("send-status","orderType")
+        }else if ("noteContentStatus" in obj || "fastContentQueryNotesData" in obj){
+            store.dispatch("updataFastContentQueryNotesData",obj.fastContentQueryNotesData)
+            emit("send-status","orderType")
+        }
+        else {
             //  如果存在空值则处理空值
             missingKeyIsExist(ot, obj)
         }
@@ -420,6 +427,10 @@ const intentionIsNotNull = (ot, obj) => {
             }
         }else if (ot === "FastQueryNotes"){
             store.dispatch("updataFastQueryNotesData",obj.fastQueryNotesData)
+            emit("send-status","orderType")
+        }else if (ot === "FastContentQueryNotes"){
+            store.dispatch("updataFastContentQueryNotesStatus",obj.noteContentStatus)
+            store.dispatch("updataFastContentQueryNotesData",obj.fastContentQueryNotesData)
             emit("send-status","orderType")
         }
         else {

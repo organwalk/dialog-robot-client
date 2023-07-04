@@ -30,9 +30,9 @@
                                      :page-two-data="pageTwoData"/>
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
-                    <el-button @click="back()" round color="#e9e9eb" v-if="backStep">Back</el-button>
-                    <el-button @click="next()" round color="#2C6AE3" v-if="nextStep">Next Step</el-button>
-                    <el-button @click="create()" round color="#2C6AE3" v-if="createStep">Confirm</el-button>
+                    <el-button @click="back()" round color="#e9e9eb" v-if="backStep" v-btn>Back</el-button>
+                    <el-button @click="next()" round color="#2C6AE3" v-if="nextStep" v-btn>Next Step</el-button>
+                    <el-button @click="create()" round color="#2C6AE3" v-if="createStep" v-btn>Confirm</el-button>
                 </el-col>
             </el-row>
         </el-card>
@@ -89,11 +89,7 @@ watch(active,(newVal,oldVal)=>{
     if (newVal < oldVal){
         nextStep.value = true
     }
-    else if (newVal > oldVal && pageTwoData.scheduleDes !==''&&pageTwoData.location !==''&&pageTwoData.scheduleMembers.length>0){
-        nextStep.value = true
-    }else {
-        nextStep.value = false
-    }
+    else nextStep.value = newVal > oldVal && pageTwoData.scheduleDes !== '' && pageTwoData.location !== '' && pageTwoData.scheduleMembers.length > 0;
 })
 
 const showCreateForm = ref(true)
@@ -167,7 +163,7 @@ const getPageTwoData = (scheduleDes,location,scheduleMembers) => {
 watch(
     () => [pageTwoData.scheduleDes,pageTwoData.location,pageTwoData.scheduleMembers],
     ([des,location,mem]) => {
-        nextStep.value = (des && location && mem[0].length>0)
+        nextStep.value = Boolean(des && location && mem)
     }
 )
 
@@ -197,7 +193,6 @@ const create = () => {
     allPageData.members = pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name}));
     //  如果存在sid则说明此次操作为修改操作
     if (sid.value){
-        console.log(222222)
         card.updataPlan(sid.value,allPageData).then(res=>{
             if (res.data.code !== 400){
                 allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
@@ -222,7 +217,6 @@ const create = () => {
             const sid = res.data.data.scheduleId
             allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
             data.saveScheduleCount(sid,allPageData).then(res=>{
-                console.log(11111111111)
                 if (res.data.success){
                     setTimeout(()=>{
                         loading.value = false

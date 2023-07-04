@@ -28,5 +28,11 @@ export default {
     },
     updataFastQueryNotesData({commit},fastQueryNotesData){
         commit('setFastQueryNotesData',fastQueryNotesData)
+    },
+    updataFastContentQueryNotesData({commit},fastContentQueryNotesData){
+        commit('setFastContentQueryNotesData',fastContentQueryNotesData)
+    },
+    updataFastContentQueryNotesStatus({commit},fastContentQueryNotesStatus){
+        commit('setFastContentQueryNotesStatus',fastContentQueryNotesStatus)
     }
 }

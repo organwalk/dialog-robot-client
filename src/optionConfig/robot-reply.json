@@ -37,6 +37,7 @@
   "ModNote": "您可以在此处管理您的事项。如果您需要删除一个事项，那您需要先取消它。对于<strong>非本日的事项您只能查看</strong>",
   "FastAddNotes": "已成功为您创建此快捷事项告知😊",
   "FastQueryNotes": "您好😊，根据您所提供的相关内容，已为您查询到如下事项：<br/><ul>${content}</ur>如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
+  "FastContentQueryNotes": "您好😊，该事项<strong>${status}</strong>，以下是该事项的具体内容：<br/><ul>${content}</ur>如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
 
   "titleMissing": "您缺失了标题，请您直接告诉我标题内容😊",
   "contentMissing": "您缺失了具体内容，您能直接告诉我内容吗😊",
@@ -55,7 +56,8 @@
   "TimeQueryPlanMissing": "您好😊，据我所知您在这个时间段似乎没有日程。如果您的日程<strong>时间跨度过长</strong>，而您告诉我的时间描述跨度过短，则可能无法满足搜索条件。<strong>建议您扩大时间描述的跨度或查看日程列表以获取完整日程信息</strong>",
   "NameQueryPlanMissing": "您好😊，您所指定的用户似乎没有为您创建日程。如果您想获取更多日程信息，可以<strong>查看日程列表</strong>",
   "ContentQueryPlanMissing": "您好😊，我没有查询到相应内容的日程。如果您想获取更多日程信息，可以<strong>查看日程列表</strong>",
-  "FastQueryNotesMissing": "您好😊，我没有查询到相关事项。如果您想获取更多事项信息，可以可以<strong>查看事项列表</strong>",
+  "FastQueryNotesMissing": "您好😊，我没有查询到相关事项。如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
+  "FastContentQueryNotesMissing": "您好😊，根据您所提及的内容，我没有查询到相关事项。如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
 
   "TimeQueryPlanNone": "抱歉，我未能在您所指定的时间段查询到相关日程信息。您可以通过下面的日程列表了解更多",
   "NameQueryPlanNone": "抱歉，我未能查询到您所指定的用户为您创建的日程等相关信息。您可以通过下面的日程列表了解更多",

@@ -1,9 +1,11 @@
 <template>
     <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
         <check-type @getCheckType="getCheckType"
+                    @get-new-dept-name = "getNewDeptName"
                     :dept-name="deptName"
                     :new-check-type="checkTypeValue"/>
         <employee-list v-if="checkTypeValue === 'Staff List'"
+                       :if-change-dept-name = "ifChangeDeptName"
                        :dept-id="deptId" :dept-name="deptName"/>
         <other-dept-list v-if="checkTypeValue === 'Other Depts' "
                          :now-dept-name="deptName"
@@ -37,13 +39,24 @@ watch(deptId,(newDeptId)=>{
 
 const deptName = ref('')
 onMounted(()=>{
+    getDeptName()
+})
+const ifChangeDeptName = ref("")
+const getNewDeptName = (val) => {
+    if (val){
+        getDeptName()
+        ifChangeDeptName.value = "change"
+    }
+}
+
+const getDeptName = () => {
     mp.getUserDept(Number(sessionStorage.getItem("uid"))).then(res=>{
         if (res.data.code === 200){
             deptName.value = res.data.data[1].name
             deptId.value = res.data.data[1].id
         }
     })
-})
+}
 
 </script>
 

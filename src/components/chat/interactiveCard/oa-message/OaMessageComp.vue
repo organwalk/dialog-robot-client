@@ -98,7 +98,6 @@ const showPageTwo = ref(false)
 const showSuccess = ref(false)
 const emit = defineEmits(['sendOASuccess'])
 const submit = () => {
-    console.log(obj)
     card.sendOAMsg(obj).then(res => {
         if (res.data.code === 200) {
             showSuccess.value = true

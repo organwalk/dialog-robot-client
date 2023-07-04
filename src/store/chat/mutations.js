@@ -28,5 +28,11 @@ export default {
     },
     setFastQueryNotesData(state,fastQueryNotesData){
         state.fastQueryNotesData = fastQueryNotesData
+    },
+    setFastContentQueryNotesStatus(state,status){
+        state.fastContentQueryNotesData.status = status
+    },
+    setFastContentQueryNotesData(state,data){
+        state.fastContentQueryNotesData.data = data
     }
 }

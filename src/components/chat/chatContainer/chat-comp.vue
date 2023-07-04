@@ -307,7 +307,7 @@ const getRecommendList = () => {
         }else {
             whenOrderTypeAboutPlanOrNote("plan")
         }
-    } else if (state.orderType === "FastQueryNotes"){
+    } else if (/\w+QueryNotes$/.test(state.orderType)){
         whenOrderTypeIsQueryNotes()
     } else if (/\w+Note$/.test(state.orderType) ||
         state.orderType === "GetNotes" ||
@@ -465,6 +465,27 @@ const getIndexOfQueryNotesByLength = (num) => {
                 dateTimeIndexes.push(randomIndex);
             }
         }
+        for (const index of randomIndexes) {
+            const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
+            const queryNotesElement = recommendsData.QueryNotesAbout[index];
+            const recommendElement = `${dateTimeElement}${queryNotesElement}`;
+            state.recommendList.push(recommendElement);
+        }
+        while (state.randomIndexes.size < 1) {
+            state.randomIndexes.add(Math.floor(Math.random() * recommendsData.QueryPlanAbout.length))
+        }
+        while (dateTimeIndexes.length < 1) {
+            randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
+            if (!dateTimeIndexes.includes(randomIndex)) {
+                dateTimeIndexes.push(randomIndex);
+            }
+        }
+        for (const index of randomIndexes) {
+            const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
+            const queryPlanElement = recommendsData.QueryPlanAbout[index];
+            const recommendElement = `${dateTimeElement}${queryPlanElement}`;
+            state.recommendList.push(recommendElement);
+        }
     } else if (num === 1){
         while (randomIndexes.length < 1) {
             randomIndex = Math.floor(Math.random() * (recommendsData.QueryNotesAbout.length - 2)) + 2
@@ -478,28 +499,14 @@ const getIndexOfQueryNotesByLength = (num) => {
                 dateTimeIndexes.push(randomIndex);
             }
         }
-    }
-    for (const index of randomIndexes) {
-        const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
-        const queryNotesElement = recommendsData.QueryNotesAbout[index];
-        const recommendElement = `${dateTimeElement}${queryNotesElement}`;
-        state.recommendList.push(recommendElement);
-    }
-    while (state.randomIndexes.size < 1) {
-        state.randomIndexes.add(Math.floor(Math.random() * recommendsData.QueryPlanAbout.length))
-    }
-    while (dateTimeIndexes.length < 1) {
-        randomIndex = Math.floor(Math.random() * recommendsData.dateTime.length);
-        if (!dateTimeIndexes.includes(randomIndex)) {
-            dateTimeIndexes.push(randomIndex);
+        for (const index of randomIndexes) {
+            const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
+            const queryNotesElement = recommendsData.QueryNotesAbout[index];
+            const recommendElement = `${dateTimeElement}${queryNotesElement}`;
+            state.recommendList.push(recommendElement);
         }
     }
-    for (const index of randomIndexes) {
-        const dateTimeElement = recommendsData.dateTime[dateTimeIndexes.pop()];
-        const queryPlanElement = recommendsData.QueryPlanAbout[index];
-        const recommendElement = `${dateTimeElement}${queryPlanElement}`;
-        state.recommendList.push(recommendElement);
-    }
+
 }
 
 //  接收用户发送事件的数据

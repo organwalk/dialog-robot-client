@@ -4,7 +4,7 @@
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <el-input
                         v-model="notificationDes"
-                        placeholder="Please input a content about notification "
+                        placeholder="请输入告知内容，如：请在上午十点参加小组会议 "
                         :prefix-icon="Check"
                         maxlength="80"
                         :rows="3"
@@ -17,7 +17,7 @@
         <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <el-card shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;">
-                    <span style="font-weight: bolder">请选择事项的基本配置项</span><br/><br/>
+                    <span style="font-weight: bolder">请填写发布事项告知所需的必要信息</span><br/><br/>
                     <el-row :gutter="10">
                         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
@@ -26,7 +26,8 @@
                                         type="datetime"
                                         format="YYYY-MM-DD HH:mm"
                                         value-format="YYYY-MM-DD HH:mm"
-                                        placeholder="通知时间"
+                                        :default-value="nowTime"
+                                        placeholder="通知时间，日期范围不可小于今日"
                                         style="width: 100%"
                                 />
                             </el-card>
@@ -49,7 +50,7 @@
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
                                 <span>选择通知人员</span><br/><br/>
                                 <el-select v-model="scheduleMembers"
-                                           placeholder="Select"
+                                           placeholder="可同时选择多名人员"
                                            multiple
                                            filterable
                                            @change="handleChange">
@@ -72,16 +73,18 @@
 
 <script setup>
 import {Check} from "@element-plus/icons-vue";
-import {defineEmits, ref, watch, defineProps, onMounted, computed} from "vue";
+import {defineEmits, ref,  defineProps, onMounted, computed, watchEffect} from "vue";
 import * as card from "@/api/cloud/card";
 import * as data from "@/api/server/data"
 import {ElMessage} from "element-plus";
+import {getNowTime, getUnixOnNewDateAndProcess} from "@/optionConfig/time-process-utils";
 
 const props = defineProps({
     showPageOne: Boolean,
     nid:String
 })
 
+const nowTime = ref()
 const startTime = ref('')
 const notice = ref(true)
 const notificationDes = ref('')
@@ -102,6 +105,8 @@ onMounted(()=>{
             })
         })
     }
+    nowTime.value = getNowTime("yyyy-mm-dd hh:mm")
+    startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm",new Date(getNowTime("yyyy-mm-dd hh:mm")))
     card.getPersonList().then(res=>{
         let users = res.data.data.userList
         opUsers.value = users
@@ -113,17 +118,17 @@ onMounted(()=>{
     })
 })
 const options = ref([])
-let mem = []
+const mem = ref([])
 
 //获取选择用户的uid及name值
 const handleChange = (selectedValues) => {
-    mem = []
+    mem.value = []
     const selectedOptions = selectedValues.map((value) => {
         const option = options.value.find((item) => item.value === value);
         return { value: value, label: option ? option.label : '' };
     });
     // 检查是否已经存在相同的对象数组
-    const isDuplicate = mem.some((arr) => {
+    const isDuplicate = mem.value.some((arr) => {
         if (arr.length !== selectedOptions.length) {
             return false;
         }
@@ -136,37 +141,29 @@ const handleChange = (selectedValues) => {
     });
     // 如果不存在相同的对象数组，则将新的对象数组添加到mem.value属性中
     if (!isDuplicate) {
-        mem.push(selectedOptions);
+        mem.value.push(selectedOptions);
     }
 }
 
 //向父组件发送该页数据，以辅助其进行表单检验
 const emit = defineEmits(["getPageOneData"])
-const sendPageOneData = () => {
-    emit('getPageOneData', notificationDes.value, startTime.value, notice.value, mem)
-}
-
-watch([scheduleMembers], (newMem) => {
-    if (newMem){
-        sendPageOneData()
+watchEffect(() => {
+    if (!startTime.value || !notice.value || !notificationDes.value || scheduleMembers.value.length === 0) {
+        emit('getPageOneData', "", "", "", [])
+    } else {
+        emit('getPageOneData', notificationDes.value, startTime.value, notice.value, mem)
     }
 })
 
-watch(startTime, (newVal) => {
-
-    // 获取今天的时间戳
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = ('0' + (today.getMonth() + 1)).slice(-2);
-    const day = ('0' + today.getDate()).slice(-2);
-    const todayString = `${year}-${month}-${day}`;
-    if (todayString !== newVal.split(' ')[0]){
-        ElMessage.error("仅能在今日范围内发起事项告知")
+watchEffect(() => {
+    const today = new Date()
+    const todayString = `${today.getFullYear()}-${('0' + (today.getMonth() + 1)).slice(-2)}-${('0' + today.getDate()).slice(-2)}`
+    if (startTime.value && todayString > startTime.value.split(' ')[0] ) {
+        ElMessage.error('通知时间范围不能小于当前日期')
         startTime.value = ''
     }
-
-
 })
+
 
 
 </script>

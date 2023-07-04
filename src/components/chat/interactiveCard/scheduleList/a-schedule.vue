@@ -10,7 +10,7 @@
         <el-card v-for="(item,index) in scheduleList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
-            <el-row justify="center">
+            <el-row justify="center" :style="item.action === 'cancel' ? { 'text-decoration': 'line-through' } : {}">
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                     <el-collapse>
                         <el-collapse-item :title="item.time">
@@ -27,13 +27,13 @@
                     }}</span>
                 </el-col>
                 <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
-                    <el-button v-if="item.uid === uid" type="primary" :icon="Edit" circle size="small"
+                    <el-button v-if="item.uid === uid && item.action !== 'cancel'" type="primary" :icon="Edit" circle size="small"
                                @click="updataSchedule(item.scheduleId)"/>
                 </el-col>
                 <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
                     <!--                    取消-->
                     <el-popconfirm width="200"
-                                   title="确定取消该日程吗？" @confirm="cancel(item.scheduleId)">
+                                   title="确定 完成 / 取消 该日程吗？" @confirm="cancel(item.scheduleId)">
                         <template #reference>
                             <el-button v-if="item.action !== 'cancel'" type="info" :icon="Close" circle size="small"/>
                         </template>

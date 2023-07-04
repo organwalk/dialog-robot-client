@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref, watch,defineEmits} from "vue";
+import {computed, onMounted, reactive, ref, watch, defineEmits, watchEffect} from "vue";
 import * as data from "@/api/server/data";
 
 //  获取点击的日程单元格
@@ -145,18 +145,16 @@ const getScheduleListByDay = (val)=>{
     emit('sendClickDay',hoverData.value)
 }
 
-watch([yearValue,monthValue],([newYear,newMonth])=>{
-    if (newYear && newMonth){
-        hoverData.value = newYear + "-" + newMonth + '-' + clickDay.value
-        const dateParts = hoverData.value.split('-');
-        const year = dateParts[0];
-        const month = dateParts[1].padStart(2, '0');
-        const day = dateParts[2].padStart(2, '0');
-        hoverData.value = `${year}-${month}-${day}`
-        emit('sendClickDay',hoverData.value)
-    }
+watchEffect(() => {
+    hoverData.value = yearValue.value + "-" + monthValue.value + '-' + chooseDateValue.value
+    console.log(hoverData.value)
+    const dateParts = hoverData.value.split('-');
+    const year = dateParts[0];
+    const month = dateParts[1].padStart(2, '0');
+    const day = dateParts[2].padStart(2, '0');
+    hoverData.value = `${year}-${month}-${day}`
+    emit('sendClickDay',hoverData.value)
 })
-
 
 // 填充日期列表
 const buildCalendar = (firstDay,lastDay) => {

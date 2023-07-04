@@ -6,7 +6,7 @@
                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                         <el-input
                                 v-model="messageTitle"
-                                placeholder="Please input a message title"
+                                placeholder="请输入消息标题，如：一则会议消息"
                                 :prefix-icon="Position"
                                 maxlength="25"
                                 show-word-limit
@@ -18,7 +18,7 @@
                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                         <el-input
                                 v-model="contentTitle"
-                                placeholder="Please input a Content title"
+                                placeholder="请输入内容标题，如：全链路深度营销"
                                 :prefix-icon="Tickets"
                                 maxlength="30"
                                 show-word-limit
@@ -30,7 +30,7 @@
                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
                         <el-input
                                 v-model="summary"
-                                placeholder="Please input Summary Content"
+                                placeholder="请输入消息内容概要"
                                 maxlength="100"
                                 show-word-limit
                                 type="textarea"

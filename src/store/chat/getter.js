@@ -7,5 +7,7 @@ export default {
     getTimeQueryPlanData:(state)=>state.timeQueryPlanData,
     getNameQueryPlanData:(state)=>state.nameQueryPlanData,
     getContentQueryPlanData:(state)=>state.contentQueryPlanData,
-    getFastQueryNotesData:(state)=>state.fastQueryNotesData
+    getFastQueryNotesData:(state)=>state.fastQueryNotesData,
+    getFastContentQueryNotesStatus:(state)=>state.fastContentQueryNotesData.status,
+    getFastContentQueryNotesData:(state)=>state.fastContentQueryNotesData.data
 }
