@@ -78,7 +78,6 @@ const getPageOneData = (newMsg, newTit, newSum) => {
 
 const getPageTwoData = (newFile, newRec,type) => {
     obj.image = 'https://organwalk.ink/api/images/' + newFile
-    console.log(type)
     if (newRec) {
         if (type === 'rec') {
             obj.receivers = newRec

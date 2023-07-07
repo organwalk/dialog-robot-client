@@ -68,6 +68,7 @@ import {ref, defineProps, computed, watch, onMounted} from "vue";
 import {Delete, Edit} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
 import * as mp from "@/api/cloud/manage-person"
+import {personInfoRefresh} from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
 
 const props = defineProps(
     {
@@ -152,6 +153,7 @@ const confirmEdit = (itemObject) =>{
                     message: '修改成功',
                     type: 'success',
                 })
+                personInfoRefresh()
                 mp.getPersonDept(Number(deptId.value)).then(res=>{
                     employeeList.value = []
                     res.data.data.users.forEach((user) => {

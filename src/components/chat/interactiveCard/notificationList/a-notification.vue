@@ -41,7 +41,7 @@
                     </el-popconfirm>
                     <!-- 删除 -->
                     <el-popconfirm width="200"
-                                   title="确定取消该日程吗？" @confirm="deleteSchedule(item.notice_id)">
+                                   title="确定删除该日程吗？" @confirm="deleteSchedule(item.notice_id)">
                         <template #reference>
                             <el-button v-if="item.action === 'cancel'" type="danger" :icon="Delete" circle
                                        size="small"/>
@@ -163,7 +163,7 @@ const deleteSchedule = (val) => {
                 if (res.data.status === 200) {
                     getToDayDate()
                     ElMessage({
-                        message: '取消成功',
+                        message: '删除成功',
                         type: 'success',
                     })
                     notificationList.value = []

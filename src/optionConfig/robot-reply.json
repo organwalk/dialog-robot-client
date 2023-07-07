@@ -13,8 +13,8 @@
   "SysMsg": "这是一则系统级的消息，应该很重要吧？🤔已帮您转达。请问还有什么能帮到您的吗？😊",
   "OAMsg": "您可以在此处填写OA消息的详细😊",
 
-  "AddMan": "已经帮您添加了这位员工。请问还有什么能帮到您的吗？😊",
-  "DelMan": "已经为您删除了这位员工。请问还有什么能帮到您的吗？😊",
+  "AddMan": "已经帮您添加了这位职员。请问还有什么能帮到您的吗？😊",
+  "DelMan": "已经为您删除了这位职员。请问还有什么能帮到您的吗？😊",
   "ModMan": "请问还有什么能帮到您的吗？😊",
   "GetManDept": "你好，据我所知，<strong>${userName}</strong>所属的部门应该是<strong>${deptName}</strong>😊请问还有什么能帮到您的吗？",
   "GetMan": "你好，据我所知，<strong>${userName}</strong>在<strong>${deptName}</strong>中工作，职责是<strong>${job}</strong>，手机号码是<strong>${mobile}</strong>。请问还有什么能帮到您的吗？😊",
@@ -40,7 +40,7 @@
   "FastContentQueryNotes": "您好😊，该事项<strong>${status}</strong>，以下是该事项的具体内容：<br/><ul>${content}</ur>如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
 
   "titleMissing": "您缺失了标题，请您直接告诉我标题内容😊",
-  "contentMissing": "您缺失了具体内容，您能直接告诉我内容吗😊",
+  "contentMissing": "您缺失了具体内容，请您直接告诉我具体内容😊",
   "receiversMissing": "您的要求我大概理解了😊，能再告诉我，您需要把消息转发给谁吗？请用顿号区别不同的发送对象，如：张三、李四",
   "groupIdMissing": "您的要求我大概理解了，能再直接告诉我，您需要把消息发到哪个部门群吗？",
   "nameMissing": "您的需求我大概理解了😊能请您直接告诉我他是谁吗？",

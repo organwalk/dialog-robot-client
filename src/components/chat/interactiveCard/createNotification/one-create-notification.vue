@@ -94,19 +94,6 @@ const notice_id = computed(()=>props.nid)
 
 //  组件被挂载时远程获取人员列表
 onMounted(()=>{
-    //  如果存在事项id则为修改事件，应该预先填充部分数据
-    if (notice_id.value){
-        data.getNotificationByNid(notice_id.value).then(res=>{
-            const obj = res.data.notificationData[0]
-            notice.value = Boolean(obj.is_push_mail)
-            notificationDes.value = obj.content
-            JSON.parse(obj.members).forEach(member => {
-                scheduleMembers.value.push(member.uid)
-            })
-        })
-    }
-    nowTime.value = getNowTime("yyyy-mm-dd hh:mm")
-    startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm",new Date(getNowTime("yyyy-mm-dd hh:mm")))
     card.getPersonList().then(res=>{
         let users = res.data.data.userList
         opUsers.value = users
@@ -115,7 +102,21 @@ onMounted(()=>{
                 arr.findIndex(u => u.value === user.value && u.label === user.label) === index
             ));
         options.value = opUsers.value
+        //  如果存在事项id则为修改事件，应该预先填充部分数据
+        if (notice_id.value){
+            data.getNotificationByNid(notice_id.value).then(res=>{
+                const obj = res.data.notificationData[0]
+                notice.value = Boolean(obj.is_push_mail)
+                notificationDes.value = obj.content
+                JSON.parse(obj.members).forEach(member => {
+                    scheduleMembers.value.push(member.uid)
+                })
+                getMemList(scheduleMembers.value)
+            })
+        }
     })
+    nowTime.value = getNowTime("yyyy-mm-dd hh:mm")
+    startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm",new Date(getNowTime("yyyy-mm-dd hh:mm")))
 })
 const options = ref([])
 const mem = ref([])
@@ -123,11 +124,14 @@ const mem = ref([])
 //获取选择用户的uid及name值
 const handleChange = (selectedValues) => {
     mem.value = []
-    const selectedOptions = selectedValues.map((value) => {
+    getMemList(selectedValues)
+}
+
+const getMemList = (val) => {
+    const selectedOptions = val.map((value) => {
         const option = options.value.find((item) => item.value === value);
         return { value: value, label: option ? option.label : '' };
     });
-    // 检查是否已经存在相同的对象数组
     const isDuplicate = mem.value.some((arr) => {
         if (arr.length !== selectedOptions.length) {
             return false;
@@ -139,9 +143,8 @@ const handleChange = (selectedValues) => {
         }
         return true;
     });
-    // 如果不存在相同的对象数组，则将新的对象数组添加到mem.value属性中
     if (!isDuplicate) {
-        mem.value.push(selectedOptions);
+        mem.value.push(selectedOptions)
     }
 }
 

@@ -102,7 +102,9 @@ onMounted(()=>{
         })
     })
 })
-watch([url.value,receivers.value],([newUrl,newRec]) => {
+watch([url,receivers],([newUrl,newRec]) => {
+    console.log(newUrl)
+    console.log(newRec)
     if (newUrl !== "" && newRec.length > 0){
        uploadContinue.value = true
         emit('sendFileStatus',newUrl,newRec,'rec')

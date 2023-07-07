@@ -102,8 +102,8 @@ const sendSysMsg = (obj)=>{
 const sendVoice = (obj) => {
     let newObj = {
         msgType:3,
-        message:obj.url,
-        extraData:"{\"duration\":" + obj.duration + "}",
+        message:obj.voiceUrl.voiceUrl,
+        extraData:"{\"duration\":" + obj.voiceUrl.duration + "}",
         receivers:["1151800183169088"],
         needPush:true
     }
