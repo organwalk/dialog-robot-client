@@ -30,6 +30,7 @@ import OneCreateNotification from "@/components/chat/interactiveCard/createNotif
 import * as card from '@/api/cloud/card'
 import * as data from '@/api/server/data'
 import {ArrowLeft} from "@element-plus/icons-vue";
+import {ElMessage} from "element-plus";
 
 //  获取父组件的nid值，若存在，则表明为修改操作，并据此判断是否应该渲染当前组件的返回键
 const props = defineProps({
@@ -71,27 +72,37 @@ const create = () => {
                         },2000)
                     }
                 })
+            }else {
+                loading.value = false
+                showCreateForm.value = false
+                ElMessage.error("服务错误。请使用 Ctrl + R 强制重新载入程序")
             }
         })
     }else {
         card.addNotes(pageOneData).then(res=>{
-            let nid = res.data.data.noticeId
-            pageOneData["members"] = JSON.stringify(pageOneData.members)
-            if (nid){
-                data.addNotes(nid,pageOneData).then(res=>{
-                    if (res.data.success){
-                        setTimeout(()=>{
-                            loading.value = false
-                            showCreateForm.value = false
-                            showSuccessTip.value = true
-                            emit('sendNotifiSuccess',showSuccessTip.value)
-                        },1000)
-                        setTimeout(()=>{
-                            let refresh = ''
-                            emit("clearNid",refresh)
-                        },2000)
-                    }
-                })
+            if (res.data.code === 200) {
+                let nid = res.data.data.noticeId
+                pageOneData["members"] = JSON.stringify(pageOneData.members)
+                if (nid) {
+                    data.addNotes(nid, pageOneData).then(res => {
+                        if (res.data.success) {
+                            setTimeout(() => {
+                                loading.value = false
+                                showCreateForm.value = false
+                                showSuccessTip.value = true
+                                emit('sendNotifiSuccess', showSuccessTip.value)
+                            }, 1000)
+                            setTimeout(() => {
+                                let refresh = ''
+                                emit("clearNid", refresh)
+                            }, 2000)
+                        }
+                    })
+                }
+            }else {
+                loading.value = false
+                showCreateForm.value = false
+                ElMessage.error("服务错误。请使用 Ctrl + R 强制重新载入程序")
             }
         })
     }

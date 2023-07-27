@@ -185,7 +185,7 @@ const imageUrl = (val) => {
     state.dontShowRec = false
     state.chatMessages.push({
         type: 'image',
-        message: 'https://organwalk.ink/api/images/' + val
+        message: 'http://47.122.19.138:38081/api/images/' + val
     })
     state.resOver = true
     loading.value = true
@@ -203,7 +203,7 @@ const voiceInfo = (obj) => {
     state.chatMessages.push({
         type: 'voice',
         message: {
-            url:'https://organwalk.ink/api/voice/' + obj.voiceUrl,
+            url:'http://47.122.19.138:38081/api/voice/' + obj.voiceUrl,
             time:obj.duration
         }
     })
@@ -227,7 +227,7 @@ const playVoice= (url) => {
 }
 
 const checkImage = (val) => {
-    const reg = /https:\/\/organwalk\.ink\/api\/images\//
+    const reg = /http:\/\/47\.122\.19\.138:38081\/api\/images\//;
     return !reg.test(val)
 }
 

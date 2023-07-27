@@ -7,7 +7,7 @@
                     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                         <el-upload
                                 v-model:file-list="fileList"
-                                action="https://organwalk.ink/api/image"
+                                action="http://47.122.19.138:38081/api/image"
                                 name="image"
                                 method="post"
                                 :auto-upload="true"

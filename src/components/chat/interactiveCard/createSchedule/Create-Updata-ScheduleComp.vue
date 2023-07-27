@@ -51,10 +51,18 @@ import * as data from "@/api/server/data"
 import {
     ArrowLeft,
 } from '@element-plus/icons-vue'
+import {ElMessage} from "element-plus";
 
 const active = ref(0)
 const next = () => {
-    if (active.value++ > 2) active.value = 0
+    const startDate = new Date(pageOneData.startTime);
+    const endDate = new Date(pageOneData.endTime);
+    if (startDate.getTime() > endDate.getTime()) {
+        active.value = 0
+        ElMessage.error("结束时间不能小于开始时间");
+    }else {
+        if (active.value++ > 2) active.value = 0
+    }
 }
 const back = () => {
     active.value --
@@ -209,23 +217,33 @@ const create = () => {
                         },2000)
                     }
                 })
+            }else {
+                loading.value = false
+                showCreateForm.value = false
+                ElMessage.error("服务错误。请使用 Ctrl + R 强制重新载入程序")
             }
         })
     }else {
         //若没有sid则为创建操作
         card.sendAddPlan(allPageData).then(res=>{
-            const sid = res.data.data.scheduleId
-            allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
-            data.saveScheduleCount(sid,allPageData).then(res=>{
-                if (res.data.success){
-                    setTimeout(()=>{
-                        loading.value = false
-                        showCreateForm.value = false
-                        showSuccessTip.value = true
-                        emit("sendSuccess",showSuccessTip.value)
-                    },1000)
-                }
-            })
+            if (res.data.code === 200){
+                const sid = res.data.data.scheduleId
+                allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
+                data.saveScheduleCount(sid,allPageData).then(res=>{
+                    if (res.data.success){
+                        setTimeout(()=>{
+                            loading.value = false
+                            showCreateForm.value = false
+                            showSuccessTip.value = true
+                            emit("sendSuccess",showSuccessTip.value)
+                        },1000)
+                    }
+                })
+            }else {
+                loading.value = false
+                showCreateForm.value = false
+                ElMessage.error("服务错误。请使用 Ctrl + R 强制重新载入程序")
+            }
         })
     }
 }

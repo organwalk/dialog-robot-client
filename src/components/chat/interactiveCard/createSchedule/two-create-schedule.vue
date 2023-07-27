@@ -53,6 +53,7 @@ import {LocationInformation} from '@element-plus/icons-vue'
 import {defineEmits, ref, defineProps, onMounted, computed, watchEffect} from "vue"
 import * as card from '@/api/cloud/card'
 import * as data from "@/api/server/data";
+import {ElMessage} from "element-plus";
 
 const props = defineProps({
     showPageTwo: Boolean,
@@ -70,24 +71,28 @@ const mem = ref([])
 //  组件被挂载时远程获取人员列表
 onMounted(()=>{
     card.getPersonList().then(res=>{
-        let users = res.data.data.userList
-        opUsers.value = users
-            .map(user => ({ value: user.userId, label: user.name }))
-            .filter((user, index, arr) => (
-                arr.findIndex(u => u.value === user.value && u.label === user.label) === index
-            ));
-        options.value = opUsers.value
-        if (sid.value){
-            data.getScheduleBySid(sid.value).then(res=>{
-                const obj = res.data.scheduleData[0]
-                scheduleDes.value = obj.strdescrip
-                const jsonObject = JSON.parse(obj.straddr)
-                location.value = jsonObject.address
-                JSON.parse(obj.members).forEach(member => {
-                    scheduleMembers.value.push(member.uid)
+        if (res.data.code === 200){
+            let users = res.data.data.userList
+            opUsers.value = users
+                .map(user => ({ value: user.userId, label: user.name }))
+                .filter((user, index, arr) => (
+                    arr.findIndex(u => u.value === user.value && u.label === user.label) === index
+                ));
+            options.value = opUsers.value
+            if (sid.value){
+                data.getScheduleBySid(sid.value).then(res=>{
+                    const obj = res.data.scheduleData[0]
+                    scheduleDes.value = obj.strdescrip
+                    const jsonObject = JSON.parse(obj.straddr)
+                    location.value = jsonObject.address
+                    JSON.parse(obj.members).forEach(member => {
+                        scheduleMembers.value.push(member.uid)
+                    })
+                    getMemList(scheduleMembers.value)
                 })
-                getMemList(scheduleMembers.value)
-            })
+            }
+        }else {
+            ElMessage.error("服务错误。请使用 Ctrl + R 强制重新载入程序")
         }
     })
 })

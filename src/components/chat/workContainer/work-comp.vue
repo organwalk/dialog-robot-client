@@ -26,7 +26,7 @@
                 </el-card>
             </el-col>
             <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-card style="border-radius: 10px">
+                <el-card style="border-radius: 10px;">
                     <el-carousel class="create-area" height="210px" direction="vertical" :autoplay="true">
                         <el-carousel-item>
                             <work-create-schedule/>
@@ -146,5 +146,7 @@ const letDialogVisibleValueToFalse = (val) => {
     --el-dialog-box-shadow: none;
     --el-dialog-padding-primary: 0;
 }
-
+:deep(.el-carousel__button){
+    background-color: #808080;
+}
 </style>

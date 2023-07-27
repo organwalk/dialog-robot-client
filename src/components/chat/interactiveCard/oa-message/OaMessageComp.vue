@@ -77,7 +77,7 @@ const getPageOneData = (newMsg, newTit, newSum) => {
 }
 
 const getPageTwoData = (newFile, newRec,type) => {
-    obj.image = 'https://organwalk.ink/api/images/' + newFile
+    obj.image = 'http://47.122.19.138:38081/api/images/' + newFile
     if (newRec) {
         if (type === 'rec') {
             obj.receivers = newRec

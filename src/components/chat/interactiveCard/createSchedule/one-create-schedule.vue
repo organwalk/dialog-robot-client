@@ -37,6 +37,7 @@
                                         type="datetime"
                                         format="YYYY-MM-DD HH:mm"
                                         value-format="YYYY-MM-DD HH:mm"
+                                        ref="endDateRef"
                                         placeholder="结束时间"
                                         style="width: 100%"
                                 />
@@ -108,14 +109,6 @@ watchEffect(() => {
     }
 })
 
-watchEffect(() => {
-    const startDate = new Date(startTime.value);
-    const endDate = new Date(endTime.value);
-    if (startDate.getTime() > endDate.getTime()) {
-        ElMessage.error("结束时间不能小于开始时间");
-        endTime.value = ''
-    }
-})
 
 onMounted(() => {
     nowTime.value = getNowTime("yyyy-mm-dd hh:mm")

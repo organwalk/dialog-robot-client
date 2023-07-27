@@ -96,6 +96,10 @@ const release = () => {
     })
 }
 
+//获取服务运行状态
+const serverStatus = () => {
+    return http.get('/system/server')
+}
 export {
     getSchedule,
     getScheduleCount,
@@ -111,5 +115,6 @@ export {
     cancelNotificationByNid,
     deleteNotificationByNid,
     getNotificationCount,
-    release
+    release,
+    serverStatus
 }

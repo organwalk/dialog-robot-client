@@ -7,6 +7,7 @@
 <script setup>
 import {getAccessToken} from "@/api/cloud/auth";
 import {onMounted} from "vue";
+import {serverStatus} from "@/api/server/data";
 
 onMounted(()=>{
     const refreshAccessToken = () => {
@@ -18,8 +19,10 @@ onMounted(()=>{
             setTimeout(refreshAccessToken, expiresIn * 1000);
         })
     };
-
     refreshAccessToken();
+    serverStatus().then(res => {
+        console.log(res.data)
+    })
 })
 
 </script>

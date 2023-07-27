@@ -49,7 +49,7 @@
                                 <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
                                     <el-upload
                                             v-model:file-list="fileList"
-                                            action="https://organwalk.ink/api/image"
+                                            action="http://47.122.19.138:38081/api/image"
                                             name="image"
                                             method="post"
                                             :auto-upload="true"
@@ -238,7 +238,7 @@ const beforeUpload = (file) => {
     });
 };
 
-const imageResource = "https://organwalk.ink/api/images/"
+const imageResource = "http://47.122.19.138:38081/api/images/"
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
@@ -429,6 +429,7 @@ const intentionIsNotNull = (ot, obj) => {
             store.dispatch("updataFastQueryNotesData",obj.fastQueryNotesData)
             emit("send-status","orderType")
         }else if (ot === "FastContentQueryNotes"){
+
             store.dispatch("updataFastContentQueryNotesStatus",obj.noteContentStatus)
             store.dispatch("updataFastContentQueryNotesData",obj.fastContentQueryNotesData)
             emit("send-status","orderType")
@@ -539,6 +540,9 @@ const objectIsMissingKey = (content) => {
         sendMissingValues(filterEmptyKeys(newObject))
         emit('send-status', 'missValue')
         emit('reply-robot', newObject)
+    }else {
+        emit('send-status', 'missValue')
+        emit('reply-robot', store.state.chat.missingKeyObj)
     }
 }
 

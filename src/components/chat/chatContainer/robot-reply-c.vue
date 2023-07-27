@@ -257,7 +257,6 @@ const getOrderTypeReply = () => {
 const getCardStatusReply = () => {
     const reply = robotReplyConfig[cardStatus.value]
     emitShowRecommend()
-    store.dispatch('updataCardSuccessReply',{})
     return reply
 }
 

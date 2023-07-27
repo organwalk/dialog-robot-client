@@ -2,7 +2,7 @@ import axios from "axios";
 import {ref, watchEffect} from "vue";
 import store from "@/store";
 
-const resource = "https://organwalk.ink/api/voice"
+const resource = "http://47.122.19.138:38081/api/voice"
 let mediaRecorder
 let audio
 let audioChunks = []
