@@ -12,6 +12,7 @@
             <!--            创建事项的页面     -->
             <one-create-notification :showPageOne="showPageOne"
                                      :nid="notice_id"
+                                     @get-data-status = "getDataStatus"
                                      @getPageOneData="getPageOneData"/>
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
@@ -20,6 +21,13 @@
             </el-row>
         </el-card>
         <el-alert style="user-select: none;border-radius: 10px;" v-if="showSuccessTip" title="Success" type="success" center show-icon :closable="false" />
+        <br v-if="showRefresh"/>
+        <el-row v-if="showRefresh" justify="center">
+            <el-alert style="user-select: none;border-radius: 10px;" title="服务出错" type="warning" center show-icon :closable="false" />
+            <el-card shadow="never" style="border: none">
+                <el-button type="primary" round @click="retry()" v-btn :disabled="stopReTry">请重试</el-button>
+            </el-card>
+        </el-row>
     </el-card>
 
 </template>
@@ -134,6 +142,21 @@ watch(
     }
 )
 
+const showRefresh = ref(false)
+const getDataStatus = (status) => {
+    stopReTry.value = false
+    if (status){
+        showRefresh.value = false
+    }else {
+        showRefresh.value = true
+        showCreateForm.value = false
+    }
+}
+const stopReTry = ref(false)
+const retry = () => {
+    showCreateForm.value = !showCreateForm.value
+    stopReTry.value = true
+}
 
 </script>
 

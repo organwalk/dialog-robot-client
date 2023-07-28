@@ -84,7 +84,12 @@
         :close-on-press-escape="false"
         :close-on-click-modal="false"
     >
-        <el-card  v-loading="getVoiceUrl" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+        <el-card v-loading="getVoiceUrl" shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
+                    <el-button :icon="Close" circle @click="closeVoice"/>
+                </el-col>
+            </el-row>
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                     <h2>请说话</h2>
@@ -104,6 +109,7 @@
                                @click="stopVoice()">停止录音</el-button>
                 </el-col>
             </el-row>
+            <br/>
         </el-card>
     </el-dialog>
     <el-dialog
@@ -114,6 +120,11 @@
         :close-on-click-modal="false"
     >
         <el-card  v-loading="getWhisperVal"   shadow="never" style="border-radius: 10px;border: none;min-height: 400px">
+            <el-row>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="right">
+                    <el-button :icon="Close" circle @click="closeVoice"/>
+                </el-col>
+            </el-row>
             <el-row>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                     <h2>请说话</h2>
@@ -143,7 +154,7 @@
 </template>
 
 <script setup>
-import {Promotion, MagicStick, Plus, Link, Microphone,VideoPause} from '@element-plus/icons-vue'
+import {Promotion, MagicStick, Plus, Link, Microphone, VideoPause, Close} from '@element-plus/icons-vue'
 import {ref, defineEmits, defineProps, computed, watch} from "vue";
 import * as order from "@/api/server/order";
 import msg from "@/api/cloud/message"
@@ -197,6 +208,7 @@ const getRecAndToSend = (val) => {
 //  结束本轮对话
 const clear = () => {
     let clear = true
+    store.dispatch('updataMissingKeyObj', {})
     emit('clear-chat', clear)
 }
 
@@ -273,7 +285,6 @@ const stopVoice = async () => {
             showVoice.value = false;
         }
     })
-
 }
 
 // 调用whisper
@@ -308,6 +319,10 @@ const stopWhisper = () => {
     })
 }
 
+const closeVoice = () => {
+    showVoice.value = false
+    showWhisper.value = false
+}
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务
 const sendOrder = () => {
@@ -336,7 +351,7 @@ const sendOrder = () => {
         } else {
             //  如果不是新一轮对话则表明具有空缺值
             //  如果空缺值为object，则需要进行人名或群组的确认
-            if (props.missingValue === 'object') {
+            if (props.missingValue === 'object' || props.missingValue === 'notfoundObject') {
                 let content = orderContent.value
                 objectIsMissingKey(content)
             } else {
@@ -509,7 +524,6 @@ const useApiAboutByDirect = (ot, obj) => {
             }
         })
         emit('send-status', 'orderType')
-        console.log(obj)
     }
     else {
         emit("send-cardStatus", ot)
@@ -521,21 +535,21 @@ const useApiAboutByDirect = (ot, obj) => {
 const objectIsMissingKey = (content) => {
     const regex = /^部门(?:群)?$/
     if (regex.test(content)) {
-        const newObject = {
+        let newObject = {
             ...store.state.chat.missingKeyObj,
             groupId: []
         }
-        delete newObject.object
+        newObject = deleteObject(newObject)
         sendMissingValues(filterEmptyKeys(newObject))
         store.dispatch('updataMissingKeyObj', newObject)
         emit('send-status', 'missValue')
         emit('reply-robot', newObject)
     } else if (content === '职员') {
-        const newObject = {
+        let newObject = {
             ...store.state.chat.missingKeyObj,
             receivers: []
         }
-        delete newObject.object
+        newObject = deleteObject(newObject)
         store.dispatch('updataMissingKeyObj', newObject)
         sendMissingValues(filterEmptyKeys(newObject))
         emit('send-status', 'missValue')
@@ -546,6 +560,14 @@ const objectIsMissingKey = (content) => {
     }
 }
 
+const deleteObject = (newObject) => {
+    if ("object" in newObject){
+        delete newObject.object
+    }else if ("notfoundObject" in newObject){
+        delete newObject.notfoundObject
+    }
+    return newObject
+}
 //  从对话中提取信息填补缺失值
 const fillMissingValueFromContent = (msv, oc) => {
     // 当指令为AddMan时，此时用户提供的姓名作为Value，而无需转换为uid，因此可直接写入空缺值状态管理
@@ -605,7 +627,6 @@ const fillMissingValueFromContent = (msv, oc) => {
                         }
                     })
                     emit('send-status', 'orderType')
-                    console.log(obj)
                 }
                 emit('send-status', 'orderType')
                 emit('res-orderType', orderType)
@@ -652,52 +673,83 @@ const userInputAboutMissingValues = async (type, val) => {
     let newObj = {}
     let userinfo = {}
     let data
+    let regex
     //type就是要补充字段的key，val就是要填补的值
     if (type in oldObj) {
         //此处应该判断Type的类型
         switch (type) {
             case 'receivers':
             case 'groupId':
-                data = await objectIdByName(type, val)
-                if (data.length === 1 && data[0] === ""){
+                if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
-                    newObj = {...oldObj, [type]: data}
+                    data = await objectIdByName(type, val)
+                    if (data.length === 1 && data[0] === ""){
+                        newObj = {...oldObj, [type]: ""}
+                    }else {
+                        newObj = {...oldObj, [type]: data}
+                    }
                 }
                 break
             case 'name':
-                data = await objectIdByName(type, val)
-                //如果数据具有长度，则表明为数组，此时插值部门数组
-                userinfo = {
-                    name: val,
-                    dept: data.deptList,
-                    uid: data.uid
+                if (typeof val === "object" || val.includes(imageResource)){
+                    newObj = {...oldObj, [type]: ""}
+                }else {
+                    data = await objectIdByName(type, val)
+                    //如果数据具有长度，则表明为数组，此时插值部门数组
+                    userinfo = {
+                        name: val,
+                        dept: data.deptList,
+                        uid: data.uid
+                    }
+                    await store.dispatch('updataSearchUid', userinfo)
+                    newObj = {...oldObj, [type]: data}
                 }
-                await store.dispatch('updataSearchUid', userinfo)
-                newObj = {...oldObj, [type]: data};
                 break;
             case 'dept':
-                data = await objectIdByName(type, val)
-                if (data) {
-                    const user = store.state.chat.searchUid
-                    let newUser = {
-                        ...user,
-                        deptId: Number(data)
+                if (typeof val === "object" || val.includes(imageResource)){
+                    newObj = {...oldObj, [type]: ""}
+                }else {
+                    data = await objectIdByName(type, val)
+                    if (data) {
+                        const user = store.state.chat.searchUid
+                        let newUser = {
+                            ...user,
+                            deptId: Number(data)
+                        }
+                        await store.dispatch('updataSearchUid', newUser)
                     }
-                    await store.dispatch('updataSearchUid', newUser)
+                    newObj = {...oldObj, [type]: data}
                 }
-                newObj = {...oldObj, [type]: data};
                 break;
             case 'userName':
-                newObj = {...oldObj, [type]: Array(val)}
+                newObj = valueCheck(typeof val === "object" || val.includes(imageResource), oldObj, type, Array(val))
+                break
+            case 'image':
+                newObj = valueCheck(typeof val === "object" || !val.includes(imageResource), oldObj, type, val)
+                break
+            case 'voiceUrl':
+                newObj = valueCheck(typeof val !== "object", oldObj, type, val)
+                break
+            case 'url':
+                regex = /(https?:\/\/)?(www\.)?[a-zA-Z0-9]+\.[a-zA-Z]+(\/\S*)?/
+                newObj = valueCheck(!regex.test(val) || val.includes(imageResource), oldObj, type, val)
+                break
+            case 'mobile':
+                regex = /^\d{11}$/
+                newObj = valueCheck(!regex.test(val) || val.includes(imageResource), oldObj, type, val)
                 break
             default:
-                newObj = {...oldObj, [type]: val};
+                newObj = valueCheck(typeof val === "object" || val.includes(imageResource), oldObj, type, val)
         }
     }
     //返回新的对象
     await store.dispatch('updataMissingKeyObj', newObj)
     return newObj
+}
+
+const valueCheck = (condition, oldObj, type, val) => {
+    return condition ? {...oldObj, [type]:""} : {...oldObj, [type]:val}
 }
 
 //  调用接口获取缺失主体的id属性

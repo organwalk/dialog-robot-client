@@ -6,9 +6,21 @@ export function getNowTime(type){
 }
 export function getUnixOnNewDateAndProcess(type,date){
     switch (type){
-        case "yyyy-mm-dd hh:mm" :
-            return getUnixOnNewDateAndHH_MM(date)
+        case "yyyy-mm-dd hh:mm start" :
+            return getUnixOnNewDateAndHH_MM("start", date)
+        case "yyyy-mm-dd hh:mm end" :
+            return getUnixOnNewDateAndHH_MM("end", date)
     }
+}
+
+export function getUnixConversion(timestamp){
+    const date = new Date(Number(timestamp));
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    const hours = ('0' + date.getHours()).slice(-2);
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+    return  year + '-' + month + '-' + day + ' ' + hours + ':' + minutes;
 }
 
 const getNowNormalAndHH_MM  = () => {
@@ -22,11 +34,18 @@ const getNowNormalAndHH_MM  = () => {
     return Date.parse(timeString)
 }
 
-const getUnixOnNewDateAndHH_MM = (date) => {
+const getUnixOnNewDateAndHH_MM = (status, date) => {
     const year = date.getFullYear();
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
     const day = ('0' + date.getDate()).slice(-2);
-    const hours = ('0' + date.getHours()).slice(-2);
+    let hours
+    if (status === "start"){
+        hours = ('0' + date.getHours()).slice(-2);
+    }else if (status === "end"){
+        const newDate = new Date(date.getTime() + 2 * 60 * 60 * 1000);
+        hours = ('0' + newDate.getHours()).slice(-2); // 获取修改后的小时
+    }
+
     const minutes = ('0' + date.getMinutes()).slice(-2);
     return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes;
 }

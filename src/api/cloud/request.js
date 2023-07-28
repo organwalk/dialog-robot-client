@@ -1,4 +1,5 @@
 import axios from "axios";
+import {getAccessToken} from "@/api/cloud/auth";
 
 const request = (config) => {
     const instance = axios.create({
@@ -17,6 +18,19 @@ const request = (config) => {
         return config
     },error => {
         return Promise.error(error)
+    })
+
+    //配置响应拦截器
+    instance.interceptors.response.use(response => {
+        if (response.data.status === 4004) {
+            getAccessToken().then(res => {
+                const accessToken = res.data.data.accessToken;
+                sessionStorage.setItem("accessToken", accessToken);
+            })
+        }
+        return response
+    }, error => {
+        return Promise.reject(error)
     })
 
     return instance(config)

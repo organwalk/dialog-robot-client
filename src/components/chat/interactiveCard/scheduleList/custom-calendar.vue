@@ -62,6 +62,8 @@
                         <el-popover
                             placement="bottom"
                             :width="50"
+                            :show-after="500"
+                            :hide-after="0"
                             trigger="hover"
                         >
                             <template #reference>
@@ -71,7 +73,7 @@
                                      style="user-select: none;">{{ row[index] }}
                                 </div>
                             </template>
-                            <span>该日期有 {{ scheduleNum }} 条记录</span>
+                            <span >该日期有 {{ scheduleNum }} 条记录</span>
                         </el-popover>
                     </template>
                 </el-table-column>
@@ -104,7 +106,7 @@ const lastDay = computed(()=>new Date(parseInt(yearValue.value.toString()),parse
 
 const chooseDate = ref(today.getDate())
 const emit = defineEmits(["sendClickDay"])
-const scheduleNum = ref('0')
+const scheduleNum = ref(0)
 const hoverData = ref('')
 const countList = reactive([])
 
@@ -128,7 +130,10 @@ const getScheduleNum = (val)=>{
     const day = dateParts[2].padStart(2, '0');
     hoverData.value = `${year}-${month}-${day}`
     const result = countList.value.find(item => item.date === hoverData.value)
-    scheduleNum.value = result ? result.count : 0
+    setTimeout(()=>{
+        scheduleNum.value = result ? result.count : 0
+    },500)
+
 }
 
 const clickDay = ref('')
@@ -145,7 +150,6 @@ const getScheduleListByDay = (val)=>{
 
 watchEffect(() => {
     hoverData.value = yearValue.value + "-" + monthValue.value + '-' + chooseDateValue.value
-    console.log(hoverData.value)
     const dateParts = hoverData.value.split('-');
     const year = dateParts[0];
     const month = dateParts[1].padStart(2, '0');
@@ -210,6 +214,15 @@ const buildCalendar = (firstDay,lastDay) => {
 
 .choose-bg {
     background-color: #2C6AE3;
+    border-radius: 5px;
+    width: 50%;
+    display: inline-block;
+    text-align: center;
+    color: white;
+}
+
+.have-schedule{
+    background-color: red;
     border-radius: 5px;
     width: 50%;
     display: inline-block;

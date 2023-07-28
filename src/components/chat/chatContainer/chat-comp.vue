@@ -527,7 +527,10 @@ const clearChat = (val) => {
     //  开启新对话意味着清除当前的问询状态
     if (val) {
         if (state.chatMessages.length >= 2) {
+            state.emptyKeysList = []
             store.dispatch('updataMissingKeyObj', {})
+            state.showObjectNameFromRec = false
+            state.dontShowRec = false
             //  同时增加一个分割线
             state.chatMessages.push({
                 type: 'line',

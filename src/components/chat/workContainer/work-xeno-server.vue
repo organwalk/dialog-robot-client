@@ -15,7 +15,7 @@
                             <span style="font-size: 15px;font-weight: bolder">版本</span>
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
-                            <span style="font-size: 10px">V 2.3</span>
+                            <span style="font-size: 10px">V 2.4</span>
                         </el-col>
                     </el-row>
                 </el-card>
@@ -47,7 +47,7 @@
         </el-row><br/>
         <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
-                <span style="font-size: 10px;color:#909399">© 2023 Xeno-onloaded.</span>
+                <span style="font-size: 10px;color:#909399">© Copyright 2023, Xeno-onloaded Team</span>
             </el-col>
         </el-row>
     </el-card>

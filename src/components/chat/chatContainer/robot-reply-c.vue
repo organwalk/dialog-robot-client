@@ -142,19 +142,23 @@ const getMissValueReply = () => {
         store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
         emit('showObjectRec','name')
     }else if (missValue.value === "groupId"){
+        store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
         emit('showObjectRec','group')
     }
     if (store.state.chat.nameAndGroupMarkNum > 1){
         return robotReplyConfig[missValue.value + 'Error']
     }else {
-        return robotReplyConfig[missValue.value + 'Missing'];
+        if (missValue.value === "notfoundObject"){
+            return robotReplyConfig[missValue.value + 'Missing'].replace("${notfound}", JSON.parse(store.state.chat.missingKeyObj.notfoundKey)[0])
+        }
+        return robotReplyConfig[missValue.value + 'Missing']
     }
 }
 
 const getOrderTypeReply = () => {
     let template = robotReplyConfig[orderType.value]
     let reply = template
-
+    store.dispatch('updataNameAndGroupMarkNum',0)
     //获取人员详情
     if (orderType.value === 'GetManDept') {
         const uid = store.state.chat.searchUid.uid

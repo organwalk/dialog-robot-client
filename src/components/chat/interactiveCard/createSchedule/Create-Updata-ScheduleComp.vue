@@ -19,12 +19,14 @@
                     </el-steps>
                 </el-col>
             </el-row>
-            <br/><br/>
+            <br v-if="!showRefresh"/><br v-if="!showRefresh"/>
 
             <!--            创建日程的页面     -->
-            <one-create-schedule :showPageOne="showPageOne" :sid="sid"
-                                 @getPageOneData="getPageOneData"/>
-            <two-create-schedule :showPageTwo="showPageTwo" :sid="sid" @getPageTwoData="getPageTwoData"/>
+            <one-create-schedule :showPageOne="showPageOne" :sid="sid" v-loading="scheduleLoading"
+                                 @getPageOneData="getPageOneData" @get-page-one-data-status="getPageOneDataStatus"/>
+            <two-create-schedule :showPageTwo="showPageTwo" :sid="sid"
+                                 @getPageTwoData="getPageTwoData"
+                                 @get-page-two-data-status="getPageTwoDataStatus"/>
             <preview-create-schedule :showPagePreview="showPagePreview"
                                      :page-one-data="pageOneData"
                                      :page-two-data="pageTwoData"/>
@@ -37,6 +39,12 @@
             </el-row>
         </el-card>
         <el-alert v-if="showSuccessTip" style="user-select: none;border-radius: 10px;" title="Success" type="success" center show-icon :closable="false" />
+        <el-row v-if="showRefresh" justify="center">
+            <el-alert style="user-select: none;border-radius: 10px;" title="服务出错" type="warning" center show-icon :closable="false" />
+            <el-card shadow="never" style="border: none">
+                <el-button type="primary" round @click="retry()" v-btn :disabled="stopReTry">请重试</el-button>
+            </el-card>
+        </el-row>
     </el-card>
 
 </template>
@@ -249,6 +257,30 @@ const create = () => {
 }
 
 const sid = computed(()=>props.scheduleData)
+
+const scheduleLoading = ref(true)
+const showRefresh = ref(false)
+const getPageOneDataStatus = (status) => {
+    refreshPage(status)
+}
+const getPageTwoDataStatus = (status) => {
+    refreshPage(status)
+}
+
+const refreshPage = (status) => {
+    scheduleLoading.value = false
+    if (status){
+        showPageOne.value = true
+        showRefresh.value = false
+    }else {
+        showPageOne.value = false
+        showRefresh.value = true
+    }
+}
+
+const retry = () => {
+    showPageOne.value = true
+}
 </script>
 
 <style scoped>

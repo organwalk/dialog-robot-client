@@ -26,12 +26,12 @@
                 <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20" align="left">
                     <span style="font-size: 10px;color: #808080">{{ item.name }} released this notification</span>
                 </el-col>
-                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
+                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center">
                     <el-button v-if="item.uid === uid && item.action !== 'cancel'" type="primary" :icon="Edit" circle
                                size="small"
                                @click="updataNotification(item.notice_id)"/>
                 </el-col>
-                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
+                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center">
                     <!--                    取消-->
                     <el-popconfirm width="200"
                                    title="确定 完成 / 取消 该事项吗？" @confirm="cancel(item.notice_id)">
@@ -79,50 +79,60 @@ const uid = sessionStorage.getItem("uid")
 
 //  切换日期时渲染相应的事项列表
 const clickDay = computed(() => props.clickDay)
-const today = new Date().toISOString().substring(0, 10)
-//  只有当日的事项才享有编辑事件的入口
-const unShowInOtherDay = ref(true)
-watch(clickDay, (newVal) => {
-    unShowInOtherDay.value = newVal === today;
-})
 
 watch(clickDay, (newVal) => {
-    if (newVal) {
-        loading.value = true
-        notificationList.value = []
+    if (!newVal.includes("-00")) {
+        getNotificationList()
+    }
+})
+
+const showEmpty = ref(false)
+
+watch(notificationList, (val) => {
+    showEmpty.value = val.length <= 0;
+})
+
+const getNotificationList = () => {
+    loading.value = true
+    let clickObj
+    if (props.clickDay){
         const timestamp = new Date(props.clickDay).getTime();
         const utcDate = new Date(timestamp).toUTCString();
         const unixTimestamp = Date.parse(utcDate);
-        const clickObj = {
+        clickObj = {
             remind_time: String(unixTimestamp)
         }
-        //且换到新的日期时，获取新的日程列表
-        data.getNotification(clickObj).then(res => {
-            //  取出事项列表数据
-            if (res.data.notificationData.length !== 0) {
-                showEmpty.value = false
-                notificationList.value = res.data.notificationData.map(item => {
-                    const Time = new Date(Number(item.remind_time)).toLocaleString('en-US',
-                        {timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit'}); // 将UTC时间转换为北京时间
-                    return {
-                        uid: item.uid,
-                        name: item.name,
-                        notice_id: item.notice_id,
-                        content: item.content,
-                        remind_time: Time,
-                        is_push_mail: item.is_push_mail,
-                        members: item.members,
-                        action: item.action
-                    }
-                })
-                loading.value = false   //关闭加载
-            } else {
-                loading.value = false
-                showEmpty.value = true
+    }else {
+        const timestamp = new Date().getTime();
+        const utcDate = new Date(timestamp).toUTCString();
+        const unixTimestamp = Date.parse(utcDate);
+        clickObj = {
+            remind_time: String(unixTimestamp)
+        }
+    }
+    //且换到新的日期时，获取新的日程列表
+    data.getNotification(clickObj).then(res => {
+        notificationList.value = res.data.notificationData.map(item => {
+            const Time = new Date(Number(item.remind_time)).toLocaleString('en-US',
+                {timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit'}); // 将UTC时间转换为北京时间
+            loading.value = false
+            return {
+                uid: item.uid,
+                name: item.name,
+                notice_id: item.notice_id,
+                content: item.content,
+                remind_time: Time,
+                is_push_mail: item.is_push_mail,
+                members: item.members,
+                action: item.action
             }
         })
-    }
-})
+        if (notificationList.value.length === 0){
+            loading.value = false
+            showEmpty.value = true
+        }
+    })
+}
 
 //  当该值为空时，表明处于列表，不为空则进入相应修改页面
 const notice_id = ref('')
@@ -130,7 +140,7 @@ const notice_id = ref('')
 const getClearNid = (val) => {
     notice_id.value = val
     setTimeout(() => {
-        getToDayDate()
+        getNotificationList()
     }, 1000)
 }
 //  更新事项
@@ -144,7 +154,7 @@ const cancel = (val) => {
         if (res.data.code === 200) {
             data.cancelNotificationByNid(val).then(res => {
                 if (res.data.status === 200) {
-                    getToDayDate()
+                    getNotificationList()
                     ElMessage({
                         message: '取消成功',
                         type: 'success',
@@ -161,7 +171,7 @@ const deleteSchedule = (val) => {
         if (res.data.code === 200) {
             data.deleteNotificationByNid(val).then(res => {
                 if (res.data.status === 200) {
-                    getToDayDate()
+                    getNotificationList()
                     ElMessage({
                         message: '删除成功',
                         type: 'success',
@@ -178,47 +188,9 @@ const loading = ref(true)
 
 onMounted(() => {
     setTimeout(() => {
-        getToDayDate()
+        getNotificationList()
     }, 1000)
 })
-
-const showEmpty = ref(false)
-//一个获取当前事项列表数据的通用方法
-const getToDayDate = () => {
-    loading.value = true
-    const timestamp = new Date().getTime();
-    const utcDate = new Date(timestamp).toUTCString();
-    const unixTimestamp = Date.parse(utcDate);
-    const todayObj = {
-        remind_time: String(unixTimestamp)
-    }
-    //请求当日的事项列表
-    data.getNotification(todayObj).then(res => {
-        //  取出事项列表数据
-        if (res.data.notificationData.length !== 0) {
-            showEmpty.value = false
-            notificationList.value = res.data.notificationData.map(item => {
-                const Time = new Date(Number(item.remind_time)).toLocaleString('en-US',
-                    {timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit'}); // 将UTC时间转换为北京时间
-                return {
-                    uid: item.uid,
-                    name: item.name,
-                    notice_id: item.notice_id,
-                    content: item.content,
-                    remind_time: Time,
-                    is_push_mail: item.is_push_mail,
-                    members: item.members,
-                    action: item.action
-                }
-            })
-            loading.value = false   //关闭加载
-        } else {
-            loading.value = false
-            showEmpty.value = true
-        }
-
-    })
-}
 </script>
 
 <style scoped>

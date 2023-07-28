@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <template>
     <el-card style="margin-bottom: 10px;border-radius: 15px;background-color: white;width: 60%">
         <el-row justify="center">
@@ -6,7 +7,7 @@
             </el-col>
             <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="right">
                 <el-icon size="20px">
-                    <AlarmClock/>
+                    <List/>
                 </el-icon>
             </el-col>
         </el-row>
@@ -26,7 +27,7 @@
 </template>
 
 <script setup>
-import {AlarmClock} from '@element-plus/icons-vue'
+import {List} from '@element-plus/icons-vue'
 import ANotification from "@/components/chat/interactiveCard/notificationList/a-notification.vue";
 import {ref} from "vue";
 import NCustomCalendar from "@/components/chat/interactiveCard/notificationList/n-custom-calendar.vue";

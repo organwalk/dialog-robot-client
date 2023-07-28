@@ -1,5 +1,5 @@
 <template>
-    <div v-show="props.showPageOne" style="width: 100%">
+    <div v-show="props.showPageOne" style="width: 100%" v-loading="loading">
         <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <el-input
@@ -27,6 +27,7 @@
                                         format="YYYY-MM-DD HH:mm"
                                         value-format="YYYY-MM-DD HH:mm"
                                         :default-value="nowTime"
+                                        :disabled-date="disabledDate"
                                         placeholder="通知时间，日期范围不可小于今日"
                                         style="width: 100%"
                                 />
@@ -49,7 +50,7 @@
                         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                             <el-card shadow="never" style="border: none;border-radius: 8px;">
                                 <span>选择通知人员</span><br/><br/>
-                                <el-select v-model="scheduleMembers"
+                                <el-select style="width: 100%" v-model="scheduleMembers"
                                            placeholder="可同时选择多名人员"
                                            multiple
                                            filterable
@@ -76,8 +77,7 @@ import {Check} from "@element-plus/icons-vue";
 import {defineEmits, ref,  defineProps, onMounted, computed, watchEffect} from "vue";
 import * as card from "@/api/cloud/card";
 import * as data from "@/api/server/data"
-import {ElMessage} from "element-plus";
-import {getNowTime, getUnixOnNewDateAndProcess} from "@/optionConfig/time-process-utils";
+import {getNowTime, getUnixConversion, getUnixOnNewDateAndProcess} from "@/optionConfig/time-process-utils";
 
 const props = defineProps({
     showPageOne: Boolean,
@@ -91,32 +91,43 @@ const notificationDes = ref('')
 const scheduleMembers = ref([])
 const opUsers = ref([])
 const notice_id = computed(()=>props.nid)
+const loading = ref(true)
 
 //  组件被挂载时远程获取人员列表
 onMounted(()=>{
     card.getPersonList().then(res=>{
-        let users = res.data.data.userList
-        opUsers.value = users
-            .map(user => ({ value: user.userId, label: user.name }))
-            .filter((user, index, arr) => (
-                arr.findIndex(u => u.value === user.value && u.label === user.label) === index
-            ));
-        options.value = opUsers.value
-        //  如果存在事项id则为修改事件，应该预先填充部分数据
-        if (notice_id.value){
-            data.getNotificationByNid(notice_id.value).then(res=>{
-                const obj = res.data.notificationData[0]
-                notice.value = Boolean(obj.is_push_mail)
-                notificationDes.value = obj.content
-                JSON.parse(obj.members).forEach(member => {
-                    scheduleMembers.value.push(member.uid)
+        if (res.data.code === 200){
+            loading.value = false
+            let users = res.data.data.userList
+            opUsers.value = users
+                .map(user => ({ value: user.userId, label: user.name }))
+                .filter((user, index, arr) => (
+                    arr.findIndex(u => u.value === user.value && u.label === user.label) === index
+                ));
+            options.value = opUsers.value
+            nowTime.value = getNowTime("yyyy-mm-dd hh:mm")
+            startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm start",new Date(getNowTime("yyyy-mm-dd hh:mm")))
+            //  如果存在事项id则为修改事件，应该预先填充部分数据
+            if (notice_id.value){
+                loading.value = true
+                data.getNotificationByNid(notice_id.value).then(res=>{
+                    const obj = res.data.notificationData[0]
+                    nowTime.value = getUnixConversion(obj.remind_time)
+                    startTime.value = getUnixConversion(obj.remind_time)
+                    notice.value = Boolean(obj.is_push_mail)
+                    notificationDes.value = obj.content
+                    JSON.parse(obj.members).forEach(member => {
+                        scheduleMembers.value.push(member.uid)
+                    })
+                    getMemList(scheduleMembers.value)
+                    loading.value = false
                 })
-                getMemList(scheduleMembers.value)
-            })
+            }
+        }else {
+            emit('getDataStatus',false)
         }
     })
-    nowTime.value = getNowTime("yyyy-mm-dd hh:mm")
-    startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm",new Date(getNowTime("yyyy-mm-dd hh:mm")))
+
 })
 const options = ref([])
 const mem = ref([])
@@ -149,7 +160,7 @@ const getMemList = (val) => {
 }
 
 //向父组件发送该页数据，以辅助其进行表单检验
-const emit = defineEmits(["getPageOneData"])
+const emit = defineEmits(["getPageOneData","getDataStatus"])
 watchEffect(() => {
     if (!startTime.value || !notice.value || !notificationDes.value || scheduleMembers.value.length === 0) {
         emit('getPageOneData', "", "", "", [])
@@ -158,14 +169,9 @@ watchEffect(() => {
     }
 })
 
-watchEffect(() => {
-    const today = new Date()
-    const todayString = `${today.getFullYear()}-${('0' + (today.getMonth() + 1)).slice(-2)}-${('0' + today.getDate()).slice(-2)}`
-    if (startTime.value && todayString > startTime.value.split(' ')[0] ) {
-        ElMessage.error('通知时间范围不能小于当前日期')
-        startTime.value = ''
-    }
-})
+const disabledDate = (time)=> {
+    return time.getTime() < Date.now() - 24 * 60 * 60 * 1000
+}
 
 
 

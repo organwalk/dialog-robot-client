@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <template>
     <el-row justify="center">
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="left">
@@ -26,11 +27,12 @@
                     item.location
                     }}</span>
                 </el-col>
-                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
-                    <el-button v-if="item.uid === uid && item.action !== 'cancel'" type="primary" :icon="Edit" circle size="small"
+                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" >
+                    <el-button v-if="item.uid === uid && item.action !== 'cancel'" type="primary" :icon="Edit" circle
+                               size="small"
                                @click="updataSchedule(item.scheduleId)"/>
                 </el-col>
-                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" v-if="unShowInOtherDay">
+                <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="center" >
                     <!--                    取消-->
                     <el-popconfirm width="200"
                                    title="确定 完成 / 取消 该日程吗？" @confirm="cancel(item.scheduleId)">
@@ -71,65 +73,71 @@ import {ElMessage} from "element-plus";
 const scheduleList = ref([])
 const props = defineProps({
     clickDay: String,
-    refreshSchedule:Boolean
+    refreshSchedule: Boolean
 })
 const uid = sessionStorage.getItem("uid")
 onMounted(() => {
     setTimeout(() => {
-        getToDayDate()
-    }, 1000)
+        getScheduleList()
+    }, 500)
 })
 
 const showEmpty = ref(true)
 
-watch(scheduleList,(val)=>{
+watch(scheduleList, (val) => {
     showEmpty.value = val.length <= 0;
 })
 
 //切换日期
 const clickDay = computed(() => props.clickDay)
-const today = new Date().toISOString().substring(0,10)
-const unShowInOtherDay = ref(true)
-watch(clickDay,(newVal)=>{
-    unShowInOtherDay.value = newVal === today;
-})
-
 
 watch(clickDay, (newVal) => {
-    if (newVal) {
-        const timestamp = new Date(props.clickDay).getTime();
-        const utcDate = new Date(timestamp).toUTCString();
-        const unixTimestamp = Date.parse(utcDate);
-        const clickObj = {
-            begintime: unixTimestamp,
-            endtime: unixTimestamp
-        }
-        //且换到新的日期时，获取新的日程列表
-        data.getSchedule(clickObj).then(res => {
-            scheduleList.value = res.data.scheduleData.map(item => {
-                const start = new Date(item.begintime * 1000)
-                const end = new Date(item.endtime * 1000);
-                const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-                const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
-                const time = `${startTime}-${endTime}`;
-                return {
-                    time: time,
-                    title: item.content,
-                    des: item.strdescrip,
-                    releaser: item.name,
-                    location: JSON.parse(item.straddr).address,
-                    uid: item.uid,
-                    scheduleId: item.scheduleId,
-                    action: item.action
-                }
-            })
-            if (scheduleList.value.length === 0){
-                showEmpty.value = true
-            }
-        })
+    if (!newVal.includes("-00")) {
+        getScheduleList()
     }
 })
 
+const getScheduleList = () => {
+    loading.value = true
+    let clickObj
+    if (props.clickDay){
+        const timestamp = new Date(props.clickDay).getTime();
+        const utcDate = new Date(timestamp).toUTCString();
+        const unixTimestamp = Date.parse(utcDate);
+        clickObj = {
+            begintime: unixTimestamp,
+            endtime: unixTimestamp
+        }
+    }else {
+        const timestamp = new Date().getTime();
+        const utcDate = new Date(timestamp).toUTCString();
+        const unixTimestamp = Date.parse(utcDate);
+        clickObj = {
+            begintime: unixTimestamp
+        }
+    }
+    //且换到新的日期时，获取新的日程列表
+    data.getSchedule(clickObj).then(res => {
+        scheduleList.value = res.data.scheduleData.map(item => {
+            const time = `${timeShowStyle(item)[0]} - ${timeShowStyle(item)[1]}`;
+            loading.value = false
+            return {
+                time: time,
+                title: item.content,
+                des: item.strdescrip,
+                releaser: item.name,
+                location: JSON.parse(item.straddr).address,
+                uid: item.uid,
+                scheduleId: item.scheduleId,
+                action: item.action
+            }
+        })
+        if (scheduleList.value.length === 0) {
+            loading.value = false
+            showEmpty.value = true
+        }
+    })
+}
 const scheduleId = ref('')
 const updataSchedule = (val) => {
     scheduleId.value = val
@@ -139,7 +147,7 @@ const updataSchedule = (val) => {
 const clearSid = (val) => {
     scheduleId.value = val
     setTimeout(() => {
-        getToDayDate()
+        getScheduleList()
     }, 1000)
 }
 
@@ -147,9 +155,9 @@ const clearSid = (val) => {
 const cancel = (val) => {
     card.cancelPlan(val).then(res => {
         if (res.data.code === 200) {
-            data.cancelSchedule(val).then(res=>{
-                if (res.data.status === 200){
-                    getToDayDate()
+            data.cancelSchedule(val).then(res => {
+                if (res.data.status === 200) {
+                    getScheduleList()
                     ElMessage({
                         message: '取消成功',
                         type: 'success',
@@ -164,9 +172,9 @@ const cancel = (val) => {
 const deleteSchedule = (val) => {
     card.deletePlan(val).then(res => {
         if (res.data.code === 200) {
-            data.deleteSchedule(val).then(res =>{
-                if (res.data.status === 200){
-                    getToDayDate()
+            data.deleteSchedule(val).then(res => {
+                if (res.data.status === 200) {
+                    getScheduleList()
                     ElMessage({
                         message: '删除成功',
                         type: 'success',
@@ -177,41 +185,36 @@ const deleteSchedule = (val) => {
     })
 }
 const loading = ref(true)
-const getToDayDate = () => {
-    const timestamp = new Date().getTime();
-    const utcDate = new Date(timestamp).toUTCString();
-    const unixTimestamp = Date.parse(utcDate);
-    const todayObj = {
-        begintime: unixTimestamp
-    }
-    //在页面挂载时请求日程列表
-    data.getSchedule(todayObj).then(res => {
-        loading.value = false
-        scheduleList.value = res.data.scheduleData.map(item => {
-            const startTime = new Date(Number(item.begintime)).toLocaleString('en-US',
-                { timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit' });
-            const endTime = new Date(Number(item.endtime)).toLocaleString('en-US',
-                { timeZone: 'Asia/Shanghai', hour12: false, hour: '2-digit', minute: '2-digit' });
-            const time = `${startTime}-${endTime}`;
-            return {
-                time: time,
-                title: item.content,
-                des: item.strdescrip,
-                releaser: item.name,
-                location: JSON.parse(item.straddr).address,
-                uid: item.uid,
-                scheduleId: item.scheduleId,
-                action: item.action
-            }
-        })
-    })
+
+const timeShowStyle = (item) => {
+    const startTime = new Date(Number(item.begintime)).toLocaleString('en-US', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    const endTime = new Date(Number(item.endtime)).toLocaleString('en-US', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    return  [startTime,endTime]
 }
 const refreshSchedule = computed(() => props.refreshSchedule)
-watch(refreshSchedule,(newVal) => {
-    if (newVal){
-        getToDayDate()
+watch(refreshSchedule, (newVal) => {
+    if (newVal) {
+        getScheduleList()
     }
 })
+
+
 </script>
 
 <style scoped>

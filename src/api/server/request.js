@@ -12,11 +12,7 @@ const request = (config) => {
             return response;
         },
         error => {
-            // 判断是否为超时错误
-            if (error.code && error.code === 'ECONNABORTED') {
-                // 清除当前请求
-                // axios.delete(error.config);
-                // 重新发送请求
+            if (error.code && error.code === 'ECONNABORTED' || error.code === '502 Bad Gateway') {
                 return instance(error.config);
             }
             return Promise.reject(error);

@@ -26,6 +26,7 @@
                                         value-format="YYYY-MM-DD HH:mm"
                                         :default-value="nowTime"
                                         placeholder="开始时间"
+                                        :disabled-date="disabledDate"
                                         style="width: 100%"
                                 />
                             </el-card>
@@ -39,6 +40,7 @@
                                         value-format="YYYY-MM-DD HH:mm"
                                         ref="endDateRef"
                                         placeholder="结束时间"
+                                        :disabled-date="disabledDate"
                                         style="width: 100%"
                                 />
                             </el-card>
@@ -66,9 +68,8 @@
 <script setup>
 import {Check} from "@element-plus/icons-vue";
 import {defineEmits, ref, defineProps, computed, watchEffect, onMounted} from "vue";
-import {ElMessage} from "element-plus";
 import * as data from '@/api/server/data'
-import {getNowTime, getUnixOnNewDateAndProcess} from "@/optionConfig/time-process-utils";
+import {getNowTime, getUnixConversion, getUnixOnNewDateAndProcess} from "@/optionConfig/time-process-utils";
 
 const props = defineProps({
     showPageOne: Boolean,
@@ -81,7 +82,7 @@ const notice = ref(true)
 const endTime = ref('')
 const title = ref('')
 
-const emit = defineEmits(["getPageOneData"])
+const emit = defineEmits(["getPageOneData","getPageOneDataStatus"])
 
 watchEffect(() => {
     if (!startTime.value || !endTime.value || !title.value) {
@@ -91,38 +92,28 @@ watchEffect(() => {
     }
 })
 
-watchEffect(() => {
-    const today = new Date()
-    const todayString = `${today.getFullYear()}-${('0' + (today.getMonth() + 1)).slice(-2)}-${('0' + today.getDate()).slice(-2)}`
-    if (startTime.value && todayString > startTime.value.split(' ')[0] ) {
-        ElMessage.error('开始时间的日期范围不能小于当前日期')
-        startTime.value = ''
-    }
-})
-
-watchEffect(() => {
-    const today = new Date()
-    const todayString = `${today.getFullYear()}-${('0' + (today.getMonth() + 1)).slice(-2)}-${('0' + today.getDate()).slice(-2)}`
-    if (endTime.value && todayString > endTime.value.split(' ')[0] ) {
-        ElMessage.error('结束时间的日期范围不能小于当前日期')
-        endTime.value = ''
-    }
-})
-
-
+const disabledDate = (time)=> {
+    return time.getTime() < Date.now() - 24 * 60 * 60 * 1000
+}
+const sid = computed(()=>props.sid)
 onMounted(() => {
     nowTime.value = getNowTime("yyyy-mm-dd hh:mm")
-    startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm",new Date(getNowTime("yyyy-mm-dd hh:mm")))
-    endTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm",new Date(getNowTime("yyyy-mm-dd hh:mm")))
+    startTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm start",new Date(getNowTime("yyyy-mm-dd hh:mm")))
+    endTime.value = getUnixOnNewDateAndProcess("yyyy-mm-dd hh:mm end",new Date(getNowTime("yyyy-mm-dd hh:mm")))
+    if (sid.value){
+        data.getScheduleBySid(sid.value).then(res=>{
+            const obj = res.data.scheduleData[0]
+            nowTime.value = getUnixConversion(obj.begintime)
+            startTime.value = getUnixConversion(obj.begintime)
+            endTime.value = getUnixConversion(obj.endtime)
+            title.value = obj.content
+            notice.value = Boolean(obj.iswarn)
+            emit('getPageOneDataStatus',true)
+        })
+    }
 })
-const sid = computed(()=>props.sid)
-if (sid.value){
-    data.getScheduleBySid(sid.value).then(res=>{
-        const obj = res.data.scheduleData[0]
-        title.value = obj.content
-        notice.value = Boolean(obj.iswarn)
-    })
-}
+
+
 
 
 </script>

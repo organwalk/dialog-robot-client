@@ -62,6 +62,8 @@
                         <el-popover
                             placement="bottom"
                             :width="50"
+                            :show-after="500"
+                            :hide-after="0"
                             trigger="hover"
                         >
                             <template #reference>
@@ -129,7 +131,9 @@ const getScheduleNum = (val)=>{
     hoverData.value = `${year}-${month}-${day}`
     if (countList.value.length > 0){
         const result = countList.value.find(item => item.date === hoverData.value)
-        scheduleNum.value = result ? result.count : 0
+        setTimeout(()=>{
+            scheduleNum.value = result ? result.count : 0
+        },500)
     }
 }
 
@@ -147,7 +151,6 @@ const getScheduleListByDay = (val)=>{
 
 watchEffect(() => {
     hoverData.value = yearValue.value + "-" + monthValue.value + '-' + chooseDateValue.value
-    console.log(hoverData.value)
     const dateParts = hoverData.value.split('-');
     const year = dateParts[0];
     const month = dateParts[1].padStart(2, '0');

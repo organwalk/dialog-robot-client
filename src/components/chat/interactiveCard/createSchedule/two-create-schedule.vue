@@ -28,8 +28,8 @@
                 <el-card shadow="never" style="border: none;background-color: #f5f9fa" align="center">
                     <span style="font-weight: bolder">添加日程成员</span>
                     <br/><br/>
-                    <el-select v-model="scheduleMembers"
-                               placeholder="Select"
+                    <el-select style="width: 100%" v-model="scheduleMembers"
+                               placeholder="可同时选择多名人员"
                                multiple
                                filterable
                                @change="handleChange">
@@ -53,7 +53,6 @@ import {LocationInformation} from '@element-plus/icons-vue'
 import {defineEmits, ref, defineProps, onMounted, computed, watchEffect} from "vue"
 import * as card from '@/api/cloud/card'
 import * as data from "@/api/server/data";
-import {ElMessage} from "element-plus";
 
 const props = defineProps({
     showPageTwo: Boolean,
@@ -90,9 +89,14 @@ onMounted(()=>{
                     })
                     getMemList(scheduleMembers.value)
                 })
+                setTimeout(()=>{
+                    emit('getPageTwoDataStatus',true)
+                },1000)
+            }else {
+                emit('getPageTwoDataStatus',true)
             }
         }else {
-            ElMessage.error("服务错误。请使用 Ctrl + R 强制重新载入程序")
+            emit('getPageTwoDataStatus',false)
         }
     })
 })
@@ -125,7 +129,7 @@ const getMemList = (val) => {
 }
 
 //传递该页的数据值
-const emit = defineEmits(["getPageTwoData"])
+const emit = defineEmits(["getPageTwoData","getPageTwoDataStatus"])
 watchEffect(() => {
     if (!scheduleDes.value || !location.value || scheduleMembers.value.length === 0) {
         emit('getPageTwoData', "", "", "", [])
