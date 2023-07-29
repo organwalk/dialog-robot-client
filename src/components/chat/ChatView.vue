@@ -23,6 +23,7 @@ import HistoryListComp from "@/components/chat/history/HistoryListComp.vue";
 import ChatComp from "@/components/chat/chatContainer/chat-comp.vue";
 import WorkComp from "@/components/chat/workContainer/work-comp.vue";
 import {onMounted, ref} from "vue";
+import {ElNotification} from "element-plus";
 
 const showChat = ref(true)
 const getTabStatus = (val) => {
@@ -35,6 +36,13 @@ const getTabStatus = (val) => {
 onMounted(()=> {
     window.currentWindow.center()
     window.currentWindow.setSize(1500, 860)
+    ElNotification({
+        title: '提示',
+        message: '您当前所处部门为：Xeno开发部。您可以在设置中切换当前所处部门',
+        type: 'info',
+        duration:0,
+        offset: 70,
+    })
 })
 </script>
 

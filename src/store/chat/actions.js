@@ -40,5 +40,8 @@ export default {
     },
     updataCacheEntity({commit},cacheEntity){
         commit('setCacheEntity',cacheEntity)
+    },
+    updataNowDept({commit},nowDept){
+        commit('setNowDept',nowDept)
     }
 }

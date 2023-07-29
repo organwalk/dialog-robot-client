@@ -45,9 +45,9 @@ const getGroupList = () => {
 }
 
 //获取当前部门下人员列表
-const getDeptPersonList = () => {
+const getDeptPersonList = (value) => {
     return http.get("/department/userList",{
-        deptId:sessionStorage.getItem("deptId")
+        deptId:value
     })
 }
 

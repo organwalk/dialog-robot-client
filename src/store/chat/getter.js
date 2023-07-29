@@ -11,5 +11,6 @@ export default {
     getFastContentQueryNotesStatus:(state)=>state.fastContentQueryNotesData.status,
     getFastContentQueryNotesData:(state)=>state.fastContentQueryNotesData.data,
     getCacheIntention:(state)=>state.cacheIntention,
-    getCacheEntity:(state)=>state.cacheEntity
+    getCacheEntity:(state)=>state.cacheEntity,
+    getNowDept:(state)=>state.nowDept
 }

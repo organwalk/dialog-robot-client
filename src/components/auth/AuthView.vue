@@ -79,6 +79,8 @@ import {Iphone, Close} from "@element-plus/icons-vue"
 import * as auth from '@/api/cloud/auth'
 import * as save from "@/api/server/save-data";
 import {ElMessage} from "element-plus";
+import {useStore} from "vuex";
+import * as mp from "@/api/cloud/manage-person";
 
 
 // ---------------本组件内容无需维护-----------------------------
@@ -91,6 +93,7 @@ const user = reactive({
     name: '',
     deptName: ''
 })
+const store = useStore()
 
 const login = () => {
     if (mobile.value === '' || mobile.value.length < 11) {
@@ -134,7 +137,7 @@ const login = () => {
                                                                 if (!res.data.success) {
                                                                     redisError()
                                                                 } else {
-                                                                    auth.getDeptPersonList().then(res => {
+                                                                    auth.getDeptPersonList(sessionStorage.getItem("deptId")).then(res => {
                                                                         const personList = res.data.data.users.map(person => {
                                                                             return {
                                                                                 id: person.id.toString(),
@@ -145,14 +148,31 @@ const login = () => {
                                                                                 privilege: "mydeptonly"
                                                                             }
                                                                         })
-                                                                        save.saveDeptPersonList(personList).then(res => {
-                                                                            if (!res.data.success) {
-                                                                                redisError()
+                                                                        mp.getDeptList().then(res => {
+                                                                            if (res.data.code === 200) {
+                                                                                let deptList = []
+                                                                                res.data.data.departments.forEach((dept) => {
+                                                                                    deptList.push({
+                                                                                        label: dept.name,
+                                                                                        value: dept.deptId
+                                                                                    })
+                                                                                })
+                                                                                store.dispatch('updataNowDept', deptList[1].label).then(()=>{
+                                                                                    save.saveDeptPersonList(store.state.chat.nowDept, personList).then(res => {
+                                                                                        if (!res.data.success) {
+                                                                                            redisError()
+                                                                                        } else {
+                                                                                            loading.value = false
+                                                                                            window.location.href = '/chat'
+                                                                                        }
+                                                                                    })
+                                                                                })
                                                                             } else {
-                                                                                loading.value = false
-                                                                                window.location.href = '/chat'
+                                                                                ElMessage.error(res.data.msg)
+                                                                                return false
                                                                             }
                                                                         })
+
                                                                     })
 
                                                                 }

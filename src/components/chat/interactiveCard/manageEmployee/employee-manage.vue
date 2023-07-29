@@ -4,10 +4,10 @@
                     @get-new-dept-name = "getNewDeptName"
                     :dept-name="deptName"
                     :new-check-type="checkTypeValue"/>
-        <employee-list v-if="checkTypeValue === 'Staff List'"
+        <employee-list v-if="checkTypeValue === 'Staff'"
                        :if-change-dept-name = "ifChangeDeptName"
                        :dept-id="deptId" :dept-name="deptName"/>
-        <other-dept-list v-if="checkTypeValue === 'Other Depts' "
+        <other-dept-list v-if="checkTypeValue === 'Depts' "
                          :now-dept-name="deptName"
                          @sendDeptId="getDeptId"/>
     </el-card>
@@ -33,7 +33,7 @@ const getDeptId = (newDeptId,newName) => {
 
 watch(deptId,(newDeptId)=>{
     if (newDeptId){
-        checkTypeValue.value = 'Staff List'
+        checkTypeValue.value = 'Staff'
     }
 })
 
@@ -50,6 +50,8 @@ const getNewDeptName = (val) => {
 }
 
 const getDeptName = () => {
+    deptName.value = ""
+    deptId.value = ""
     mp.getUserDept(Number(sessionStorage.getItem("uid"))).then(res=>{
         if (res.data.code === 200){
             deptName.value = res.data.data[1].name

@@ -23,6 +23,10 @@ const deletePlan = (sid)=>{
     return http.uPost('/schedule/delete?scheduleId='+sid)
 }
 
+const getPlan = (sid) => {
+    return http.get('/schedule/detail?scheduleId='+sid)
+}
+
 const addNotes = (obj)=>{
     return http.unPost('/notification/create',obj)
 }
@@ -47,6 +51,7 @@ export {
     updataPlan,
     cancelPlan,
     deletePlan,
+    getPlan,
     addNotes,
     updataNotes,
     cancelNotes,

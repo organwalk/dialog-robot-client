@@ -6,11 +6,9 @@ const dept = (type,obj)=>{
             addDept(obj)
             break
         case 'DelDept':
-            delDept(obj)
-            break
+            return delDept(obj)
         case 'UpdateDept':
-            updateDept(obj)
-            break
+            return updateDept(obj)
     }
 }
 

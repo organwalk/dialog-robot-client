@@ -1,21 +1,24 @@
 import http from "@/api/server/http";
 
-const sendOrderToServer = (content) => {
+const sendOrderToServer = (deptName,content) => {
     let obj = {
         action:"order",
+        deptName:deptName,
         orderContent:content
     }
     return http.post('/order/'+sessionStorage.getItem("mobile"),obj)
 }
 
-const getUserIdByName = (nameArrary) => {
+const getUserIdByName = (deptName,nameArrary) => {
     return http.post('/data/receivers/'+sessionStorage.getItem('mobile'),{
+        deptName:deptName,
         nameArray:nameArrary
     })
 }
 
-const getGroupIdByName = (nameArray) => {
+const getGroupIdByName = (deptName, nameArray) => {
     return http.post('/data/groupId/'+sessionStorage.getItem('mobile'),{
+        deptName:deptName,
         nameArray:[nameArray]
     })
 }

@@ -40,5 +40,8 @@ export default {
     },
     setCacheEntity(state,cacheEntity){
         state.cacheEntity = cacheEntity
+    },
+    setNowDept(state,nowDept){
+        state.nowDept = nowDept
     }
 }

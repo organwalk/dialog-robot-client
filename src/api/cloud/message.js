@@ -101,12 +101,13 @@ const sendSysMsg = (obj)=>{
 
 const sendVoice = (obj) => {
     let newObj = {
+        ...obj,
         msgType:3,
-        message:obj.voiceUrl.voiceUrl,
+        message:"http://47.122.19.138:38181/api/voice/" + obj.voiceUrl.voiceUrl,
         extraData:"{\"duration\":" + obj.voiceUrl.duration + "}",
-        receivers:["1151800183169088"],
         needPush:true
     }
+    delete newObj.voiceUrl
     return http.post(msgBaseUrl,newObj)
 }
 export default msg

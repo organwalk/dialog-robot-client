@@ -32,9 +32,10 @@ const saveGroupList = (group) => {
 }
 
 //存储当前部门下人员列表
-const saveDeptPersonList = (users) => {
+const saveDeptPersonList = (deptName,users) => {
     return http.post('/data/dept/person/'+sessionStorage.getItem("mobile"),{
         action:'save',
+        deptName:deptName,
         dept:[
             {
                 users:users
@@ -43,11 +44,19 @@ const saveDeptPersonList = (users) => {
     })
 }
 
+const deleteAboutDept = () => {
+    return http.delete('/data/dept/group/'+ sessionStorage.getItem("mobile"))
+}
+
+const deletePersonInDept = (name,deptName) => {
+    return http.delete('/data/dept/person/'+ sessionStorage.getItem("mobile") + "?name=" + name + "&&deptName=" + deptName)
+}
 
 export {
     saveUserInfo,
     saveDeptList,
     saveGroupList,
-    saveDeptPersonList
-
+    saveDeptPersonList,
+    deleteAboutDept,
+    deletePersonInDept
 }

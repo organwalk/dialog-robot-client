@@ -59,22 +59,10 @@
                     <!-- 使用作用域插槽自定义单元格内容 -->
                     <template #default="{ row }">
                         <!-- 显示对应的日期 -->
-                        <el-popover
-                            placement="bottom"
-                            :width="50"
-                            :show-after="500"
-                            :hide-after="0"
-                            trigger="hover"
-                        >
-                            <template #reference>
-                                <div :class="{'choose-bg': row[index] === chooseDateValue }"
-                                     @mouseover="getScheduleNum(row[index])"
-                                     @click="getScheduleListByDay(row[index])"
-                                     style="user-select: none;">{{ row[index] }}
-                                </div>
-                            </template>
-                            <span >该日期有 {{ scheduleNum }} 条记录</span>
-                        </el-popover>
+                        <div :class="{'choose-bg': row[index] === chooseDateValue }"
+                             @click="getScheduleListByDay(row[index])"
+                             style="user-select: none;">{{ row[index] }}
+                        </div>
                     </template>
                 </el-table-column>
             </el-table>
@@ -106,7 +94,6 @@ const lastDay = computed(()=>new Date(parseInt(yearValue.value.toString()),parse
 
 const chooseDate = ref(today.getDate())
 const emit = defineEmits(["sendClickDay"])
-const scheduleNum = ref(0)
 const hoverData = ref('')
 const countList = reactive([])
 
@@ -121,20 +108,6 @@ onMounted(()=>{
         countList.value = res.data.scheduleData
     })
 })
-
-const getScheduleNum = (val)=>{
-    hoverData.value = yearValue.value + "-" + monthValue.value + '-' +val
-    const dateParts = hoverData.value.split('-');
-    const year = dateParts[0];
-    const month = dateParts[1].padStart(2, '0');
-    const day = dateParts[2].padStart(2, '0');
-    hoverData.value = `${year}-${month}-${day}`
-    const result = countList.value.find(item => item.date === hoverData.value)
-    setTimeout(()=>{
-        scheduleNum.value = result ? result.count : 0
-    },500)
-
-}
 
 const clickDay = ref('')
 const getScheduleListByDay = (val)=>{

@@ -1,6 +1,6 @@
 {
-  "name": "dialog-robot-client",
-  "version": "0.1.0",
+  "name": "Xeno-loader",
+  "version": "0.1.3",
   "private": true,
   "scripts": {
     "start": "nodemon --watch main.js --exec npm run build",

@@ -49,7 +49,7 @@
                                 <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
                                     <el-upload
                                             v-model:file-list="fileList"
-                                            action="http://47.122.19.138:38081/api/image"
+                                            action="https://47.122.19.138:38081/api/image"
                                             name="image"
                                             method="post"
                                             :auto-upload="true"
@@ -250,7 +250,7 @@ const beforeUpload = (file) => {
     });
 };
 
-const imageResource = "http://47.122.19.138:38081/api/images/"
+const imageResource = "http://47.122.19.138:38181/api/images/"
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
@@ -369,7 +369,7 @@ const sendOrder = () => {
 
 //  处于新的对话中
 const inNewConversation = (content) => {
-    order.sendOrderToServer(content).then(res => {
+    order.sendOrderToServer(store.state.chat.nowDept,content).then(res => {
         let ot = '' //指令类型
         let obj = {} //参数对象
         let reply = true //回复状态
@@ -760,10 +760,10 @@ const objectIdByName = async (type, val) => {
             let res
             if (val.length > 1) {
                 const matches = val.match(namePattern);
-                res = await order.getUserIdByName(matches)
+                res = await order.getUserIdByName(store.state.chat.nowDept, matches)
             } else {
                 let nameList = []
-                res = await order.getUserIdByName(nameList.push(val))
+                res = await order.getUserIdByName(store.state.chat.nowDept, nameList.push(val))
             }
             const dataArray = res.data.data
             dataArray.forEach((item) => {
@@ -771,7 +771,7 @@ const objectIdByName = async (type, val) => {
             });
             return dataArray.map((item) => item[0]);
         } else if (type === 'groupId') {
-            const res = await order.getGroupIdByName(val);
+            const res = await order.getGroupIdByName(store.state.chat.nowDept, val);
             const groupId = res.data.data;
             return groupId.map((item) => item[1])[0];
         } else if (type === 'name') {
@@ -791,7 +791,7 @@ const objectIdByName = async (type, val) => {
                 deptList: deptList
             }
         } else if (type === 'dept') {
-            const res = await order.getGroupIdByName(val);
+            const res = await order.getGroupIdByName(store.state.chat.nowDept, val);
             const groupId = res.data.data;
             return groupId.map((item) => item[0])[0];
         }

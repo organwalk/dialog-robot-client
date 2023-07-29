@@ -2,7 +2,7 @@ import axios from "axios";
 import {ref, watchEffect} from "vue";
 import store from "@/store";
 
-const resource = "http://47.122.19.138:38081/api/voice"
+const resource = "https://47.122.19.138:38081/api/voice"
 let mediaRecorder
 let audio
 let audioChunks = []
@@ -16,7 +16,6 @@ const usingVoice = (action) => {
 }
 
 const startRecording = () => {
-    console.log(audioChunks.length)
     navigator.mediaDevices.getUserMedia({audio: true})
         .then(stream => {
             //  实例化一个媒体录制接口

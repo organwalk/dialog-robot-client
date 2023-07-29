@@ -41,6 +41,8 @@ function logout(){
             setTimeout(function(){
                 window.location.href = "/auth"
             }, 2500);
+        }else {
+            ElMessage.error("服务错误，请重新运行本程序")
         }
     })
 }

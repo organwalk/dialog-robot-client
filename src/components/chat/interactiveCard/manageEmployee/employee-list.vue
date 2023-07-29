@@ -5,13 +5,13 @@
                 v-model="search"
                 placeholder="Search"
                 :prefix-icon="Search"
-                style="width: 80%"
+                style="width: 100%"
                 class="search"
                 @input="searchEmployee()"
             />
         </el-col>
     </el-row><br/>
-    <el-collapse v-loading="loading" accordion style="width: 100%;height:370px;overflow-y: auto">
+    <el-collapse v-loading="loading" accordion style="width: 100%;height:400px;overflow-y: auto;user-select: none">
         <el-card v-for="(item,index) in employeeList" :key="index"
                  shadow="never"
                  style="border-radius: 10px;margin-bottom: 10px">
@@ -21,9 +21,10 @@
                         :column="2"
                         size="default"
                         border
+                        v-loading="editLoading"
                 >
                     <template #extra>
-                        <el-button type="primary" :icon="Edit" @click="read = false" circle size="small"/>
+                        <el-button type="primary" :icon="Edit" @click="getCacheData(item)" circle size="small"/>
                         <el-popconfirm title="确认删除?" @confirm="deleteUser(item.id)">
                             <template #reference>
                                 <el-button  type="danger" :icon="Delete" circle size="small"/>
@@ -40,7 +41,14 @@
                     </el-descriptions-item>
                     <el-descriptions-item>
                         <template #label>Department</template>
-                        <el-input class="edit" v-model="item.deptName" :readonly="read" />
+                        <el-select class="edit" v-model="defaultDept" value-key="id" size="large" :disabled="read">
+                            <el-option
+                                v-for="dept in deptList"
+                                :key="dept.value"
+                                :label="dept.label"
+                                :value="dept.value"
+                            />
+                        </el-select>
                     </el-descriptions-item>
                     <el-descriptions-item>
                         <template #label>Job</template>
@@ -68,7 +76,8 @@ import {ref, defineProps, computed, watch, onMounted} from "vue";
 import {Delete, Edit} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
 import * as mp from "@/api/cloud/manage-person"
-import {personInfoRefresh} from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
+import * as auth from "@/api/cloud/auth";
+import * as save from "@/api/server/save-data";
 
 const props = defineProps(
     {
@@ -82,39 +91,21 @@ const employeeList = ref([])
 const deptId = computed(()=>props.deptId)
 const deptName = computed(()=>props.deptName)
 const ifChangeDeptName = computed(()=>props.ifChangeDeptName)
+const defaultDept = ref('')
 
 //实现人员列表加载
 onMounted(()=>{
     if (deptId.value){
-        mp.getPersonDept(deptId.value).then(res=>{
-            res.data.data.users.forEach((user) => {
-                user.deptName = deptName.value
-                employeeList.value.push(user)
-                loading.value = false
-            })
-        })
+        getPersonByDeptId(deptId.value)
     }
 })
 watch(deptId,(newVal)=>{
-    mp.getPersonDept(newVal).then(res=>{
-        employeeList.value = []
-        res.data.data.users.forEach((user) => {
-            user.deptName = deptName.value
-            employeeList.value.push(user)
-            loading.value = false
-        })
-    })
+    getPersonByDeptId(newVal)
 })
 watch(ifChangeDeptName,(newVal)=>{
     if (newVal){
         loading.value = true
-        mp.getPersonDept(deptId.value).then(res=>{
-            res.data.data.users.forEach((user) => {
-                user.deptName = deptName.value
-                employeeList.value.push(user)
-                loading.value = false
-            })
-        })
+        getPersonByDeptId(deptId.value)
     }
 })
 
@@ -130,44 +121,76 @@ const searchEmployee = () => {
             employeeList.value = [found]
         }
     } else {
-        mp.getPersonDept(Number(deptId.value)).then(res=>{
-            employeeList.value = []
-            res.data.data.users.forEach((user) => {
-                user.deptName = deptName.value
-                employeeList.value.push(user)
-                loading.value = false
-            })
-        })
+        getPersonByDeptId(deptId.value)
     }
 }
 
+const getCacheData = (item) => {
+    read.value = false
+    cacheName.value = item.name
+}
+//实现职员修改
 const read = ref(true)
+const editLoading = ref(false)
+const cacheName = ref()
 const confirmEdit = (itemObject) =>{
-    if (itemObject.name && itemObject.mobile && itemObject.deptName && itemObject.title){
+    editLoading.value = true
+    if (itemObject.name && itemObject.mobile && defaultDept.value && itemObject.title){
         itemObject["uid"] = itemObject.id
+        if (defaultDept.value !== deptId.value){
+            itemObject["oldDeptId"] = deptId.value
+            itemObject["deptId"] = defaultDept.value
+        }
         delete itemObject.id
         mp.updataPersonInfo(itemObject).then(res=>{
-            if (res.data.data.uid){
+            if (res.data.code===200){
+                editLoading.value = false
                 read.value = true
-                ElMessage({
-                    message: '修改成功',
-                    type: 'success',
-                })
-                personInfoRefresh()
-                mp.getPersonDept(Number(deptId.value)).then(res=>{
-                    employeeList.value = []
-                    res.data.data.users.forEach((user) => {
-                        user.deptName = deptName.value
-                        employeeList.value.push(user)
-                        loading.value = false
+                if (itemObject["deptId"] !== deptId.value){
+                    auth.getDeptPersonList(itemObject["deptId"]).then(res => {
+                        console.log(res.data)
+                        const personList = res.data.data.users.map(person => {
+                            return {
+                                id: person.id.toString(),
+                                name: person.name,
+                                mobile: person.mobile,
+                                sequence: person.sequence,
+                                orgId: person.orgId,
+                                privilege: "mydeptonly"
+                            }
+                        })
+                        if (personList.length === 0){
+                            if (cacheName.value !== undefined){
+                                save.deletePersonInDept(cacheName.value, deptName.value)
+                            }
+                        }
+                        let deptList = []
+                        mp.getDeptList().then(res => {
+                            res.data.data.departments.forEach((dept) => {
+                                deptList.push({
+                                    label:dept.name,
+                                    value:dept.deptId
+                                })
+                            })
+                            save.saveDeptPersonList(deptList.find(item => item.value === itemObject["deptId"]).label, personList).then(res => {
+                                if (res.data.status !== 200) {
+                                    throw new Error("服务错误，请重试");
+                                }
+                            })
+                        })
                     })
-                })
+                }
+                getPersonByDeptId(deptId.value)
+                editLoading.value = false
+                ElMessage.success("职员信息修改成功")
+            }else {
+                ElMessage.error(res.data.msg)
+                editLoading.value = false
             }
         })
     }else {
         ElMessage.error('请完整填写信息')
     }
-
 }
 
 const deleteUser = (userID)=>{
@@ -193,6 +216,58 @@ const deleteUser = (userID)=>{
     })
 }
 
+let deptList = []
+//获取职员列表
+const getPersonByDeptId = (val) => {
+    employeeList.value = []
+    mp.getPersonDept(val).then(res=>{
+        res.data.data.users.forEach((user) => {
+            user.deptName = deptName.value
+            employeeList.value.push(user)
+            loading.value = false
+        })
+    })
+    deptList = []
+    mp.getDeptList().then(res => {
+        res.data.data.departments.forEach((dept) => {
+            deptList.push({
+                label:dept.name,
+                value:dept.deptId
+            })
+
+        })
+        defaultDept.value = deptList.find(item => item.label === deptName.value)?.value || '';
+    })
+    auth.getDeptPersonList(val).then(res => {
+        let personList = []
+        if (res.data.data.users !== []){
+            personList = res.data.data.users.map(person => {
+                return {
+                    id: person.id.toString(),
+                    name: person.name,
+                    mobile: person.mobile,
+                    sequence: person.sequence,
+                    orgId: person.orgId,
+                    privilege: "mydeptonly"
+                }
+            })
+        }
+        if (personList.length === 0){
+            if (cacheName.value !== undefined){
+                save.deletePersonInDept(cacheName.value, deptName.value)
+            }else {
+                loading.value = false
+                ElMessage.error("当前部门暂无人员")
+            }
+        }else {
+            save.saveDeptPersonList(deptName.value,personList).then(res => {
+                if (res.data.status !== 200) {
+                    throw new Error("服务错误，请重试");
+                }
+            })
+        }
+    })
+}
 </script>
 
 <style scoped>
@@ -220,5 +295,12 @@ const deleteUser = (userID)=>{
 }
 /deep/  .edit .el-input__wrapper :hover{
     box-shadow: none;
+}
+/deep/ .el-input.is-disabled .el-input__wrapper {
+    background-color: #ffffff;
+}
+/deep/ .el-input.is-disabled .el-input__inner {
+    color: #000000;
+    -webkit-text-fill-color: #6a6870;
 }
 </style>

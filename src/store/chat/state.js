@@ -14,5 +14,6 @@ export default {
         data:[]
     },
     cacheIntention:'',
-    cacheEntity:''
+    cacheEntity:'',
+    nowDept:''
 }

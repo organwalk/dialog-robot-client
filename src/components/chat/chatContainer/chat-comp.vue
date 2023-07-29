@@ -93,6 +93,7 @@
                 </el-button>
             </el-col>
         </el-row>
+<!--        数据标注-->
         <el-row v-if="mark" style="margin-top: -4%">
             <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2" align="left" v-if="showLike">
                 <el-button round @click="markLike()" :disabled="!showDislike" v-btn>
@@ -123,7 +124,7 @@
                 </el-button>
             </el-col>
         </el-row>
-        <br/>
+        <br v-if="mark"/>
         <el-dialog
                 v-model="editFeedback"
                 width="40%"
@@ -170,7 +171,7 @@
                             </template>
                             <el-card shadow="never" style="border: none">
                                 <h4 style="margin: 0">实体文本</h4>
-                                <h5 style="font-weight: lighter">您可以按照您的理解重新划分实体</h5>
+                                <h5 style="font-weight: lighter">您可以按照您的理解重新划分实体，当实体表现为 '{}' 时，则表明当前意图不存在实体，无需划分</h5>
                                 <el-input style="margin-bottom: 10px" v-for="(value, key) in entity" :key="key" v-model="entity[key]">
                                     <template #prepend>{{key}}</template>
                                 </el-input>
@@ -281,7 +282,7 @@ const imageUrl = (val) => {
     state.dontShowRec = false
     state.chatMessages.push({
         type: 'image',
-        message: 'http://47.122.19.138:38081/api/images/' + val
+        message: 'https://47.122.19.138:38081/api/images/' + val
     })
     state.resOver = true
     loading.value = true
@@ -299,7 +300,7 @@ const voiceInfo = (obj) => {
     state.chatMessages.push({
         type: 'voice',
         message: {
-            url: 'http://47.122.19.138:38081/api/voice/' + obj.voiceUrl,
+            url: 'https://47.122.19.138:38081/api/voice/' + obj.voiceUrl,
             time: obj.duration
         }
     })
@@ -323,7 +324,7 @@ const playVoice = (url) => {
 }
 
 const checkImage = (val) => {
-    const reg = /http:\/\/47\.122\.19\.138:38081\/api\/images\//;
+    const reg = /http:\/\/47\.122\.19\.138:38181\/api\/images\//;
     return !reg.test(val)
 }
 
@@ -672,7 +673,7 @@ const markLike = () => {
             content:res.data.data[0].content,
             intention:res.data.data[0].intention,
             entity:res.data.data[0].entity,
-            evaluate:"dislike",
+            evaluate:"like",
             newIntention:"",
             newEntity:""
         }
