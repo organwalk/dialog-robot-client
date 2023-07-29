@@ -672,7 +672,7 @@ const markLike = () => {
             content:res.data.data[0].content,
             intention:res.data.data[0].intention,
             entity:res.data.data[0].entity,
-            evaluate:"dislike",
+            evaluate:"like",
             newIntention:"",
             newEntity:""
         }
