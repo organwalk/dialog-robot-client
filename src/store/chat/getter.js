@@ -9,5 +9,7 @@ export default {
     getContentQueryPlanData:(state)=>state.contentQueryPlanData,
     getFastQueryNotesData:(state)=>state.fastQueryNotesData,
     getFastContentQueryNotesStatus:(state)=>state.fastContentQueryNotesData.status,
-    getFastContentQueryNotesData:(state)=>state.fastContentQueryNotesData.data
+    getFastContentQueryNotesData:(state)=>state.fastContentQueryNotesData.data,
+    getCacheIntention:(state)=>state.cacheIntention,
+    getCacheEntity:(state)=>state.cacheEntity
 }

@@ -10,6 +10,7 @@
   },
   "main": "main.js",
   "dependencies": {
+    "@electron/remote": "^2.0.10",
     "axios": "^1.4.0",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.6",
@@ -17,8 +18,7 @@
     "image-conversion": "^2.1.1",
     "vue": "^3.2.13",
     "vue-router": "^4.2.1",
-    "vuex": "^4.0.2",
-    "@electron/remote": "^2.0.10"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -27,7 +27,7 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "electron": "^25.2.0",
+    "electron": "^25.3.2",
     "electron-builder": "^24.4.0",
     "electron-package": "^0.1.0",
     "electron-updater": "^6.1.1",

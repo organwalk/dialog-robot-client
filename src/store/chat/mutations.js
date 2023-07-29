@@ -34,5 +34,11 @@ export default {
     },
     setFastContentQueryNotesData(state,data){
         state.fastContentQueryNotesData.data = data
+    },
+    setCacheIntention(state,cacheIntention){
+        state.cacheIntention = cacheIntention
+    },
+    setCacheEntity(state,cacheEntity){
+        state.cacheEntity = cacheEntity
     }
 }

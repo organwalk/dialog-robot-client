@@ -100,6 +100,26 @@ const release = () => {
 const serverStatus = () => {
     return http.get('/system/server')
 }
+
+const getNowModelResult = () => {
+    return http.post('/system/feedback',{
+        action:"getNowModelResult",
+        mobile:sessionStorage.getItem("mobile")
+    })
+}
+
+const sendFeedback = (obj) => {
+    return http.put('/system/feedback/send',obj)
+}
+
+const getFeedbackById = (id) => {
+    return http.get('/system/feedback/get/' + id)
+}
+
+const updateFeedback = (obj) => {
+    return http.put('/system/feedback/edit',obj)
+}
+
 export {
     getSchedule,
     getScheduleCount,
@@ -116,5 +136,9 @@ export {
     deleteNotificationByNid,
     getNotificationCount,
     release,
-    serverStatus
+    serverStatus,
+    getNowModelResult,
+    sendFeedback,
+    getFeedbackById,
+    updateFeedback
 }

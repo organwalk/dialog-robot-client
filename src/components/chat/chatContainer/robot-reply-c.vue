@@ -12,7 +12,7 @@
                 :is="component"
             />
         </el-col>
-    </el-row>
+    </el-row><br/>
 </template>
 
 <script setup>
@@ -48,7 +48,7 @@ const cardStatus = computed(() => props.cardStatus)
  * 提交‘展示推荐卡片’、‘缺失值Key’
  * @type {EmitFn<(string)[]>}
  */
-const emit = defineEmits(['showRecommend', 'showObjectRec', 'send-miss-value-type','send-loading'])
+const emit = defineEmits(['showRecommend', 'showObjectRec', 'send-miss-value-type','send-loading', "showFeedback"])
 const store = useStore()
 
 //  初始化文字回复
@@ -253,6 +253,7 @@ const getOrderTypeReply = () => {
         reply = template
     }
     emit('showRecommend', reply)
+    emit('showFeedback',true)
     store.dispatch('updataMissingKeyObj', {})
     store.dispatch('updataVoiceObj',{})
     return reply
@@ -261,6 +262,7 @@ const getOrderTypeReply = () => {
 const getCardStatusReply = () => {
     const reply = robotReplyConfig[cardStatus.value]
     emitShowRecommend()
+    emit('showFeedback',true)
     return reply
 }
 

@@ -34,5 +34,11 @@ export default {
     },
     updataFastContentQueryNotesStatus({commit},fastContentQueryNotesStatus){
         commit('setFastContentQueryNotesStatus',fastContentQueryNotesStatus)
+    },
+    updataCacheIntention({commit},cacheIntention){
+        commit('setCacheIntention',cacheIntention)
+    },
+    updataCacheEntity({commit},cacheEntity){
+        commit('setCacheEntity',cacheEntity)
     }
 }

@@ -12,5 +12,7 @@ export default {
     fastContentQueryNotesData:{
         status:'',
         data:[]
-    }
+    },
+    cacheIntention:'',
+    cacheEntity:''
 }
