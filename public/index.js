@@ -34,14 +34,18 @@ addEventListener('DOMContentLoaded',()=>{
 
     
     const box_btns = document.getElementById('btns-main-window')
-    box_btns.addEventListener('mouseover',()=>{
-        // console.log(box_btns.childNodes[0].style);
+    // box_btns.addEventListener('mouseover',()=>{
+    //     // console.log(box_btns.childNodes[0].style);
+    //     box_btns.children[0].style['display'] = 'block'
+    // })
+    // box_btns.addEventListener('mouseout',()=>{
+    //     // console.log(box_btns.childNodes[0]);
+    //     // box_btns.children[0].style['display'] = 'none'
+    //     box_btns.children[0].style['display'] = 'block'
+    // })
+    setTimeout(() => {
         box_btns.children[0].style['display'] = 'block'
-    })
-    box_btns.addEventListener('mouseout',()=>{
-        // console.log(box_btns.childNodes[0]);
-        box_btns.children[0].style['display'] = 'none'
-    })
+    }, 300);
     var mainBtns = document.getElementsByClassName('btn_circle')
     mainBtns = Array.from(mainBtns)
     function allBtnUp() {
