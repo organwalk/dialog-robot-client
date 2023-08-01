@@ -12,5 +12,7 @@ export default {
     getFastContentQueryNotesData:(state)=>state.fastContentQueryNotesData.data,
     getCacheIntention:(state)=>state.cacheIntention,
     getCacheEntity:(state)=>state.cacheEntity,
-    getNowDept:(state)=>state.nowDept
+    getNowDept:(state)=>state.nowDept,
+    getReplyUseObject:(state)=>state.replyUseObject,
+    getReplyErrorMsg:(state)=>state.replyErrorMsg
 }

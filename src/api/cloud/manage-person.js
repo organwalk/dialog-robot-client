@@ -1,16 +1,5 @@
 import http from "@/api/cloud/http";
 
-const man = (type,object)=>{
-    switch (type){
-        case 'AddMan':
-            addMan(object)
-            break
-        case 'DelMan':
-            delMan(object)
-            break
-    }
-}
-
 const manBaseUrl = '/user'
 const addMan = (obj)=>{
     const newObj = {
@@ -49,7 +38,7 @@ const updataPersonInfo = (obj)=>{
     return http.post('/user/update',obj)
 }
 export {
-    man,
+    addMan,
     getUserDept,
     getPersonDept,
     getUserDetail,

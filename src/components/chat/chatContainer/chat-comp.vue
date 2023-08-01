@@ -78,19 +78,26 @@
                 <el-tooltip
                         effect="dark"
                         content="为您推荐"
-                        placement="bottom"
+                        placement="top"
                 >
                     <el-button :icon="More" circle v-btn/>
                 </el-tooltip>
             </el-col>
-            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"
-                    v-for="(item,index) in objectRecommend.slice(0,3)"
-                    :key="index"
-            >
-                <el-button style="width: 95%;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                           round v-btn @click="sendObjectNameToInput(item.name)">
-                    {{ item.name }}
-                </el-button>
+            <el-col :xs="23" :sm="23" :md="23" :lg="23" :xl="23">
+                <template v-if="objectRecommend.length === 1">
+                    <el-button style="width: 95%;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                               round v-btn @click="sendObjectNameToInput(objectRecommend[0][0].name)">
+                        {{ objectRecommend[0][0].name }}
+                    </el-button>
+                </template>
+                <template v-else>
+                    <el-row>
+                        <el-button v-for="(item, index) in objectRecommend" :key="index" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                   round v-btn @click="sendObjectNameToInput(item.name)">
+                            {{ item.name }}
+                        </el-button>
+                    </el-row>
+                </template>
             </el-col>
         </el-row>
 <!--        数据标注-->
@@ -242,7 +249,7 @@ const state = reactive({
     missValueType: '',  //空缺值类型
     cardStatus: '', //  回复组件中所需”卡片回复状态机“所需参数
     recommendText: '',  //  推荐语句
-    objectNameFromRec: '', // 推荐人名
+    objectNameFromRec: {}, // 推荐人名
     imageUrl: '',    //图片url
     voiceUrl: '',//录音文件Url
     duration: Number,//时长
@@ -361,30 +368,42 @@ const objectRecommend = ref([])
 const getObjectRecommendUserList = (type) => {
     objectRecommend.value = []
     if (type === "name") {
-        getPersonDept(Number(sessionStorage.getItem("deptId"))).then(res => {
+        getPersonDept(store.state.chat.nowDept.deptId).then(res => {
             const users = res.data.data.users
-            const randomIndexes = []
-            while (randomIndexes.length < 3) {
-                const randomIndex = Math.floor(Math.random() * users.length)
-                if (!randomIndexes.includes(randomIndex)) {
-                    randomIndexes.push(randomIndex)
+            if (users.length > 3){
+                const randomIndexes = []
+                while (randomIndexes.length < 3) {
+                    const randomIndex = Math.floor(Math.random() * users.length)
+                    if (!randomIndexes.includes(randomIndex)) {
+                        randomIndexes.push(randomIndex)
+                    }
                 }
+                randomIndexes.forEach(index => {
+                    objectRecommend.value.push(users[index])
+                })
+            }else {
+                objectRecommend.value.push(users)
             }
-            randomIndexes.forEach(index => {
-                objectRecommend.value.push(users[index])
-            })
         })
     } else if (type === "group") {
         getDeptList().then(res => {
-            res.data.data.departments.forEach((dept) => {
-                objectRecommend.value.push(dept)
-                loading.value = false
-            })
-        })
+            const departments = res.data.data.departments;
+            const n = departments.length;
+            const indices = new Set();
+            while (indices.size < 3) {
+                indices.add(Math.floor(Math.random() * n));
+            }
+            indices.forEach(index => {
+                objectRecommend.value.push(departments[index]);
+            });
+            loading.value = false;
+        });
     }
 }
 const sendObjectNameToInput = (name) => {
-    state.objectNameFromRec = name
+    const randomNumber = Math.floor(Math.random() * 100000);
+    const timestamp = new Date().getTime();
+    state.objectNameFromRec = {name:name,code:randomNumber.toString() + timestamp.toString()}
     state.showObjectNameFromRec = false
 }
 const showObjectRec = (val) => {

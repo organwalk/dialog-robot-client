@@ -43,5 +43,11 @@ export default {
     },
     setNowDept(state,nowDept){
         state.nowDept = nowDept
+    },
+    setReplyUseObject(state,replyUseObject){
+        state.replyUseObject = replyUseObject
+    },
+    setReplyErrorMsg(state,replyErrorMsg){
+        state.replyErrorMsg = replyErrorMsg
     }
 }

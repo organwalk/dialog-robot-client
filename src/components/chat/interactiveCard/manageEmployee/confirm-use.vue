@@ -1,5 +1,6 @@
 <template>
     <el-card style="width: 50%;margin-bottom: 10px;border-radius: 15px;background-color: white;">
+        <br/>
         <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <img src="@/assets/employee.png" style="width: 80%;" alt="not image"/>
@@ -18,7 +19,7 @@
                     </el-row>
                 </el-card>
             </el-col>
-        </el-row>
+        </el-row><br/>
     </el-card>
 
 </template>

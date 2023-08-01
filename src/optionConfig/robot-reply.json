@@ -3,14 +3,14 @@
 
   "SendMsg": "请问您想发送什么类型的消息？\uD83D\uDE0A以下是一些常用消息的推荐:",
 
-  "AppMsg": "好的，我已经成功发送了这则应用消息，可以正常查收😊😊请问还有什么能帮到您的吗？",
-  "TxtMsg": "好的，我已经成功发送了这则文本消息，可以正常查收😊😊请问还有什么能帮到您的吗？",
-  "PicMsg": "我已经将这则图片消息发送出去了。请问还有什么能帮到您的吗？",
-  "VocMsg": "好的，我已经成功发送了这则语音消息，\uD83D\uDE0A\uD83D\uDE0A请问还有什么能帮到您的吗？",
-  "LinkMsg": "我已经成功发送了这则链接消息，😊😊请问还有什么能帮到您的吗？",
-  "MulMsg": "这是一篇图文并茂的文章😊，我已经转发出去了。请问还有什么能帮到您的吗？",
-  "IDMsg": "不错的名片，希望一切顺利😊已为您转达。请问还有什么能帮到您的吗？",
-  "SysMsg": "这是一则系统级的消息，应该很重要吧？🤔已帮您转达。请问还有什么能帮到您的吗？😊",
+  "AppMsg": "好的，我已经成功发送这则应用消息给<strong>${replyUseObject}</strong>😊😊请问还有什么能帮到您的吗？",
+  "TxtMsg": "好的，我已经成功发送了这则文本消息给<strong>${replyUseObject}</strong>😊😊请问还有什么能帮到您的吗？",
+  "PicMsg": "我已经将这则图片消息发送给<strong>${replyUseObject}</strong>。请问还有什么能帮到您的吗？",
+  "VocMsg": "好的，我已经成功发送这则语音消息给<strong>${replyUseObject}</strong>，\uD83D\uDE0A\uD83D\uDE0A请问还有什么能帮到您的吗？",
+  "LinkMsg": "我已经成功发送了这则链接消息给<strong>${replyUseObject}</strong>，😊😊请问还有什么能帮到您的吗？",
+  "MulMsg": "这是一篇图文并茂的文章😊，我已经将它转发给了<strong>${replyUseObject}</strong>。请问还有什么能帮到您的吗？",
+  "IDMsg": "不错的名片，希望一切顺利😊已为您转达给<strong>${replyUseObject}</strong>。请问还有什么能帮到您的吗？",
+  "SysMsg": "好的，我已经成功发送这则系统消息给<strong>${replyUseObject}</strong>。请问还有什么能帮到您的吗？😊",
   "OAMsg": "您可以在此处填写OA消息的详细😊",
 
   "AddMan": "已经帮您添加了这位职员。请问还有什么能帮到您的吗？😊",
@@ -43,7 +43,7 @@
   "contentMissing": "您缺失了具体内容，请您直接告诉我具体内容😊",
   "receiversMissing": "您的要求我大概理解了😊，能再告诉我，您需要把消息转发给谁吗？请用顿号区别不同的发送对象，如：张三、李四",
   "groupIdMissing": "您的要求我大概理解了，能再直接告诉我，您需要把消息发到哪个部门群吗？",
-  "nameMissing": "您的需求我大概理解了😊能请您直接告诉我他是谁吗？",
+  "nameMissing": "您的需求我大概理解了😊能请您直接告诉我这位职员的姓名吗？",
   "deptMissing": "能请您直接告诉我部门名吗？",
   "imageMissing": "能请您给我一张图片吗？",
   "voiceUrlMissing": "能请您把语音发给我吗😊",
@@ -64,6 +64,8 @@
   "NameQueryPlanNone": "抱歉，我未能查询到您所指定的用户为您创建的日程等相关信息。您可以通过下面的日程列表了解更多",
   "ContentQueryPlanNone": "抱歉，我未能查询到相应日程。您可以通过下面的日程列表了解更多",
 
-  "receiversError": "您可能输错了职员姓名，或者不存在这个职员，请您重新检查<strong>职员姓名</strong>并告诉我😊",
-  "groupIdError": "您可能输错了部门群名，或者不存在这个部门群，请您重新检查<strong>部门群名</strong>并告诉我😊"
+  "receiversError": "您的输入中存在错误的职员姓名，或者当前部门下不存在您所指定的职员，请您重新检查<strong>职员姓名</strong>并告诉我😊",
+  "groupIdError": "您可能输错了部门群名，或者不存在这个部门群，请您重新检查<strong>部门群名</strong>并告诉我😊",
+  "AddManError": "非常抱歉\uD83D\uDE25新增职员失败。来自云空间的失败提示信息：<strong>${tip}</strong>",
+  "DelManError": "非常抱歉\uD83D\uDE25删除职员失败。来自云空间的失败提示信息：<strong>${tip}</strong>"
 }

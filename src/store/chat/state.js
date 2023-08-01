@@ -15,5 +15,7 @@ export default {
     },
     cacheIntention:'',
     cacheEntity:'',
-    nowDept:''
+    nowDept:'',
+    replyUseObject:'',
+    replyErrorMsg:''
 }

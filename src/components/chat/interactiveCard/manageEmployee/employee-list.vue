@@ -148,7 +148,6 @@ const confirmEdit = (itemObject) =>{
                 read.value = true
                 if (itemObject["deptId"] !== deptId.value){
                     auth.getDeptPersonList(itemObject["deptId"]).then(res => {
-                        console.log(res.data)
                         const personList = res.data.data.users.map(person => {
                             return {
                                 id: person.id.toString(),
@@ -174,7 +173,7 @@ const confirmEdit = (itemObject) =>{
                             })
                             save.saveDeptPersonList(deptList.find(item => item.value === itemObject["deptId"]).label, personList).then(res => {
                                 if (res.data.status !== 200) {
-                                    throw new Error("服务错误，请重试");
+                                    ElMessage.error("服务错误，请重试");
                                 }
                             })
                         })
@@ -262,7 +261,7 @@ const getPersonByDeptId = (val) => {
         }else {
             save.saveDeptPersonList(deptName.value,personList).then(res => {
                 if (res.data.status !== 200) {
-                    throw new Error("服务错误，请重试");
+                    ElMessage.error("服务错误，请重试");
                 }
             })
         }

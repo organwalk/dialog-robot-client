@@ -43,5 +43,11 @@ export default {
     },
     updataNowDept({commit},nowDept){
         commit('setNowDept',nowDept)
+    },
+    updataReplyUseObject({commit},replyUseObject){
+        commit('setReplyUseObject',replyUseObject)
+    },
+    updataReplyErrorMsg({commit},replyErrorMsg){
+        commit('setReplyErrorMsg',replyErrorMsg)
     }
 }

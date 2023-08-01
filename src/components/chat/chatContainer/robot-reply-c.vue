@@ -69,6 +69,8 @@ const getReply = () => {
         case 'orderType':
             store.dispatch('updataNameAndGroupMarkNum',0)
             robotReply.value = getOrderTypeReply()
+            store.dispatch('updataReplyUseObject',"")
+            store.dispatch('updataReplyErrorMsg',"")
             break;
         case 'cardInteraction':
             robotReply.value = getCardStatusReply()
@@ -156,7 +158,17 @@ const getMissValueReply = () => {
 }
 
 const getOrderTypeReply = () => {
-    let template = robotReplyConfig[orderType.value]
+    let template
+    console.log(store.state.chat.replyErrorMsg)
+    if (store.state.chat.replyErrorMsg !== ''){
+        template = robotReplyConfig[orderType.value + "Error"]
+        template = template.replace("${tip}",store.state.chat.replyErrorMsg)
+    }else {
+        template = robotReplyConfig[orderType.value]
+    }
+    if (store.state.chat.replyUseObject !== ''){
+        template = template.replace("${replyUseObject}",store.state.chat.replyUseObject)
+    }
     let reply = template
     store.dispatch('updataNameAndGroupMarkNum',0)
     //获取人员详情
@@ -249,13 +261,11 @@ const getOrderTypeReply = () => {
             }
         }
     }
-    else {
-        reply = template
-    }
     emit('showRecommend', reply)
     emit('showFeedback',true)
     store.dispatch('updataMissingKeyObj', {})
     store.dispatch('updataVoiceObj',{})
+    console.log(reply)
     return reply
 }
 

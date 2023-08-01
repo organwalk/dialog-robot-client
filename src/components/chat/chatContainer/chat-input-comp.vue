@@ -185,7 +185,7 @@ const emit = defineEmits(["user-input", //  传递用户输入文本事件
 const props = defineProps({
     missingValue: String,
     recommend: String,
-    objectNameFromRec:String,
+    objectNameFromRec:Object,
     resOver: Boolean
 })
 
@@ -198,7 +198,7 @@ watch(rcd, (val) => {
 // 动态获取推荐人名
 const objectName = computed(() => props.objectNameFromRec)
 watch(objectName,(val) => {
-    getRecAndToSend(val)
+    getRecAndToSend(val.name)
 })
 const getRecAndToSend = (val) => {
     orderContent.value = val
@@ -209,6 +209,7 @@ const getRecAndToSend = (val) => {
 const clear = () => {
     let clear = true
     store.dispatch('updataMissingKeyObj', {})
+    store.dispatch('updataNameAndGroupMarkNum', 0)
     emit('clear-chat', clear)
 }
 
@@ -369,7 +370,7 @@ const sendOrder = () => {
 
 //  处于新的对话中
 const inNewConversation = (content) => {
-    order.sendOrderToServer(store.state.chat.nowDept,content).then(res => {
+    order.sendOrderToServer(store.state.chat.nowDept.deptName,content).then(res => {
         let ot = '' //指令类型
         let obj = {} //参数对象
         let reply = true //回复状态
@@ -444,13 +445,20 @@ const intentionIsNotNull = (ot, obj) => {
             store.dispatch("updataFastQueryNotesData",obj.fastQueryNotesData)
             emit("send-status","orderType")
         }else if (ot === "FastContentQueryNotes"){
-
             store.dispatch("updataFastContentQueryNotesStatus",obj.noteContentStatus)
             store.dispatch("updataFastContentQueryNotesData",obj.fastContentQueryNotesData)
             emit("send-status","orderType")
         }
         else {
             //  如果不存在空值则直接调用接口
+            if ("replyUseObject" in obj){
+                store.dispatch('updataReplyUseObject',obj.replyUseObject).then(()=>{
+                    delete obj.replyUseObject
+                })
+            }
+            if ("notfoundKey" in obj){
+                delete obj.notfoundKey
+            }
             useApiAboutByDirect(ot, obj)
         }
     }
@@ -465,6 +473,10 @@ const intentionIsNull = (ot) => {
 
 //  如果存在空缺值，则发送空缺值
 const missingKeyIsExist = (ot, obj) => {
+    console.log(obj)
+    if ("replyUseObject" in obj){
+        delete obj.replyUseObject
+    }
     //将空缺值列表发送给父组件
     sendMissingValues(filterEmptyKeys(obj))
     //保存空缺的响应参数对象至状态管理
@@ -509,10 +521,28 @@ const useApiAboutByDirect = (ot, obj) => {
             store.dispatch('updataSearchUid', newObj)
             emit('send-status', 'orderType')
         }
-        emit('send-status', 'orderType')
-        mp.man(ot, getOrderResObject(obj))
+        if (ot === 'AddMan'){
+            mp.addMan(getOrderResObject(obj)).then(res => {
+                if (res.data.code !== 200){
+                    store.dispatch('updataReplyErrorMsg',res.data.msg).then(() => {
+                        emit('send-status', 'orderType')
+                    })
+                }else {
+                    emit('send-status', 'orderType')
+                }
+            })
+        }else if (ot === 'DelMan'){
+            mp.delMan(getOrderResObject(obj)).then(res => {
+                if (res.data.code !== 200){
+                    store.dispatch('updataReplyErrorMsg',res.data.msg).then(()=>{
+                        emit('send-status', 'orderType')
+                    })
+                }else {
+                    emit('send-status', 'orderType')
+                }
+            })
+        }
     } else if (deptType.test(ot) && ot !== 'GetManDept') {
-        emit('send-status', 'orderType')
         md.dept(ot, getOrderResObject(obj))
     } else if (ot === "FastAddNotes"){
         delete obj.orderType
@@ -616,7 +646,38 @@ const fillMissingValueFromContent = (msv, oc) => {
                 msg(orderType, getOrderResObject(store.state.chat.missingKeyObj))
                 const mType = /Man/
                 if (mType.test(orderType)) {
-                    mp.man(orderType, getOrderResObject(store.state.chat.missingKeyObj))
+                    if (orderType === 'AddMan'){
+                        mp.addMan(getOrderResObject(store.state.chat.missingKeyObj)).then(res => {
+                            if (res.data.code === 200){
+                                emit('send-status', 'orderType')
+                                emit('res-orderType', orderType)
+                                emit('reply-robot', newObj)
+                            }else {
+                                store.dispatch('updataReplyErrorMsg',res.data.msg).then(() => {
+                                    console.log(111)
+                                    console.log(store.state.chat.replyErrorMsg)
+                                    emit('send-status', 'orderType')
+                                    emit('res-orderType', orderType)
+                                    emit('reply-robot', newObj)
+                                })
+                            }
+                        })
+                    }else if (orderType === 'DelMan'){
+                        console.log(store.state.chat.missingKeyObj)
+                        mp.delMan(getOrderResObject(store.state.chat.missingKeyObj)).then(res => {
+                            if (res.data.code !== 200){
+                                store.dispatch('updataReplyErrorMsg',res.data.msg).then(()=>{
+                                    emit('send-status', 'orderType')
+                                    emit('res-orderType', orderType)
+                                    emit('reply-robot', newObj)
+                                })
+                            }else {
+                                emit('send-status', 'orderType')
+                                emit('res-orderType', orderType)
+                                emit('reply-robot', newObj)
+                            }
+                        })
+                    }
                 }else if (ot === "FastAddNotes"){
                     let obj = getOrderResObject(store.state.chat.missingKeyObj)
                     card.addNotes(obj).then(res=>{
@@ -627,10 +688,13 @@ const fillMissingValueFromContent = (msv, oc) => {
                         }
                     })
                     emit('send-status', 'orderType')
+                    emit('res-orderType', orderType)
+                    emit('reply-robot', newObj)
+                }else {
+                    emit('send-status', 'orderType')
+                    emit('res-orderType', orderType)
+                    emit('reply-robot', newObj)
                 }
-                emit('send-status', 'orderType')
-                emit('res-orderType', orderType)
-                emit('reply-robot', newObj)
             }
         })
     }
@@ -669,6 +733,7 @@ const sendMissingValues = (emptyKeysList) => {
 
 //将用户对空缺值的补充填补进空缺对象中
 const userInputAboutMissingValues = async (type, val) => {
+    console.log(val)
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
     let userinfo = {}
@@ -683,8 +748,11 @@ const userInputAboutMissingValues = async (type, val) => {
                 if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
+                    if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
+                        await store.dispatch('updataReplyUseObject', val)
+                    }
                     data = await objectIdByName(type, val)
-                    if (data.length === 1 && data[0] === ""){
+                    if ((data.length === 1 && data[0] === "")||data.some((item) => item === "")){
                         newObj = {...oldObj, [type]: ""}
                     }else {
                         newObj = {...oldObj, [type]: data}
@@ -695,6 +763,9 @@ const userInputAboutMissingValues = async (type, val) => {
                 if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
+                    if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
+                        await store.dispatch('updataReplyUseObject', val)
+                    }
                     data = await objectIdByName(type, val)
                     //如果数据具有长度，则表明为数组，此时插值部门数组
                     userinfo = {
@@ -710,6 +781,9 @@ const userInputAboutMissingValues = async (type, val) => {
                 if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
+                    if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
+                        await store.dispatch('updataReplyUseObject', val)
+                    }
                     data = await objectIdByName(type, val)
                     if (data) {
                         const user = store.state.chat.searchUid
@@ -723,6 +797,9 @@ const userInputAboutMissingValues = async (type, val) => {
                 }
                 break;
             case 'userName':
+                if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
+                    await store.dispatch('updataReplyUseObject', val)
+                }
                 newObj = valueCheck(typeof val === "object" || val.includes(imageResource), oldObj, type, Array(val))
                 break
             case 'image':
@@ -760,10 +837,10 @@ const objectIdByName = async (type, val) => {
             let res
             if (val.length > 1) {
                 const matches = val.match(namePattern);
-                res = await order.getUserIdByName(store.state.chat.nowDept, matches)
+                res = await order.getUserIdByName(store.state.chat.nowDept.deptName, matches)
             } else {
                 let nameList = []
-                res = await order.getUserIdByName(store.state.chat.nowDept, nameList.push(val))
+                res = await order.getUserIdByName(store.state.chat.nowDept.deptName, nameList.push(val))
             }
             const dataArray = res.data.data
             dataArray.forEach((item) => {
@@ -771,7 +848,7 @@ const objectIdByName = async (type, val) => {
             });
             return dataArray.map((item) => item[0]);
         } else if (type === 'groupId') {
-            const res = await order.getGroupIdByName(store.state.chat.nowDept, val);
+            const res = await order.getGroupIdByName(store.state.chat.nowDept.deptName, val);
             const groupId = res.data.data;
             return groupId.map((item) => item[1])[0];
         } else if (type === 'name') {
@@ -791,7 +868,7 @@ const objectIdByName = async (type, val) => {
                 deptList: deptList
             }
         } else if (type === 'dept') {
-            const res = await order.getGroupIdByName(store.state.chat.nowDept, val);
+            const res = await order.getGroupIdByName(store.state.chat.nowDept.deptName, val);
             const groupId = res.data.data;
             return groupId.map((item) => item[0])[0];
         }

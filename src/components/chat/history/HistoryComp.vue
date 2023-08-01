@@ -83,6 +83,8 @@ import {ref, defineEmits, onMounted} from "vue";
 import * as mp from "@/api/cloud/manage-person";
 import {ElMessage} from "element-plus";
 import {useStore} from "vuex";
+import * as auth from "@/api/cloud/auth";
+import * as save from "@/api/server/save-data";
 
 const chat = ref('#2C6AE3')
 const work = ref('')
@@ -96,19 +98,14 @@ const store = useStore()
 const onSetting = () => {
     visible.value = true
     loading.value = true
-    let status = getDeptList()
-    if (status){
-        loading.value = false
-    }else {
-        loading.value = false
-    }
+    getDeptList()
 }
 
-onMounted(()=>{
+onMounted(() => {
     getDeptList()
 })
 
-const getDeptList = () =>{
+const getDeptList = () => {
     deptList.value = []
     mp.getDeptList().then(res => {
         if (res.data.code === 200) {
@@ -118,31 +115,56 @@ const getDeptList = () =>{
                     value: dept.deptId
                 })
             })
-            if (store.state.chat.nowDept === ""){
-                store.dispatch('updataNowDept', deptList.value[1].label)
+            if (store.state.chat.nowDept === "") {
+                store.dispatch('updataNowDept',
+                    {
+                        deptName:deptList.value[1].label,
+                        deptId:deptList.value[1].value
+                        }
+                    )
                     .then(() => {
-                        nowDept.value = store.state.chat.nowDept
+                        nowDept.value = store.state.chat.nowDept.deptName
                     })
                 defaultDept.value = deptList.value.find(item => item.label === deptList.value[1].label)?.value || '';
-                return true
-            }else {
-                nowDept.value = store.state.chat.nowDept
-                defaultDept.value = deptList.value.find(item => item.label === store.state.chat.nowDept)?.value || '';
-                return true
+                loading.value = false
+            } else {
+                nowDept.value = store.state.chat.nowDept.deptName
+                defaultDept.value = deptList.value.find(item => item.label === store.state.chat.nowDept.deptName)?.value || '';
+                loading.value = false
             }
         } else {
             ElMessage.error(res.data.msg)
-            return false
+            loading.value = false
         }
     })
 }
 const changeNowDeptName = () => {
-    store.dispatch('updataNowDept', deptList.value.find(item => item.value === defaultDept.value).label)
+    loading.value = true
+    store.dispatch('updataNowDept', {deptName:deptList.value.find(item => item.value === defaultDept.value).label,deptId:defaultDept.value})
         .then(() => {
-            visible.value = false
-            ElMessage.success("已成功切换当前部门至 " + store.state.chat.nowDept)
+            auth.getDeptPersonList(defaultDept.value).then(res => {
+                const personList = res.data.data.users.map(person => {
+                    return {
+                        id: person.id.toString(),
+                        name: person.name,
+                        mobile: person.mobile,
+                        sequence: person.sequence,
+                        orgId: person.orgId,
+                        privilege: "mydeptonly"
+                    }
+                })
+                save.saveDeptPersonList(store.state.chat.nowDept.deptName, personList).then(res => {
+                    if (res.data.status !== 200) {
+                        loading.value = false
+                        ElMessage.error("服务错误，请重试");
+                    }else {
+                        loading.value = false
+                        visible.value = false
+                        ElMessage.success("已成功切换当前部门至 " + store.state.chat.nowDept.deptName)
+                    }
+                })
+            })
         })
-
 }
 
 const onChat = () => {
