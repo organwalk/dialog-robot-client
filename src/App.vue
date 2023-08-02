@@ -30,21 +30,24 @@ onMounted(()=>{
 </script>
 
 <style>
-body {
-    margin: 0 0;
-    padding: 0 0;
-}
-body, html{
-    width: 100%;
-    height: 100%;
-}
-#app {
-    width: 100%;
-    /* height: calc(100% - 58.5px); */
-    border-radius: 16px 16px;
-    height: 97.5%;
-}
-::-webkit-scrollbar {
-    display: none;
-}
+    body {
+        margin: 0 0;
+        padding: 0 0;
+    }
+    body, html{
+        width: 100%;
+        height: 100%;
+    }
+    #app {
+        width: 100%;
+        /* height: calc(100% - 58.5px); */
+        border-radius: 16px 16px;
+        height: 97.5%;
+    }
+    .el-overlay {
+        border-radius: 15px;
+    }
+    ::-webkit-scrollbar {
+        display: none;
+    }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <el-card class="chatContainer" :scrollTop="state.containerScrollTop" shadow="never"
-             style="border: none; background-color: #f7f7f7;height: calc(100% - 119.5px);overflow-y: auto;border-radius: 0">
+             style="border: none; background-color: #f7f7f7;height: calc(100% - 121.3px);overflow-y: auto;border-radius: 0">
         <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" align="center">
                 <span style="font-size: 10px;color: #B5B8C0;font-weight: bolder" v-if="state.showToDay">{{
