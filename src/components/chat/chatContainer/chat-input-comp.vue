@@ -168,6 +168,9 @@ import RecordingComp from "@/components/chat/interactiveCard/using-voice/recordi
 import {useWhisper} from "@/api/whisper/use-whisper";
 import {ElMessage} from "element-plus";
 import * as data from "@/api/server/data";
+import * as save from "@/api/server/save-data";
+import * as auth from "@/api/cloud/auth";
+import * as personInfoRefresh from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
 
 
 const orderContent = ref('')
@@ -459,6 +462,7 @@ const intentionIsNotNull = (ot, obj) => {
             if ("notfoundKey" in obj){
                 delete obj.notfoundKey
             }
+            console.log("--Now the model analysis result is not missingValue and robot will useApiAboutByDirect")
             useApiAboutByDirect(ot, obj)
         }
     }
@@ -469,14 +473,25 @@ const intentionIsNull = (ot) => {
     //若为空，则将空指令类型发送至父组件,以表意图不明
     emit('send-status', 'initial')
     emit('res-orderType', ot)
+    emit('reply-robot', true)
 }
 
 //  如果存在空缺值，则发送空缺值
 const missingKeyIsExist = (ot, obj) => {
-    console.log(obj)
-    if ("replyUseObject" in obj){
-        delete obj.replyUseObject
+    if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(ot)){
+        if ("replyUseObject" in obj && obj.replyUseObject.length !== 0){
+            store.dispatch('updataReplyUseObject', obj.replyUseObject).then(()=>{
+                delete obj.replyUseObject
+            })
+        }else {
+            delete obj.replyUseObject
+        }
+    }else {
+        if ("replyUseObject" in obj){
+            delete obj.replyUseObject
+        }
     }
+    console.log(obj)
     //将空缺值列表发送给父组件
     sendMissingValues(filterEmptyKeys(obj))
     //保存空缺的响应参数对象至状态管理
@@ -487,12 +502,17 @@ const missingKeyIsExist = (ot, obj) => {
 
 //  如果不存在空缺值，则可以调用赛方接口
 const useApiAboutByDirect = (ot, obj) => {
+    console.log("--The robot is executing useApiAboutByDirect")
     //在此应该进行类别划分
     const msgType = /Msg/
     const manType = /Man/
     const deptType = /Dept/
     if (msgType.test(ot)) {
-        msg(ot, getOrderResObject(obj))
+        if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(ot)){
+            store.dispatch('updataReplyUseObject', obj.replyUseObject).then(()=>{
+                msg(ot, getOrderResObject(obj))
+            })
+        }
         if (ot === 'OAMsg') {
             emit('send-cardStatus', ot)
             emit('send-status', 'cardInteraction')
@@ -511,39 +531,39 @@ const useApiAboutByDirect = (ot, obj) => {
                 },
                 dept: obj.dept
             }
-            store.dispatch('updataMissingKeyObj', newObj)
-            emit('send-status', 'orderType')
+            store.dispatch('updataMissingKeyObj', newObj).then(()=>{
+                emit('res-orderType', ot)
+                emit('send-status', 'orderType')
+                emit('reply-robot', true)
+            })
         } else if (ot === 'GetManDept') {
             let newObj = {
                 uid: obj.uid,
                 name: obj.name
             }
             store.dispatch('updataSearchUid', newObj)
+            emit('res-orderType', ot)
             emit('send-status', 'orderType')
+            emit('reply-robot', true)
         }
-        if (ot === 'AddMan'){
-            mp.addMan(getOrderResObject(obj)).then(res => {
-                if (res.data.code !== 200){
-                    store.dispatch('updataReplyErrorMsg',res.data.msg).then(() => {
-                        emit('send-status', 'orderType')
-                    })
-                }else {
-                    emit('send-status', 'orderType')
-                }
-            })
+        else if (ot === 'AddMan'){
+            addManByContent(ot, obj)
         }else if (ot === 'DelMan'){
-            mp.delMan(getOrderResObject(obj)).then(res => {
-                if (res.data.code !== 200){
-                    store.dispatch('updataReplyErrorMsg',res.data.msg).then(()=>{
-                        emit('send-status', 'orderType')
-                    })
-                }else {
-                    emit('send-status', 'orderType')
-                }
-            })
+            delManByContent(ot, obj)
         }
     } else if (deptType.test(ot) && ot !== 'GetManDept') {
-        md.dept(ot, getOrderResObject(obj))
+        if (ot === "AddDept"){
+            addDeptByContent(ot,obj)
+        }
+        else if (ot === "DelDept"){
+            if (obj.dept !== ""){
+                deleteDeptByContent(ot,obj.dept)
+            }else {
+                emit('res-orderType', ot)
+                emit('send-status', 'orderType')
+                emit('reply-robot', true)
+            }
+        }
     } else if (ot === "FastAddNotes"){
         delete obj.orderType
         card.addNotes(obj).then(res=>{
@@ -607,28 +627,36 @@ const fillMissingValueFromContent = (msv, oc) => {
             ...store.state.chat.missingKeyObj,
             name: oc
         }
-        store.dispatch('updataMissingKeyObj', newObj)    //  更新空缺值状态
-        sendMissingValues(filterEmptyKeys(newObj))  //  对空缺值进行过滤
-        emit('send-status', 'missValue') //  发送当前状态为“空缺值”供回复组件状态机响应
-        emit('reply-robot', newObj)  //  发送当前对象值，供聊天容器组件唤醒回复
+        store.dispatch('updataMissingKeyObj', newObj).then(()=>{
+            if (!Object.values(newObj).includes("")){
+                addManByContent(ot,newObj)
+            }else {
+                sendMissingValues(filterEmptyKeys(newObj))  //  对空缺值进行过滤
+                emit('send-status', 'missValue') //  发送当前状态为“空缺值”供回复组件状态机响应
+                emit('reply-robot', newObj)  //  发送当前对象值，供聊天容器组件唤醒回复
+            }
+        })    //  更新空缺值状态
     }
     //  当指令为AddDept时，此时用户提供的部门名作为Value，而无需转换为deptId，因此可直接写入空缺值状态管理
     else if (ot === 'AddDept') {
         let obj = {
             dept: oc
         }
-        md.dept(ot, obj)
-        emit('send-status', 'orderType')
-        emit('res-orderType', ot)
-        emit('reply-robot', true)
+        if (!Object.values(obj).includes("")){
+            addDeptByContent(ot,obj)
+        }else {
+            emit('res-orderType', ot)
+            emit('send-status', 'orderType')
+            emit('reply-robot', true)
+        }
     } else if (ot === 'DelDept') {
-        order.getDeptIdByName(oc).then(res => {
-            let deptId = res.data.data[0]
-            md.dept(ot, deptId)
-        })
-        emit('send-status', 'orderType')
-        emit('res-orderType', ot)
-        emit('reply-robot', true)
+        if (oc !== ""){
+            deleteDeptByContent(ot,oc)
+        }else {
+            emit('res-orderType', ot)
+            emit('send-status', 'orderType')
+            emit('reply-robot', true)
+        }
     } else {
         //  获取空缺值属性处理结果
         userInputAboutMissingValues(msv, oc).then(newObj => {
@@ -647,35 +675,31 @@ const fillMissingValueFromContent = (msv, oc) => {
                 const mType = /Man/
                 if (mType.test(orderType)) {
                     if (orderType === 'AddMan'){
-                        mp.addMan(getOrderResObject(store.state.chat.missingKeyObj)).then(res => {
-                            if (res.data.code === 200){
-                                emit('send-status', 'orderType')
-                                emit('res-orderType', orderType)
-                                emit('reply-robot', newObj)
-                            }else {
-                                store.dispatch('updataReplyErrorMsg',res.data.msg).then(() => {
-                                    console.log(111)
-                                    console.log(store.state.chat.replyErrorMsg)
-                                    emit('send-status', 'orderType')
-                                    emit('res-orderType', orderType)
-                                    emit('reply-robot', newObj)
-                                })
-                            }
-                        })
+                        addManByContent(orderType, newObj)
                     }else if (orderType === 'DelMan'){
-                        console.log(store.state.chat.missingKeyObj)
-                        mp.delMan(getOrderResObject(store.state.chat.missingKeyObj)).then(res => {
-                            if (res.data.code !== 200){
-                                store.dispatch('updataReplyErrorMsg',res.data.msg).then(()=>{
-                                    emit('send-status', 'orderType')
-                                    emit('res-orderType', orderType)
-                                    emit('reply-robot', newObj)
-                                })
-                            }else {
-                                emit('send-status', 'orderType')
-                                emit('res-orderType', orderType)
-                                emit('reply-robot', newObj)
-                            }
+                        delManByContent(orderType, newObj)
+                    }else if (orderType === 'GetMan') {
+                        let newObject = {
+                            name: {
+                                uid: newObj.uid
+                            },
+                            dept: newObj.deptId
+                        }
+                        store.dispatch('updataMissingKeyObj', newObject).then(()=>{
+                            emit('res-orderType', orderType)
+                            emit('send-status', 'orderType')
+                            emit('reply-robot', true)
+                        })
+                    }else if (orderType === 'GetManDept') {
+                        console.log(newObj)
+                        let newObject = {
+                            uid: newObj.uid,
+                            name: newObj.name
+                        }
+                        store.dispatch('updataMissingKeyObj', newObject).then(()=>{
+                            emit('res-orderType', orderType)
+                            emit('send-status', 'orderType')
+                            emit('reply-robot', true)
                         })
                     }
                 }else if (ot === "FastAddNotes"){
@@ -733,7 +757,7 @@ const sendMissingValues = (emptyKeysList) => {
 
 //将用户对空缺值的补充填补进空缺对象中
 const userInputAboutMissingValues = async (type, val) => {
-    console.log(val)
+    console.log("--this message is missingValue in now:" + val)
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
     let userinfo = {}
@@ -763,41 +787,84 @@ const userInputAboutMissingValues = async (type, val) => {
                 if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
-                    if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
-                        await store.dispatch('updataReplyUseObject', val)
-                    }
+                    let addObj = {}
                     data = await objectIdByName(type, val)
                     //如果数据具有长度，则表明为数组，此时插值部门数组
-                    userinfo = {
-                        name: val,
-                        dept: data.deptList,
-                        uid: data.uid
+                    if (data.uid){
+                        userinfo = {
+                            name: val,
+                            dept: data.deptList,
+                            uid: data.uid
+                        }
+                        if (oldObj.orderType === "GetMan"){
+                            addObj = {
+                                ...oldObj,
+                                uid:data.uid
+                            }
+                            delete addObj.name
+                            if (oldObj.dept){
+                                data = await objectIdByName("dept", oldObj.dept)
+                                addObj = {
+                                    ...oldObj,
+                                    deptId:Number(data)
+                                }
+                                delete addObj.dept
+                            }
+                            newObj = addObj
+                        }else {
+                            newObj = {
+                                ...oldObj,
+                                name: val,
+                                dept: data.deptList,
+                                uid: data.uid
+                            }
+                        }
+                        await store.dispatch('updataSearchUid', userinfo)
+                    }else {
+                        newObj = {...oldObj, [type]: ""}
                     }
-                    await store.dispatch('updataSearchUid', userinfo)
-                    newObj = {...oldObj, [type]: data}
                 }
                 break;
             case 'dept':
                 if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
-                    if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
-                        await store.dispatch('updataReplyUseObject', val)
-                    }
                     data = await objectIdByName(type, val)
+                    let addObj = {}
                     if (data) {
                         const user = store.state.chat.searchUid
                         let newUser = {
                             ...user,
                             deptId: Number(data)
                         }
-                        await store.dispatch('updataSearchUid', newUser)
+                        addObj = {
+                            ...oldObj,
+                            deptId:Number(data)
+                        }
+                        delete addObj.dept
+                        if (oldObj.name){
+                            data = await objectIdByName("name", oldObj.name)
+                            newUser = {
+                                ...newUser,
+                                uid:data.uid
+                            }
+                            addObj = {
+                                ...addObj,
+                                uid:data.uid
+                            }
+                            delete addObj.name
+                        }
+                        console.log(addObj)
+                        await store.dispatch('updataSearchUid', newUser).then(()=>{
+                            newObj = addObj
+                        })
+                    }else {
+                        newObj = {...oldObj, [type]: ""}
                     }
-                    newObj = {...oldObj, [type]: data}
                 }
                 break;
             case 'userName':
-                if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(oldObj.orderType)){
+                if (oldObj.orderType !== (" OAMsg" || "SendMsg")){
                     await store.dispatch('updataReplyUseObject', val)
                 }
                 newObj = valueCheck(typeof val === "object" || val.includes(imageResource), oldObj, type, Array(val))
@@ -821,6 +888,7 @@ const userInputAboutMissingValues = async (type, val) => {
         }
     }
     //返回新的对象
+    console.log(newObj)
     await store.dispatch('updataMissingKeyObj', newObj)
     return newObj
 }
@@ -855,16 +923,19 @@ const objectIdByName = async (type, val) => {
             let nameList = []
             nameList.push(val)
             const resAll = await card.getPersonList()
-            const uidId = resAll.data.data.userList.find(user => user.name === val).userId
-            const res = await mp.getUserDept(uidId);
+            const foundUser = resAll.data.data.userList.find(user => user.name === val);
+            const rUserId = foundUser ? foundUser.userId : "";
             let deptList = [];
-            if (res.data.code === 200) {
-                res.data.data.map(dept => {
-                    deptList.push(dept.name)
-                })
+            if (rUserId !== ""){
+                const res = await mp.getUserDept(rUserId);
+                if (res.data.code === 200) {
+                    res.data.data.map(dept => {
+                        deptList.push(dept.name)
+                    })
+                }
             }
             return {
-                uid: uidId,
+                uid: rUserId,
                 deptList: deptList
             }
         } else if (type === 'dept') {
@@ -879,6 +950,160 @@ const objectIdByName = async (type, val) => {
             throw err;
         }
     }
+}
+
+const addManByContent = (orderType, newObj) => {
+    let obj
+    if (Object.keys(store.state.chat.missingKeyObj).length === 0){
+        obj = newObj
+    }else{
+        obj = getOrderResObject(store.state.chat.missingKeyObj)
+    }
+    mp.addMan(obj).then(res => {
+        if (res.data.code === 200){
+            auth.getDeptPersonList(store.state.chat.nowDept.deptId).then(res => {
+                let personList = []
+                if (res.data.data.users !== []){
+                    personList = res.data.data.users.map(person => {
+                        return {
+                            id: person.id.toString(),
+                            name: person.name,
+                            mobile: person.mobile,
+                            sequence: person.sequence,
+                            orgId: person.orgId,
+                            privilege: "mydeptonly"
+                        }
+                    })
+                }
+                save.saveDeptPersonList(store.state.chat.nowDept.deptName,personList).then(() => {
+                    emit('res-orderType', orderType)
+                    emit('send-status', 'orderType')
+                    emit('reply-robot', newObj)
+                })
+            })
+        }else {
+            store.dispatch('updataReplyErrorMsg',res.data.msg).then(() => {
+                emit('res-orderType', orderType)
+                emit('send-status', 'orderType')
+                emit('reply-robot', newObj)
+            })
+        }
+    })
+}
+
+const delManByContent = (orderType, newObj) => {
+    let obj
+    if (Object.keys(store.state.chat.missingKeyObj).length === 0){
+        obj = newObj
+    }else{
+        obj = getOrderResObject(store.state.chat.missingKeyObj)
+    }
+    console.log(obj)
+    let nameList = []
+    nameList.push(obj.name)
+    order.getUserIdByName(store.state.chat.nowDept.deptName, nameList).then(res=>{
+        console.log(res.data.data[0])
+        mp.delMan({name:{uid:res.data.data[0][0]},dept:obj.dept}).then(res => {
+            if (res.data.code === 200){
+                save.deletePersonInDept(obj.name, store.state.chat.nowDept.deptName).then(res=>{
+                    if (res.data.status !==200){
+                        store.dispatch('updataReplyErrorMsg',"该职员并不存在于当前部门之中，请检查职员姓名是否输入正确").then(()=>{
+                            emit('res-orderType', orderType)
+                            emit('send-status', 'orderType')
+                            emit('reply-robot', newObj)
+                        })
+                    }else {
+                        emit('res-orderType', orderType)
+                        emit('send-status', 'orderType')
+                        emit('reply-robot', newObj)
+                    }
+                })
+            }else {
+                store.dispatch('updataReplyErrorMsg',res.data.msg).then(() => {
+                    emit('res-orderType', orderType)
+                    emit('send-status', 'orderType')
+                    emit('reply-robot', newObj)
+                })
+            }
+        })
+    })
+}
+
+const addDeptByContent = (orderType, newObj) =>{
+    md.addDept(getOrderResObject(newObj)).then(res=>{
+        if (res.data.code === 200){
+            auth.getDeptList().then(res => {
+                if (res.data.code === 200) {
+                    const deptArray = res.data.data.departments.map(dept => {
+                        return {
+                            deptId: dept.deptId,
+                            parentId: dept.parentId,
+                            name: dept.name,
+                            order: dept.order
+                        };
+                    });
+                    save.saveDeptList(deptArray).then(res => {
+                        if (!res.data.success) {
+                            store.dispatch('updataReplyErrorMsg', "内部服务错误，请重试").then(()=>{
+                                emit('res-orderType', orderType)
+                                emit('send-status', 'orderType')
+                                emit('reply-robot', newObj)
+                            })
+                        }else {
+                            emit('res-orderType', orderType)
+                            emit('send-status', 'orderType')
+                            emit('reply-robot', newObj)
+                        }
+                    })
+                } else {
+                    store.dispatch('updataReplyErrorMsg', "内部服务错误，请重试").then(()=>{
+                        emit('res-orderType', orderType)
+                        emit('send-status', 'orderType')
+                        emit('reply-robot', newObj)
+                    })
+                }
+            })
+        }else {
+            store.dispatch('updataReplyErrorMsg', res.data.msg).then(()=>{
+                emit('res-orderType', orderType)
+                emit('send-status', 'orderType')
+                emit('reply-robot', newObj)
+            })
+        }
+    })
+}
+
+const deleteDeptByContent = (ot,oc) => {
+    order.getDeptIdByName(oc).then(res => {
+        if (res.data.status === 200 && Object.keys(res.data.data).length !== 0){
+            let deptId = res.data.data[0]
+            md.delDept(deptId).then(res => {
+                if (res.data.code === 200){
+                    let status = personInfoRefresh.updateDeptName()
+                    if (status){
+                        emit('res-orderType', ot)
+                        emit('send-status', 'orderType')
+                        emit('reply-robot', true)
+                    }else {
+                        store.dispatch('updataReplyErrorMsg',"内部服务错误")
+                        emit('res-orderType', ot)
+                        emit('send-status', 'orderType')
+                        emit('reply-robot', true)
+                    }
+                }else {
+                    store.dispatch('updataReplyErrorMsg',res.data.msg)
+                    emit('res-orderType', ot)
+                    emit('send-status', 'orderType')
+                    emit('reply-robot', true)
+                }
+            })
+        }else {
+            store.dispatch('updataReplyErrorMsg',"不存在该部门")
+            emit('res-orderType', ot)
+            emit('send-status', 'orderType')
+            emit('reply-robot', true)
+        }
+    })
 }
 </script>
 

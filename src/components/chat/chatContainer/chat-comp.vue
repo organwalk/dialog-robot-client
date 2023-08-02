@@ -351,7 +351,6 @@ const getReplyStatus = (val) => {
         })
         state.resOver = false
         loading.value = false
-        // state.showRecommendTip = true
         scrollBottom()
     }
 }

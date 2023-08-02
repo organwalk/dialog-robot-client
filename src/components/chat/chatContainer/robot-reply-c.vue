@@ -147,6 +147,12 @@ const getMissValueReply = () => {
         store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
         emit('showObjectRec','group')
     }
+    else if (missValue.value === "dept"){
+        store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
+    }
+    else if (missValue.value === "name"){
+        store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
+    }
     if (store.state.chat.nameAndGroupMarkNum > 1){
         return robotReplyConfig[missValue.value + 'Error']
     }else {
@@ -159,7 +165,6 @@ const getMissValueReply = () => {
 
 const getOrderTypeReply = () => {
     let template
-    console.log(store.state.chat.replyErrorMsg)
     if (store.state.chat.replyErrorMsg !== ''){
         template = robotReplyConfig[orderType.value + "Error"]
         template = template.replace("${tip}",store.state.chat.replyErrorMsg)
@@ -167,6 +172,8 @@ const getOrderTypeReply = () => {
         template = robotReplyConfig[orderType.value]
     }
     if (store.state.chat.replyUseObject !== ''){
+        console.log(template)
+        console.log(store.state.chat.replyUseObject)
         template = template.replace("${replyUseObject}",store.state.chat.replyUseObject)
     }
     let reply = template
@@ -192,22 +199,24 @@ const getOrderTypeReply = () => {
             }
             const deptId = store.state.chat.missingKeyObj.dept
             getUserDetail(userId, deptId).then(res => {
-                const userName = res.data.data.user.name
-                let job
-                if (res.data.data.user.title === undefined) {
-                    job = "暂未设置"
-                } else {
-                    job = res.data.data.user.title
+                if (res.data.code === 200){
+                    const userName = res.data.data.user.name
+                    let job
+                    if (res.data.data.user.title === undefined) {
+                        job = "暂未设置"
+                    } else {
+                        job = res.data.data.user.title
+                    }
+                    const mobile = res.data.data.user.mobile
+                    getUserDept(userId).then(res => {
+                        const deptName = res.data.data.map(item => item.name)
+                        robotReply.value = reply.replace(/\${userName}/g, userName)
+                            .replace(/\${deptName}/g, deptName.join("、"))
+                            .replace(/\${job}/g, job)
+                            .replace(/\${mobile}/g, mobile)
+                        store.dispatch('updataMissingKeyObj', {})
+                    })
                 }
-                const mobile = res.data.data.user.mobile
-                getUserDept(userId).then(res => {
-                    const deptName = res.data.data.map(item => item.name)
-                    robotReply.value = reply.replace(/\${userName}/g, userName)
-                        .replace(/\${deptName}/g, deptName)
-                        .replace(/\${job}/g, job)
-                        .replace(/\${mobile}/g, mobile)
-                    store.dispatch('updataMissingKeyObj', {})
-                })
             })
         }
     } else if (orderType.value === 'TimeQueryPlan'){

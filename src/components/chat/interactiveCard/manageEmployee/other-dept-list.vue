@@ -29,7 +29,7 @@
                     >
                         <el-button :icon="Edit" circle size="small" type="primary"  @click="editDeptName(item.name)" v-btn/>
                     </el-tooltip>
-                    <el-popconfirm v-if="item.name!=='未分组'" width="200" title="您确定要删除此部门吗？" @confirm="deleteDept(item.deptId)">
+                    <el-popconfirm v-if="item.name!=='未分组'" width="200" title="您确定要删除此部门吗？" @confirm="deleteDeptByDeptId(item.deptId)">
                         <template #reference>
                             <el-button :icon="Delete" circle size="small" type="danger" v-btn/>
                         </template>
@@ -76,7 +76,7 @@ import {ref, defineEmits, onMounted, defineProps,  computed} from "vue";
 import * as mp from "@/api/cloud/manage-person"
 import {ElMessage} from "element-plus";
 import {getDeptIdByName} from "@/api/server/order";
-import {dept} from "@/api/cloud/manage-dept";
+import {delDept, dept} from "@/api/cloud/manage-dept";
 import * as personInfoRefresh from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
 
 const deptList = ref([])
@@ -158,8 +158,8 @@ const changeDeptName = () => {
 
 
 //删除部门
-const deleteDept = (val) => {
-    dept("DelDept", val).then(res => {
+const deleteDeptByDeptId = (val) => {
+    delDept(val).then(res => {
         if (res.data.code === 200){
             let status = personInfoRefresh.updateDeptName()
             if (status){
