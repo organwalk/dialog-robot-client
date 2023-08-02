@@ -43,9 +43,13 @@ addEventListener('DOMContentLoaded',()=>{
     //     // box_btns.children[0].style['display'] = 'none'
     //     box_btns.children[0].style['display'] = 'block'
     // })
-    setTimeout(() => {
-        box_btns.children[0].style['display'] = 'block'
-    }, 300);
+    if(new URL(location.href).pathname === '/auth') {
+        box_btns.children[0].style['display'] = 'none'
+    } else {
+        setTimeout(() => {
+            box_btns.children[0].style['display'] = 'block'
+        }, 300);
+    }
     var mainBtns = document.getElementsByClassName('btn_circle')
     mainBtns = Array.from(mainBtns)
     function allBtnUp() {
