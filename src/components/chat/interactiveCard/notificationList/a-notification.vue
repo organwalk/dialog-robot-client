@@ -6,7 +6,7 @@
     </el-row>
     <br/>
     <div style="width: 100%;height:350px;overflow-y: auto" v-if="!notice_id" v-loading="loading">
-        <el-empty v-if="showEmpty" description="当前日期暂无事项"/>
+        <el-empty v-if="showEmpty" description="当前日期暂无事项" image="/img/empty.png"/>
         <el-card v-for="(item,index) in notificationList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">

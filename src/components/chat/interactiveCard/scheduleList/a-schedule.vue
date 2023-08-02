@@ -7,7 +7,7 @@
     </el-row>
     <br/>
     <div style="width: 100%;height:350px;overflow-y: auto" v-if="!scheduleId" v-loading="loading">
-        <el-empty v-if="showEmpty" description="当前日期暂无日程"></el-empty>
+        <el-empty v-if="showEmpty" description="当前日期暂无日程" image="/img/empty.png"></el-empty>
         <el-card v-for="(item,index) in scheduleList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
