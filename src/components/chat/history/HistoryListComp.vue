@@ -13,7 +13,7 @@
 }
 .history-list-comp-area {
     /* height: calc(100% - 222.4px); */
-    height: calc(100% - 284px);
+    height: calc(100% - 345px);
     overflow-y: auto;
     border-radius: 0 0 0 15px;
 }
