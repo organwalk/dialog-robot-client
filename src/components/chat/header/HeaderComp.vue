@@ -1,5 +1,5 @@
 <template>
-    <el-card style="background-color: #333333;border-radius: 15px 15px 0 0 ;border: none;" :body-style="{padding:'10px'}">
+    <el-card style="box-shadow: none;background-color: #333333;border-radius: 15px 15px 0 0 ;border: none;" :body-style="{padding:'10px'}">
         <el-row>
             <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4" align="center">
             </el-col>
