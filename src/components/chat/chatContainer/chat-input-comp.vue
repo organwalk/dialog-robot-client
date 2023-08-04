@@ -377,12 +377,12 @@ const inNewConversation = (content) => {
         let ot = '' //指令类型
         let obj = {} //参数对象
         let reply = true //回复状态
-        emit('reply-robot', reply)
         //判断对话指令响应体中的意图是否为空
         if (res.data.orderRes.orderType !== '') {
             //  若存在意图，则继续
             ot = res.data.orderRes.orderType
             obj = res.data.orderRes
+            emit('reply-robot', reply)
             intentionIsNotNull(ot, obj)
         } else {
             //  若不存在意图，则视为无效指令，要求用户重新输入

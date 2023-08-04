@@ -76,7 +76,7 @@ import {ref, defineEmits, onMounted, defineProps,  computed} from "vue";
 import * as mp from "@/api/cloud/manage-person"
 import {ElMessage} from "element-plus";
 import {getDeptIdByName} from "@/api/server/order";
-import {delDept, dept} from "@/api/cloud/manage-dept";
+import {delDept, updateDept} from "@/api/cloud/manage-dept";
 import * as personInfoRefresh from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
 
 const deptList = ref([])
@@ -139,7 +139,7 @@ const changeDeptName = () => {
             deptId: Number(deptId),
             name:String(changeDeptNameValue.value)
         }
-        dept("UpdateDept",obj).then(res => {
+        updateDept(obj).then(res => {
            if (res.data.code === 200){
                let status = personInfoRefresh.updateDeptName()
                if (status){

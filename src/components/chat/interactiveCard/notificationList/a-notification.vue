@@ -6,7 +6,7 @@
     </el-row>
     <br/>
     <div style="width: 100%;height:350px;overflow-y: auto" v-if="!notice_id" v-loading="loading">
-        <el-empty v-if="showEmpty" description="当前日期暂无事项" image="/img/empty.png"/>
+        <el-empty v-if="showEmpty" description="当前日期暂无事项" :image="emptyImage"/>
         <el-card v-for="(item,index) in notificationList"
                  :key=index
                  shadow="never" style="border: none;background-color: #f5f9fa;border-radius: 10px;margin-bottom: 10px">
@@ -69,6 +69,7 @@ import CreateUpdataNotificationComp
 import * as data from "@/api/server/data";
 import * as card from "@/api/cloud/card"
 import {ElMessage} from "element-plus";
+import emptyImage from "@/assets/empty.png"
 
 //  接收由父组件中转的日历组件提供的当前点击日期
 const props = defineProps({
