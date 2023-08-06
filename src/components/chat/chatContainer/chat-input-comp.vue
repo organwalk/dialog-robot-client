@@ -27,48 +27,64 @@
                 </el-tooltip>
             </el-col>
             <el-col :xs="20" :sm="20" :md="20" :lg="20" :xl="20">
-                <el-input
-                        class="chat-input"
-                        v-model="orderContent"
-                        placeholder="Talk to Xeno-Loader"
-                        autofocus
-                        size="large"
-                        :readonly="resOver"
-                        clearable
-                        @keyup.enter="sendOrder()"
+                <el-popover
+                    :visible="showInputOrderTipVisible"
+                    placement="top"
+                    popper-style="width:60%"
+                    show-after="0"
+                    hide-after="0"
                 >
-                    <template #append>
-                        <el-popover
-                                placement="bottom"
-                                trigger="hover"
+                    <el-card shadow="never" style="border: none">
+                        <h4 style="margin: 0">输入建议:</h4><br/>
+                        <li @click="chooseTip(item)" v-for="item in tipContent" :key="item" v-html="highlightMatchedText(item)" style="line-height: 1.8rem;font-weight: lighter;user-select: none;"></li>
+                    </el-card>
+                    <template #reference>
+                        <el-input
+                            class="chat-input"
+                            v-model="orderContent"
+                            placeholder="Talk to Xeno-Loader"
+                            autofocus
+                            size="large"
+                            :readonly="resOver"
+                            clearable
+                            @input="showInputOrderTip()"
+                            @keyup.enter="sendOrder()"
                         >
-                            <template #reference>
-                                <el-button color="white" :icon="Plus"/>
+                            <template #append>
+                                <el-popover
+                                    placement="bottom"
+                                    trigger="hover"
+                                >
+                                    <template #reference>
+                                        <el-button color="white" :icon="Plus"/>
+                                    </template>
+                                    <el-row>
+                                        <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
+                                            <el-upload
+                                                v-model:file-list="fileList"
+                                                action="https://47.122.19.138:38081/api/image"
+                                                name="image"
+                                                method="post"
+                                                :auto-upload="true"
+                                                :limit="1"
+                                                ref="photoRef"
+                                                :show-file-list="false"
+                                                :before-upload="beforeUpload"
+                                                @change="handleChange"
+                                            >
+                                                <el-button :icon="Link" circle/>
+                                            </el-upload>
+                                        </el-col>
+                                        <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
+                                            <el-button :icon="Microphone" circle @click="voice()" />
+                                        </el-col>
+                                    </el-row>
+                                </el-popover>
                             </template>
-                            <el-row>
-                                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
-                                    <el-upload
-                                            v-model:file-list="fileList"
-                                            action="https://47.122.19.138:38081/api/image"
-                                            name="image"
-                                            method="post"
-                                            :auto-upload="true"
-                                            :limit="1"
-                                            ref="photoRef"
-                                            :show-file-list="false"
-                                            :before-upload="beforeUpload"
-                                            @change="handleChange"
-                                    >
-                                        <el-button :icon="Link" circle/>
-                                    </el-upload>
-                                </el-col>
-                                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
-                                    <el-button :icon="Microphone" circle @click="voice()" />
-                                </el-col>
-                            </el-row>
-                        </el-popover>
+                        </el-input>
                     </template>
-                </el-input>
+                </el-popover>
+
             </el-col>
             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1" align="center">
                 <el-button :icon="Promotion" style="border-radius: 10px;" size="large" color="#2C6AE3"
@@ -171,6 +187,8 @@ import * as data from "@/api/server/data";
 import * as save from "@/api/server/save-data";
 import * as auth from "@/api/cloud/auth";
 import * as personInfoRefresh from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
+import InputOrderTipData from "@/optionConfig/input-order-tip-data";
+import Fuse from 'fuse.js'
 
 
 const orderContent = ref('')
@@ -216,6 +234,33 @@ const clear = () => {
     emit('clear-chat', clear)
 }
 
+const showInputOrderTipVisible = ref(false)
+const tipContent = ref()
+const fuse = new Fuse(InputOrderTipData, {
+    keys: ['text'],
+    includeScore: true,
+    threshold: 0.6 // 调整匹配阈值，越小越严格
+})
+const showInputOrderTip = () => {
+    showInputOrderTipVisible.value = true
+    tipContent.value = fuse.search(orderContent.value).map(obj => obj.item)
+    if (tipContent.value.length === 0){
+        showInputOrderTipVisible.value = false
+    }
+    if (orderContent.value === '' || Object.keys(store.state.chat.missingKeyObj).length !== 0){
+        showInputOrderTipVisible.value = false
+    }
+}
+const chooseTip = (val) => {
+    orderContent.value = val
+}
+
+const highlightMatchedText = (text) => {
+    const matchedText = orderContent.value;
+    const regex = new RegExp(matchedText, 'gi');
+    console.log(text)
+    return text.replace(regex, `<span style="color: #409EFF;">${matchedText}</span>`);
+}
 //  发送图片
 let photoRef = ref()
 const fileList = ref([])
@@ -330,6 +375,7 @@ const closeVoice = () => {
 // 向聊天容器发送聊天内容
 // 发送内容至自然语言处理服务
 const sendOrder = () => {
+    showInputOrderTipVisible.value = false
     resOver.value = true
     let refresh = ''
     emit('user-input', orderContent.value)

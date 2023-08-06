@@ -14,6 +14,9 @@
                         size="small"
                         :icon="ArrowRightBold" circle />
                 </el-card>
+                <el-row justify="center" class="carousel-indicators">
+                    <li v-for="(n, index) in 5" :key="n" :class="{ active: index === indexActive}" :data-index="index"  @mouseover="hoverTheActive"></li>
+                </el-row>
             </el-card>
         </el-col>
         <el-col :xs="10" :sm="10" :md="10" :lg="10" :xl="10" align="center">
@@ -22,8 +25,9 @@
                 <span>Limitations</span><br/><br/>
                 <el-card shadow="never"  v-for = "(item,index) in limitationsList"
                           :key="index"
+                         style="height: 150px;line-height: 100px"
                           class="rec-card">
-                    <span style="line-height: 2;" v-html="item"/>
+                    <p style="line-height: 2;" v-html="item"/>
                 </el-card>
             </el-card>
 
@@ -42,24 +46,37 @@ import {onMounted, ref,defineEmits} from "vue";
 import recommendsData from "@/optionConfig/recommendText.json"
 
 const recommendList = ref([])
-const randomIndexes = new Set();
 const limitationsList = ref([])
 const emit = defineEmits(['send-recommend-text'])
 
 const sendRecommendText = (recommend) => {
    emit('send-recommend-text',recommend)
 }
+const indexActive = ref(0)
+const hoverTheActive = (event) => {
+    indexActive.value = Number(event.target.dataset.index)
+    recommendList.value = printSlice(indexActive.value)
+}
 
 onMounted(()=>{
-    while (randomIndexes.size < 3) {
-        randomIndexes.add(Math.floor(Math.random() * recommendsData.recommend.length));
-    }
-    for (const index of randomIndexes) {
-        recommendList.value.push(recommendsData.recommend[index]);
-    }
-    Array.prototype.push.apply(limitationsList.value,recommendsData.limitation)
+   recommendList.value = printSlice(1)
+   limitationsList.value = recommendsData.limitation
 })
 
+function printSlice(index) {
+    const shuffledRecommend = shuffle(recommendsData.recommend);
+    const start = index * 3;
+    const end = start + 3;
+    return shuffledRecommend.slice(start, end)
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
 </script>
 
 <style scoped>
@@ -69,7 +86,6 @@ onMounted(()=>{
     animation-timing-function: ease-out;
     animation-delay: 0s;
     animation-iteration-count: 1;
-
     border-radius: 10px;
     margin-bottom: 10px;
 }
@@ -90,5 +106,18 @@ onMounted(()=>{
         transform: scale(1);
         opacity: 1;
     }
+}
+.carousel-indicators li{
+    list-style-type: none;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background-color: lightgray;
+    margin: 5px;
+}
+.carousel-indicators li.active{
+    background-color: gray;
+}
+.carousel-indicators li:hover{
+    background-color: gray;
 }
 </style>
