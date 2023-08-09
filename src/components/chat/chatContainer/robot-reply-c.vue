@@ -71,6 +71,7 @@ const getReply = () => {
             robotReply.value = getOrderTypeReply()
             store.dispatch('updataReplyUseObject',"")
             store.dispatch('updataReplyErrorMsg',"")
+            emit('showFeedback',true)
             break;
         case 'cardInteraction':
             robotReply.value = getCardStatusReply()
@@ -147,6 +148,9 @@ const getMissValueReply = () => {
         store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
         emit('showObjectRec','group')
     }
+    else if (missValue.value === "members"){
+        store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
+    }
     else if (missValue.value === "dept"){
         store.dispatch('updataNameAndGroupMarkNum',store.state.chat.nameAndGroupMarkNum + 1)
     }
@@ -157,7 +161,11 @@ const getMissValueReply = () => {
         return robotReplyConfig[missValue.value + 'Error']
     }else {
         if (missValue.value === "notfoundObject"){
-            return robotReplyConfig[missValue.value + 'Missing'].replace("${notfound}", JSON.parse(store.state.chat.missingKeyObj.notfoundKey)[0])
+            if (JSON.parse(store.state.chat.missingKeyObj.notfoundKey).length > 1){
+                return robotReplyConfig[missValue.value + 'Missing'].replace("${notfound}", "您输入的信息：" + "\"" + JSON.parse(store.state.chat.missingKeyObj.notfoundKey) + "\"" + " 出现部分错误。")
+            }else {
+                return robotReplyConfig[missValue.value + 'Missing'].replace("${notfound}", "我未能找到与" + "\"" + JSON.parse(store.state.chat.missingKeyObj.notfoundKey)[0] + "\"" + "相关的职员或部门群。")
+            }
         }
         return robotReplyConfig[missValue.value + 'Missing']
     }
@@ -172,8 +180,6 @@ const getOrderTypeReply = () => {
         template = robotReplyConfig[orderType.value]
     }
     if (store.state.chat.replyUseObject !== ''){
-        console.log(template)
-        console.log(store.state.chat.replyUseObject)
         template = template.replace("${replyUseObject}",store.state.chat.replyUseObject)
     }
     let reply = template
@@ -258,12 +264,16 @@ const getOrderTypeReply = () => {
         }else {
             emit('showRecommend', reply)
             let status = store.state.chat.fastContentQueryNotesData.status
+            console.log(store.state.chat.fastContentQueryNotesData)
             if (Array.isArray(status)){
                 return reply.replace("${status}","相关条目较多").replace("${content}",store.state.chat.fastContentQueryNotesData.data.join(''))
             }else {
                 if (status === "save"){
                     status = "您还未完成"
-                }else {
+                }else if (status === ""){
+                    status = "存在"
+                }
+                else {
                     status = "您已完成"
                 }
                 return reply.replace("${status}",status).replace("${content}",store.state.chat.fastContentQueryNotesData.data.join(''))
@@ -271,10 +281,8 @@ const getOrderTypeReply = () => {
         }
     }
     emit('showRecommend', reply)
-    emit('showFeedback',true)
     store.dispatch('updataMissingKeyObj', {})
     store.dispatch('updataVoiceObj',{})
-    console.log(reply)
     return reply
 }
 

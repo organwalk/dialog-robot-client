@@ -9,10 +9,10 @@ const sendOrderToServer = (deptName,content) => {
     return http.post('/order/'+sessionStorage.getItem("mobile"),obj)
 }
 
-const getUserIdByName = (deptName,nameArrary) => {
+const getUserIdByName = (deptName,nameArray) => {
     return http.post('/data/receivers/'+sessionStorage.getItem('mobile'),{
         deptName:deptName,
-        nameArray:nameArrary
+        nameArray:nameArray
     })
 }
 

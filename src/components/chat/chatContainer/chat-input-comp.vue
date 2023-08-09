@@ -30,11 +30,11 @@
                 <el-popover
                     :visible="showInputOrderTipVisible"
                     placement="top"
-                    popper-style="width:60%"
+                    popper-style="width:60%;border-radius: 10px"
                     show-after="0"
                     hide-after="0"
                 >
-                    <el-card shadow="never" style="border: none">
+                    <el-card shadow="never" style="border: none;max-height: 70vh;overflow-y: auto">
                         <h4 style="margin: 0">输入建议:</h4><br/>
                         <li @click="chooseTip(item)" v-for="item in tipContent" :key="item" v-html="highlightMatchedText(item)" style="line-height: 1.8rem;font-weight: lighter;user-select: none;"></li>
                     </el-card>
@@ -258,7 +258,6 @@ const chooseTip = (val) => {
 const highlightMatchedText = (text) => {
     const matchedText = orderContent.value;
     const regex = new RegExp(matchedText, 'gi');
-    console.log(text)
     return text.replace(regex, `<span style="color: #409EFF;">${matchedText}</span>`);
 }
 //  发送图片
@@ -508,7 +507,7 @@ const intentionIsNotNull = (ot, obj) => {
             if ("notfoundKey" in obj){
                 delete obj.notfoundKey
             }
-            console.log("--Now the model analysis result is not missingValue and robot will useApiAboutByDirect")
+            console.log("--" + new Date().toLocaleDateString('en-GB') + ":Now the model analysis result is not missingValue and robot will useApiAboutByDirect--")
             useApiAboutByDirect(ot, obj)
         }
     }
@@ -537,7 +536,6 @@ const missingKeyIsExist = (ot, obj) => {
             delete obj.replyUseObject
         }
     }
-    console.log(obj)
     //将空缺值列表发送给父组件
     sendMissingValues(filterEmptyKeys(obj))
     //保存空缺的响应参数对象至状态管理
@@ -548,7 +546,7 @@ const missingKeyIsExist = (ot, obj) => {
 
 //  如果不存在空缺值，则可以调用赛方接口
 const useApiAboutByDirect = (ot, obj) => {
-    console.log("--The robot is executing useApiAboutByDirect")
+    console.log("--" + new Date().toLocaleDateString('en-GB') + ":The robot is executing useApiAboutByDirect")
     //在此应该进行类别划分
     const msgType = /Msg/
     const manType = /Man/
@@ -737,7 +735,6 @@ const fillMissingValueFromContent = (msv, oc) => {
                             emit('reply-robot', true)
                         })
                     }else if (orderType === 'GetManDept') {
-                        console.log(newObj)
                         let newObject = {
                             uid: newObj.uid,
                             name: newObj.name
@@ -803,7 +800,7 @@ const sendMissingValues = (emptyKeysList) => {
 
 //将用户对空缺值的补充填补进空缺对象中
 const userInputAboutMissingValues = async (type, val) => {
-    console.log("--this message is missingValue in now:" + val)
+    console.log("--" + new Date().toLocaleDateString('en-GB') + ":this message is missingValue in now:" + val)
     let oldObj = store.state.chat.missingKeyObj
     let newObj = {}
     let userinfo = {}
@@ -815,6 +812,7 @@ const userInputAboutMissingValues = async (type, val) => {
         switch (type) {
             case 'receivers':
             case 'groupId':
+            case 'members':
                 if (typeof val === "object" || val.includes(imageResource)){
                     newObj = {...oldObj, [type]: ""}
                 }else {
@@ -900,7 +898,6 @@ const userInputAboutMissingValues = async (type, val) => {
                             }
                             delete addObj.name
                         }
-                        console.log(addObj)
                         await store.dispatch('updataSearchUid', newUser).then(()=>{
                             newObj = addObj
                         })
@@ -934,7 +931,6 @@ const userInputAboutMissingValues = async (type, val) => {
         }
     }
     //返回新的对象
-    console.log(newObj)
     await store.dispatch('updataMissingKeyObj', newObj)
     return newObj
 }
@@ -965,7 +961,58 @@ const objectIdByName = async (type, val) => {
             const res = await order.getGroupIdByName(store.state.chat.nowDept.deptName, val);
             const groupId = res.data.data;
             return groupId.map((item) => item[1])[0];
-        } else if (type === 'name') {
+        } else if (type === 'members'){
+            const namePattern = /[\u4e00-\u9fa5]{2,}(?:·[\u4e00-\u9fa5]{2,})*/g;
+            let res, result;
+            if (val.length > 2) {
+                let oldResult = []
+                let checkResult = []
+                result = []
+                const matches = val.match(namePattern);
+                for (let i = 0; i < matches.length; i++) {
+                    const name = matches[i];
+                    const n = [name];
+                    res = await order.getUserIdByName(store.state.chat.nowDept.deptName, n);
+                    const dataArray = res.data.data;
+                    dataArray.forEach((item) => {
+                        item[0] = item[0] || '';
+                    });
+                    oldResult.push(dataArray.map((item) => {
+                        return { name: n[0], uid: item[0] }
+                    })[0])
+                }
+                checkResult.push(...oldResult)
+                let hasEmptyUid = false;
+                for (let i = 0; i < checkResult.length; i++) {
+                    if (!checkResult[i].uid) {
+                        hasEmptyUid = true;
+                        break;
+                    }
+                }
+                if (hasEmptyUid) {
+                    result = []
+                } else {
+                    result = checkResult
+                }
+            } else {
+                let nameList = [];
+                nameList.push(val);
+                res = await order.getUserIdByName(store.state.chat.nowDept.deptName, nameList);
+                const dataArray = res.data.data;
+                if (res.data.data[0].length !== 0){
+                    dataArray.forEach((item) => {
+                        item[0] = item[0] || '';
+                    });
+                    result = dataArray.map((item) => {
+                        return { name: val, uid: item[0] };
+                    });
+                }else {
+                    result = []
+                }
+            }
+            return result
+        }
+        else if (type === 'name') {
             let nameList = []
             nameList.push(val)
             const resAll = await card.getPersonList()
@@ -1044,11 +1091,9 @@ const delManByContent = (orderType, newObj) => {
     }else{
         obj = getOrderResObject(store.state.chat.missingKeyObj)
     }
-    console.log(obj)
     let nameList = []
     nameList.push(obj.name)
     order.getUserIdByName(store.state.chat.nowDept.deptName, nameList).then(res=>{
-        console.log(res.data.data[0])
         mp.delMan({name:{uid:res.data.data[0][0]},dept:obj.dept}).then(res => {
             if (res.data.code === 200){
                 save.deletePersonInDept(obj.name, store.state.chat.nowDept.deptName).then(res=>{

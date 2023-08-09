@@ -42,6 +42,7 @@
   "titleMissing": "您缺失了标题，请您直接告诉我标题内容😊",
   "contentMissing": "您缺失了具体内容，请您直接告诉我具体内容😊",
   "receiversMissing": "您的要求我大概理解了😊，能再告诉我，您需要把消息转发给谁吗？请用顿号区别不同的发送对象，如：张三、李四",
+  "membersMissing": "请告诉我该事项需要通知的职员姓名。如果您需要通知多名职员，请用顿号区别不同的职员，如：张三、李四",
   "groupIdMissing": "您的要求我大概理解了，能再直接告诉我，您需要把消息发到哪个部门群吗？",
   "nameMissing": "您的需求我大概理解了😊能请您直接告诉我这位职员的姓名吗？",
   "deptMissing": "能请您告诉我部门名吗？例如：Xeno开发部",
@@ -58,13 +59,15 @@
   "ContentQueryPlanMissing": "您好😊，我没有查询到相应内容的日程。如果您想获取更多日程信息，可以<strong>查看日程列表</strong>",
   "FastQueryNotesMissing": "您好😊，我没有查询到相关事项。如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
   "FastContentQueryNotesMissing": "您好😊，根据您所提及的内容，我没有查询到相关事项。如果您想获取更多事项信息，可以<strong>查看事项列表</strong>",
-  "notfoundObjectMissing": "非常抱歉，我未能找到与“${notfound}”相关的职员或部门群。请问，您是希望将消息推送给<strong>职员</strong>，还是推送到<strong>部门群</strong>呢？请您直接告诉我",
+  "notfoundObjectMissing": "非常抱歉，${notfound}请问，您是希望将消息推送给<strong>职员</strong>，还是推送到<strong>部门群</strong>呢？请您直接告诉我",
+
 
   "TimeQueryPlanNone": "抱歉，我未能在您所指定的时间段查询到相关日程信息。您可以通过下面的日程列表了解更多",
   "NameQueryPlanNone": "抱歉，我未能查询到您所指定的用户为您创建的日程等相关信息。您可以通过下面的日程列表了解更多",
   "ContentQueryPlanNone": "抱歉，我未能查询到相应日程。您可以通过下面的日程列表了解更多",
 
   "receiversError": "您的输入中存在错误的职员姓名，或者当前部门下不存在您所指定的职员，请您重新检查<strong>职员姓名</strong>并告诉我😊",
+  "membersError": "您的输入中存在错误的职员姓名，或者当前部门下不存在您所指定的职员，请您重新检查<strong>职员姓名</strong>并告诉我😊如果您需要同时通知大量职员，推荐您使用<strong>创建事项</strong>卡片",
   "groupIdError": "您可能输错了部门群名，或者不存在这个部门群，请您重新检查<strong>部门群名</strong>并告诉我😊",
   "deptError": "您可能输错了部门名，或者不存在这个部门，请您重新检查<strong>部门名</strong>并告诉我😊",
   "nameError": "您可能输错了职员姓名，或者不存在该职员，请您重新检查<strong>职员姓名</strong>并告诉我😊",

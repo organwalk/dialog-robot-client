@@ -30,7 +30,6 @@
                     <p style="line-height: 2;" v-html="item"/>
                 </el-card>
             </el-card>
-
         </el-col>
         <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"/>
     </el-row>

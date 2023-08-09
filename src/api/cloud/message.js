@@ -90,6 +90,7 @@ const sendIDMsg = (obj)=>{
 
 const sendSysMsg = (obj)=>{
     obj['msgType'] = 25
+    obj['flags'] = 0
     obj['extraData'] = JSON.stringify({title:obj.title,content:obj.content,desc:obj.desc})
     const newObj = {
         ...obj,
