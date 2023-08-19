@@ -152,6 +152,16 @@ const intentionOptions = [
         value: "FastContentQueryNotes"
       }
     ]
+  },
+  {
+    value: "OtherAbout",
+    label: "其它",
+    children: [
+      {
+        label: "模型无关",
+        value: "unknown"
+      }
+    ]
   }
 ]
 

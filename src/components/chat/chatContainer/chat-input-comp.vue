@@ -554,6 +554,7 @@ const useApiAboutByDirect = (ot, obj) => {
     if (msgType.test(ot)) {
         if (/^(?!OAMsg|SendMsg).*Msg.*$/.test(ot)){
             store.dispatch('updataReplyUseObject', obj.replyUseObject).then(()=>{
+                console.log(1111)
                 msg(ot, getOrderResObject(obj))
             })
         }
@@ -585,10 +586,11 @@ const useApiAboutByDirect = (ot, obj) => {
                 uid: obj.uid,
                 name: obj.name
             }
-            store.dispatch('updataSearchUid', newObj)
-            emit('res-orderType', ot)
-            emit('send-status', 'orderType')
-            emit('reply-robot', true)
+            store.dispatch('updataSearchUid', newObj).then(()=>{
+                emit('res-orderType', ot)
+                emit('send-status', 'orderType')
+                emit('reply-robot', true)
+            })
         }
         else if (ot === 'AddMan'){
             addManByContent(ot, obj)
@@ -820,7 +822,8 @@ const userInputAboutMissingValues = async (type, val) => {
                         await store.dispatch('updataReplyUseObject', val)
                     }
                     data = await objectIdByName(type, val)
-                    if ((data.length === 1 && data[0] === "")||data.some((item) => item === "")){
+                    console.log(data)
+                    if ((data.length === 1 && data[0] === "")){
                         newObj = {...oldObj, [type]: ""}
                     }else {
                         newObj = {...oldObj, [type]: data}

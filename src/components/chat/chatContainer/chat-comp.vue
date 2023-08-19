@@ -644,6 +644,7 @@ const clearChat = (val) => {
             store.dispatch('updataMissingKeyObj', {})
             state.showObjectNameFromRec = false
             state.dontShowRec = false
+            mark.value = false
             //  同时增加一个分割线
             state.chatMessages.push({
                 type: 'line',
@@ -760,7 +761,16 @@ const confirmFeedback = () => {
     if (intentionValue.value === store.state.chat.cacheIntention
         && JSON.stringify(entity.value) === store.state.chat.cacheEntity){
         ElMessage.warning("您还没有作出纠正")
-    }else {
+    }
+    else if (intentionValue.value === 'unknown'){
+        feedbackLoading.value = false
+        editFeedback.value = false
+        whenSendFeedback.value = true
+        store.dispatch('updataCacheIntention',"")
+        store.dispatch('updataCacheEntity',"")
+        ElMessage.success("感谢您的反馈！")
+    }
+    else {
         feedbackLoading.value = true
         updateFeedback(
             {
@@ -781,7 +791,6 @@ const confirmFeedback = () => {
                 ElMessage.error("服务出错，请重试")
             }
         })
-
     }
 }
 

@@ -37,14 +37,14 @@
                     <el-popconfirm width="200"
                                    title="确定 完成 / 取消 该日程吗？" @confirm="cancel(item.scheduleId)">
                         <template #reference>
-                            <el-button v-if="item.action !== 'cancel'" type="info" :icon="Close" circle size="small"/>
+                            <el-button v-if="item.uid === uid && item.action !== 'cancel'" type="info" :icon="Close" circle size="small"/>
                         </template>
                     </el-popconfirm>
                     <!-- 删除 -->
                     <el-popconfirm width="200"
                                    title="确定删除该日程吗？" @confirm="deleteSchedule(item.scheduleId)">
                         <template #reference>
-                            <el-button v-if="item.action === 'cancel'" type="danger" :icon="Delete" circle
+                            <el-button v-if="item.uid === uid && item.action === 'cancel'" type="danger" :icon="Delete" circle
                                        size="small"/>
                         </template>
                     </el-popconfirm>
