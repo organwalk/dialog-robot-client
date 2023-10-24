@@ -289,7 +289,7 @@ const imageUrl = (val) => {
     state.dontShowRec = false
     state.chatMessages.push({
         type: 'image',
-        message: 'https://47.122.19.138:38081/api/images/' + val
+        message: 'https://localhost:38081/api/images/' + val
     })
     state.resOver = true
     loading.value = true
@@ -307,7 +307,7 @@ const voiceInfo = (obj) => {
     state.chatMessages.push({
         type: 'voice',
         message: {
-            url: 'https://47.122.19.138:38081/api/voice/' + obj.voiceUrl,
+            url: 'https://localhost:38081/api/voice/' + obj.voiceUrl,
             time: obj.duration
         }
     })
@@ -331,7 +331,7 @@ const playVoice = (url) => {
 }
 
 const checkImage = (val) => {
-    const reg = /http:\/\/47\.122\.19\.138:38181\/api\/images\//;
+  const reg = /http:\/\/localhost:38181\/api\/images\//;
     return !reg.test(val)
 }
 

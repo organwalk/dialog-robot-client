@@ -62,7 +62,7 @@
                                         <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
                                             <el-upload
                                                 v-model:file-list="fileList"
-                                                action="https://47.122.19.138:38081/api/image"
+                                                action="https://localhost:38081/api/image"
                                                 name="image"
                                                 method="post"
                                                 :auto-upload="true"
@@ -298,7 +298,7 @@ const beforeUpload = (file) => {
     });
 };
 
-const imageResource = "http://47.122.19.138:38181/api/images/"
+const imageResource = "http://localhost:38181/api/images/"
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
@@ -620,8 +620,7 @@ const useApiAboutByDirect = (ot, obj) => {
             }
         })
         emit('send-status', 'orderType')
-    }
-    else {
+    } else {
         emit("send-cardStatus", ot)
         emit('send-status', 'cardInteraction')
     }
