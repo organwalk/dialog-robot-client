@@ -107,8 +107,8 @@ const login = () => {
                     sessionStorage.setItem("uid", res.data.data.uid)
                     sessionStorage.setItem("mobile", mobile.value)
                     auth.getDeptListByUid().then(res => {
-                        sessionStorage.setItem("deptId", res.data.data[1].id)
-                        user.deptName = res.data.data[1].name
+                        sessionStorage.setItem("deptId", res.data.data[0].id)
+                        user.deptName = res.data.data[0].name
                         auth.getUserInfoByUid().then(res => {
                             user.mobile = res.data.data.mobile
                             user.uid = res.data.data.uid

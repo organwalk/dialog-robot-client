@@ -62,7 +62,7 @@
                                         <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12" align="center">
                                             <el-upload
                                                 v-model:file-list="fileList"
-                                                action="https://localhost:38081/api/image"
+                                                :action="upImgUrl"
                                                 name="image"
                                                 method="post"
                                                 :auto-upload="true"
@@ -189,6 +189,7 @@ import * as auth from "@/api/cloud/auth";
 import * as personInfoRefresh from "@/components/chat/interactiveCard/manageEmployee/personInfoRefresh";
 import InputOrderTipData from "@/optionConfig/input-order-tip-data";
 import Fuse from 'fuse.js'
+import {imgUrl, upImgUrl} from "@/optionConfig/api_url";
 
 
 const orderContent = ref('')
@@ -298,12 +299,12 @@ const beforeUpload = (file) => {
     });
 };
 
-const imageResource = "http://localhost:38181/api/images/"
+const imageResource = imgUrl
 const handleChange = (res) => {
     if (res.status === "success") {
         url.value = res.response
         emit('image-url', url.value)
-        orderContent.value = imageResource + url.value
+        orderContent.value = imageResource + '/' + url.value
         sendOrder()
     }
 }

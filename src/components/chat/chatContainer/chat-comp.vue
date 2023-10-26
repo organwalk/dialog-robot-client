@@ -231,6 +231,7 @@ import {playRecording, playRecordingPause} from "@/optionConfig/voice-function";
 import {getDeptList, getPersonDept} from "@/api/cloud/manage-person";
 import intentionOptions from "@/optionConfig/intention_data.js"
 import {getFeedbackById, getNowModelResult, sendFeedback, updateFeedback} from "@/api/server/data";
+import {imgReg, imgUrl, voiceUrl} from "@/optionConfig/api_url";
 
 const state = reactive({
     toDay: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate(),
@@ -289,7 +290,7 @@ const imageUrl = (val) => {
     state.dontShowRec = false
     state.chatMessages.push({
         type: 'image',
-        message: 'https://localhost:38081/api/images/' + val
+        message: imgUrl + '/' + val
     })
     state.resOver = true
     loading.value = true
@@ -307,7 +308,7 @@ const voiceInfo = (obj) => {
     state.chatMessages.push({
         type: 'voice',
         message: {
-            url: 'https://localhost:38081/api/voice/' + obj.voiceUrl,
+            url: voiceUrl + '/' + obj.voiceUrl,
             time: obj.duration
         }
     })
@@ -331,7 +332,7 @@ const playVoice = (url) => {
 }
 
 const checkImage = (val) => {
-  const reg = /http:\/\/localhost:38181\/api\/images\//;
+  const reg = imgReg;
     return !reg.test(val)
 }
 
