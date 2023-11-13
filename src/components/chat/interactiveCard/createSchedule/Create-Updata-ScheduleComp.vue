@@ -60,6 +60,7 @@ import {
     ArrowLeft,
 } from '@element-plus/icons-vue'
 import {ElMessage} from "element-plus";
+import bigInt from "big-integer";
 
 const active = ref(0)
 const next = () => {
@@ -235,7 +236,7 @@ const create = () => {
         //若没有sid则为创建操作
         card.sendAddPlan(allPageData).then(res=>{
             if (res.data.code === 200){
-                const sid = res.data.data.scheduleId
+                const sid = bigInt(res.data.data.scheduleId)
                 allPageData["members"] = JSON.stringify(pageTwoData.scheduleMembers[0].map(({value: uid, label: name}) => ({uid, name})))
                 data.saveScheduleCount(sid,allPageData).then(res=>{
                     if (res.data.success){

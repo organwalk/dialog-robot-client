@@ -8,8 +8,12 @@ module.exports = defineConfig({
   //     }
   //   }
   // },
+  lintOnSave: false,
   transpileDependencies: true,
   devServer:{
+    client: {
+      overlay: false,
+    },
     proxy:{
       '/api':{
         target:'https://www.ecpan.cn/platform',

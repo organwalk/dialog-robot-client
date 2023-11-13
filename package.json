@@ -12,6 +12,7 @@
   "dependencies": {
     "@electron/remote": "^2.0.10",
     "axios": "^1.4.0",
+    "big-integer": "^1.6.51",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.6",
     "fuse.js": "^6.6.2",
